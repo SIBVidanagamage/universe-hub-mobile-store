@@ -15,5 +15,8 @@
     "universe-hub"
   ],
   "author": "Universe Hub",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0"
+  }
 }

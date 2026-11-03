@@ -47,6 +47,15 @@ const App = {
     this.bindEvents();
     this.setupRepairEstimator();
 
+    // Fetch fresh cloud products if Supabase is connected
+    if (window.SupabaseSync && typeof window.SupabaseSync.fetchProducts === "function") {
+      window.SupabaseSync.fetchProducts().then(() => {
+        this.renderCatalog();
+        this.renderCategories();
+        this.renderBrandsSection();
+      });
+    }
+
     // Check if URL has admin hash
     if (window.location.hash === "#admin") {
       if (this.currentUser && this.currentUser.role === "admin") {
@@ -1606,6 +1615,11 @@ const App = {
     orders.unshift(newOrder);
     localStorage.setItem("UH_ORDERS", JSON.stringify(orders));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.createOrder === "function") {
+      window.SupabaseSync.createOrder(newOrder);
+    }
+
     // Clear cart
     localStorage.setItem("UH_CART", JSON.stringify([]));
     this.updateCartBadge();
@@ -1686,6 +1700,11 @@ const App = {
     let repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
     repairs.unshift(newJob);
     localStorage.setItem("UH_REPAIRS", JSON.stringify(repairs));
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.createRepairOrder === "function") {
+      window.SupabaseSync.createRepairOrder(newJob);
+    }
 
     this.closeModal("repair-booking-modal");
     
@@ -1850,6 +1869,11 @@ const App = {
     let reviews = JSON.parse(localStorage.getItem("UH_REVIEWS")) || [];
     reviews.unshift(newReview);
     localStorage.setItem("UH_REVIEWS", JSON.stringify(reviews));
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.createReview === "function") {
+      window.SupabaseSync.createReview(newReview);
+    }
 
     document.getElementById("store-review-form").reset();
     this.closeModal("review-modal");

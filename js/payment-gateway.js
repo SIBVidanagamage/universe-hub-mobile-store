@@ -566,6 +566,11 @@ const PaymentGateway = {
     orders.unshift(finalizedOrder);
     localStorage.setItem("UH_ORDERS", JSON.stringify(orders));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.createOrder === "function") {
+      window.SupabaseSync.createOrder(finalizedOrder);
+    }
+
     // Log to UH_GATEWAY_LOGS
     this.logTransaction({
       id: transactionId,

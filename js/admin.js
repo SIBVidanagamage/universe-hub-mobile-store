@@ -842,6 +842,16 @@ const AdminController = {
     products.unshift(newProduct);
     localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
+      window.SupabaseSync.saveProduct(prod);
+    }
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
+      window.SupabaseSync.saveProduct(newProduct);
+    }
+
     // Reset Form
     document.getElementById("admin-add-product-form").reset();
     if (window.MediaUploader) MediaUploader.reset('adm');
@@ -953,6 +963,11 @@ const AdminController = {
 
     localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
+      window.SupabaseSync.saveProduct(prod);
+    }
+
     if (window.App && typeof App.closeModal === "function") {
       App.closeModal("admin-edit-product-modal");
     }
@@ -976,6 +991,11 @@ const AdminController = {
       if (prod) {
         prod.stock = parseInt(newStock, 10);
         localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+
+        // Sync to Supabase Cloud Database
+        if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
+          window.SupabaseSync.saveProduct(prod);
+        }
         this.renderProductsTable();
         showToast(`Stock updated to ${prod.stock}!`);
       }
@@ -987,6 +1007,11 @@ const AdminController = {
       let products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
       products = products.filter(p => p.id !== prodId);
       localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+
+      // Sync to Supabase Cloud Database
+      if (window.SupabaseSync && typeof window.SupabaseSync.deleteProduct === "function") {
+        window.SupabaseSync.deleteProduct(prodId);
+      }
       this.renderProductsTable();
       this.renderStats();
       showToast("Product deleted from store.");
