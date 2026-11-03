@@ -2758,6 +2758,31 @@
   <!-- Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
+  <!-- Netlify Native Forms Integration for Zero-Failure Email Alerts -->
+  <form name="order-notifications" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="order-notifications" />
+    <input type="text" name="order_id" />
+    <input type="text" name="date" />
+    <input type="text" name="customer_name" />
+    <input type="text" name="contact_phone" />
+    <input type="text" name="customer_email" />
+    <input type="text" name="delivery_method" />
+    <input type="text" name="shipping_address" />
+    <input type="text" name="payment_mode" />
+    <textarea name="ordered_items"></textarea>
+    <input type="text" name="total_amount" />
+  </form>
+
+  <form name="repair-notifications" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="repair-notifications" />
+    <input type="text" name="tracking_code" />
+    <input type="text" name="customer_name" />
+    <input type="text" name="phone" />
+    <input type="text" name="device" />
+    <input type="text" name="fault_issue" />
+    <input type="text" name="preferred_time" />
+  </form>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>

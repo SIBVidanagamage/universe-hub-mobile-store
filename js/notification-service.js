@@ -56,6 +56,33 @@
         "Total Amount": totalFormatted
       };
 
+      // 1. Dispatch via Netlify Native Forms (100% Guaranteed on Netlify edge)
+      try {
+        const netlifyParams = new URLSearchParams({
+          "form-name": "order-notifications",
+          "order_id": orderId,
+          "date": new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" }),
+          "customer_name": customerName,
+          "contact_phone": phone,
+          "customer_email": email,
+          "delivery_method": deliveryMethod,
+          "shipping_address": `${address}, ${city}`,
+          "payment_mode": paymentMethod,
+          "ordered_items": itemsSummary,
+          "total_amount": totalFormatted
+        });
+
+        await fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: netlifyParams.toString()
+        });
+        console.log("⚡ [NotificationService] Order dispatched via Netlify Forms Edge");
+      } catch (e) {
+        console.warn("[NotificationService] Netlify form dispatch error:", e);
+      }
+
+      // 2. Dispatch via FormSubmit / External Mail
       try {
         console.log(`[NotificationService] Dispatching order email to ${this.config.adminEmail}...`);
         const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(this.config.adminEmail)}`, {
@@ -104,6 +131,29 @@
         "Repair Desk": "Maharagama Flagship Store (188/8c High Level Rd)"
       };
 
+      // 1. Dispatch via Netlify Native Forms
+      try {
+        const netlifyParams = new URLSearchParams({
+          "form-name": "repair-notifications",
+          "tracking_code": trackingCode,
+          "customer_name": name,
+          "phone": phone,
+          "device": device,
+          "fault_issue": fault,
+          "preferred_time": date
+        });
+
+        await fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: netlifyParams.toString()
+        });
+        console.log("⚡ [NotificationService] Repair booking dispatched via Netlify Forms");
+      } catch (e) {
+        console.warn("[NotificationService] Netlify repair form error:", e);
+      }
+
+      // 2. Dispatch via FormSubmit
       try {
         await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(this.config.adminEmail)}`, {
           method: "POST",
@@ -171,3 +221,4 @@
     module.exports = NotificationService;
   }
 })(typeof window !== "undefined" ? window : globalThis);
+
