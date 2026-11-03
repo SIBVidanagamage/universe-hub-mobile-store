@@ -1,0 +1,2781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universe Hub - Premium Mobile, Certified iPhones & Repair Lab</title>
+  <meta name="description" content="Universe Hub is your premier destination for brand new iPhones, certified pre-owned phones, 65W GaN chargers, MagSafe cases, and rapid physical store mobile repairs.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css?v=12">
+  <link rel="stylesheet" href="css/invoice.css?v=1">
+  <link rel="stylesheet" href="css/payment.css?v=1">
+  <style>
+    .site-main-logo, #admin-logo-preview {
+      background: transparent !important;
+      mix-blend-mode: screen !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================================
+       STOREFRONT VIEW
+       ========================================================================= -->
+  <div id="storefront-view">
+    
+    <!-- Top Announcement Bar -->
+    <div class="top-bar">
+      <div class="container top-bar-content">
+        <div class="top-bar-perks">
+          <div class="perk-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+            <span>Island-Wide Fast Delivery (Orders Over Rs. 15,000 Free)</span>
+          </div>
+          <div class="perk-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>100% Genuine Apple & Flagship Tech</span>
+          </div>
+          <div class="perk-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>30-Min Physical Store Express Repairs</span>
+          </div>
+        </div>
+
+        <div class="top-bar-actions">
+          <button id="top-admin-shortcut" class="admin-shortcut-btn" style="display:none;" onclick="App.toggleAdminView(true)">
+            ⚙️ Admin Center
+          </button>
+          <span id="top-admin-divider" style="color:var(--text-muted); display:none;">|</span>
+          <a href="https://maps.app.goo.gl/r1BY5dMznxRunVC58" target="_blank" rel="noopener noreferrer" id="top-store-location-link" style="color:var(--text-secondary); font-size:12px; display:flex; align-items:center; gap:4px; text-decoration:none;">
+            📍 <span id="top-bar-location-text">Maharagama Flagship Store</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="main-navbar">
+      <div class="container nav-row">
+        <!-- Official Logo -->
+        <a href="#" class="brand-logo" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;" style="display:flex; align-items:center; text-decoration:none;">
+          <img src="assets/universe_hub_logo.png?v=10" alt="Universe Hub - Your One Stop Shop For Everything" class="site-main-logo" style="height:48px; width:auto; max-width:240px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
+        </a>
+
+        <!-- Search with Dropdown -->
+        <div class="search-wrapper">
+          <div class="search-input-box">
+            <span class="search-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </span>
+            <input type="text" id="main-search-input" class="search-input" placeholder="Search iPhones, GaN chargers, MagSafe cases, repairs..." autocomplete="off">
+            <select class="search-category-select" onchange="App.filterByCategory(this.value)">
+              <option value="all">All Items</option>
+              <option value="iphones">iPhones</option>
+              <option value="cases">Cases</option>
+              <option value="chargers">Chargers</option>
+              <option value="audio">Audio</option>
+            </select>
+          </div>
+          <div id="search-dropdown-results" class="search-results-dropdown"></div>
+        </div>
+
+        <!-- Navigation Action Buttons -->
+        <div class="nav-actions">
+          <!-- Auth / Profile -->
+          <button id="nav-auth-btn" class="user-profile-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Login</span>
+          </button>
+
+          <!-- Wishlist -->
+          <button class="nav-icon-btn" onclick="showToast('Your saved wishlist is synced!')" title="Wishlist">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span id="wishlist-count-badge" class="badge-counter" style="display:none;">0</span>
+          </button>
+
+          <!-- Shopping Cart Drawer Trigger -->
+          <button id="nav-cart-btn" class="nav-icon-btn" title="View Cart">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span id="cart-count-badge" class="badge-counter" style="display:none;">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sub-Navbar Category Links -->
+    <nav class="sub-navbar">
+      <div class="container">
+        <ul class="sub-nav-links" id="sub-navbar-links">
+          <li><a href="#" class="active" onclick="App.filterByCategory('all'); return false;">Home</a></li>
+          <li><a href="#catalog-section" onclick="App.filterByCategory('brand-new-iphones');">Brand New iPhones</a></li>
+          <li><a href="#catalog-section" onclick="App.filterByCategory('used-iphones');">Certified Used Phones</a></li>
+          <li><a href="#catalog-section" onclick="App.filterByCategory('back-covers');">Cases & Covers</a></li>
+          <li><a href="#catalog-section" onclick="App.filterByCategory('chargers');">Chargers & Cables</a></li>
+          <li><a href="#catalog-section" onclick="App.filterByCategory('audio');">Audio & AirPods</a></li>
+          <li><a href="#repair-center" class="nav-pill-highlight">🔧 Mobile Repair Lab</a></li>
+          <li><a href="#store-reviews">⭐ Store Reviews (4.9★)</a></li>
+          <li><a href="#store-location">📍 Physical Shop</a></li>
+          <li><a href="javascript:void(0)" onclick="InvoiceService.showCustomerOrders()" style="color:var(--neon-cyan); font-weight:600;">🧾 Invoices &amp; Orders</a></li>
+          <li><a href="javascript:void(0)" onclick="App.openAboutModal()" style="color:#d8b4fe; font-weight:600;">ℹ️ About Us</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section (Mobix Aesthetic) -->
+    <section class="hero-section">
+      <div class="hero-glow-circle"></div>
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="hero-tag-pill">
+            <span class="pulse-dot"></span>
+            PREMIUM MOBILE & APPLE SPECIALISTS
+          </div>
+          <h1 class="hero-title">
+            Upgrade Your
+            <span class="gradient-text">Mobile Experience</span>
+          </h1>
+          <p class="hero-desc">
+            Discover official brand new Apple iPhones, certified pre-owned phones tested with 100% battery guarantee, ultra-fast 65W GaN chargers, and express 30-minute in-store repairs.
+          </p>
+          <div class="hero-cta-group">
+            <a href="#catalog-section" class="btn-primary-glow">
+              <span>Shop Collection</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+            <button class="btn-glass" onclick="App.openRepairBookingModal()">
+              <span>Book Repair ⚡</span>
+            </button>
+          </div>
+
+          <div class="hero-features-row">
+            <div class="hero-feat-item">
+              <div class="feat-icon-box">🛡️</div>
+              <div class="feat-text">
+                <h5>100% Genuine</h5>
+                <p>Apple Care & Store Warranty</p>
+              </div>
+            </div>
+            <div class="hero-feat-item">
+              <div class="feat-icon-box">🚚</div>
+              <div class="feat-text">
+                <h5>Fast Island Delivery</h5>
+                <p>Cash on Delivery Available</p>
+              </div>
+            </div>
+            <div class="hero-feat-item">
+              <div class="feat-icon-box">🔋</div>
+              <div class="feat-text">
+                <h5>Tested Battery Health</h5>
+                <p>Zero Part Replacement Alerts</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Showcase Visual -->
+        <div class="hero-visual-card">
+          <img id="hero-showcase-img" src="assets/hero_showcase.jpg?v=3" alt="Universe Hub Latest iPhones Showcase" class="hero-visual-img" onerror="this.src='assets/hero_showcase.jpg'">
+          
+          <div class="floating-annotation annotation-top-right">
+            <div class="anno-dot"></div>
+            <div class="anno-text">Next-Gen Titanium Series • 100% Original</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shop by Category (Mobix Grid) -->
+    <section class="section-pad" style="padding-top:20px;">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Shop by Category</h2>
+            <p>Explore our wide selection of devices, accessories, and certified repair solutions.</p>
+          </div>
+          <a href="#catalog-section" class="view-all-link" onclick="App.filterByCategory('all')">
+            <span>View All</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+
+        <div id="category-grid-container" class="category-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Shop by Official Brand Section -->
+    <section class="section-pad" style="padding-top:0;">
+      <div class="container">
+        <div class="section-head" style="margin-bottom:20px;">
+          <div class="section-title-wrap">
+            <h2>Shop by Official Brand</h2>
+            <p>100% Genuine Anker, Baseus, Ugreen, WiWU, Asper, Spigen &amp; Apple Flagship Accessories.</p>
+          </div>
+          <button class="view-all-link" style="background:none; border:none; cursor:pointer;" onclick="App.filterByBrand('all')">
+            <span>View All Brands</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+        <div id="homepage-brands-grid" class="brands-grid">
+          <!-- Dynamically populated by App.renderBrandsSection() -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Catalog Section -->
+    <section id="catalog-section" class="section-pad">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Best Sellers & Featured Tech</h2>
+            <p>Hand-picked Apple iPhones, certified used bargains, and high-performance accessories.</p>
+          </div>
+        </div>
+
+        <!-- Catalog Filter Tabs -->
+        <div class="catalog-tabs-bar" id="catalog-tabs-bar">
+          <button class="tab-btn active" data-cat="all">🌟 All Products</button>
+        </div>
+
+        <!-- Catalog Brand Filter Pills Bar -->
+        <div class="catalog-brand-filter-bar" id="catalog-brand-filter-bar">
+          <!-- Dynamically populated with Anker, Baseus, Ugreen, WiWU, Asper, etc. -->
+        </div>
+
+        <!-- Products Grid -->
+        <div id="products-catalog-container" class="products-grid">
+          <!-- Dynamically Populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Dual Promo Banners (Mobix Exact Layout) -->
+    <section class="container">
+      <div class="promo-banners-grid">
+        <!-- Banner 1: Cases -->
+        <div class="promo-card" id="promo-banner-1" style="background-image: url('assets/cases_banner.jpg');">
+          <div class="promo-card-content">
+            <h3 id="promo-1-title">Keep Your Phone Safe &amp; Stylish</h3>
+            <p id="promo-1-desc">Premium aerospace carbon fiber, MagSafe clear cases and camera lens protection for every model.</p>
+            <button class="promo-btn" id="promo-1-btn" onclick="App.filterByCategory('cases')">
+              <span id="promo-1-btn-text">Explore Cases</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner 2: Chargers -->
+        <div class="promo-card" id="promo-banner-2" style="background-image: url('assets/chargers_banner.jpg');">
+          <div class="promo-card-content">
+            <h3 id="promo-2-title">Power Up Your Life</h3>
+            <p id="promo-2-desc">65W GaN fast dual chargers, 240W braided cables &amp; digital battery packs for non-stop performance.</p>
+            <button class="promo-btn" id="promo-2-btn" onclick="App.filterByCategory('chargers')">
+              <span id="promo-2-btn-text">Shop Chargers</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mobile Repair Center Section -->
+    <section id="repair-center" class="repair-section">
+      <div class="container">
+        <div style="text-align:center; max-width:680px; margin:0 auto;">
+          <div class="repair-header-badge">⚡ UNIVERSE HUB CERTIFIED REPAIR LAB</div>
+          <h2 style="font-size:36px; font-weight:900; color:#fff; letter-spacing:-0.5px;">Express Mobile Repair Service</h2>
+          <p style="color:var(--text-secondary); font-size:15px; margin-top:10px;">
+            Screen cracked? Battery dropping fast? Visit our physical store in Maharagama (188/8c High Level Rd) for 30-minute express repairs using genuine parts with full post-repair diagnostics.
+          </p>
+        </div>
+
+        <div class="repair-split-grid">
+          <!-- Interactive Cost Estimator -->
+          <div class="repair-card-interactive">
+            <div class="step-indicator">STEP 1 • LIVE COST ESTIMATOR</div>
+            <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:18px;">Select Your Device & Repair</h3>
+
+            <div class="repair-form-group">
+              <label for="estimator-device">Phone Model:</label>
+              <select id="estimator-device" style="width:100%;">
+                <option value="iPhone 16 Pro Max">Apple iPhone 16 Pro Max</option>
+                <option value="iPhone 16 Pro">Apple iPhone 16 Pro</option>
+                <option value="iPhone 15 Pro Max">Apple iPhone 15 Pro Max</option>
+                <option value="iPhone 15">Apple iPhone 15</option>
+                <option value="iPhone 14 Pro Max" selected>Apple iPhone 14 Pro Max</option>
+                <option value="iPhone 13 Pro">Apple iPhone 13 Pro</option>
+                <option value="iPhone 12">Apple iPhone 12</option>
+                <option value="iPhone 11">Apple iPhone 11</option>
+                <option value="Samsung Galaxy S24 Ultra">Samsung Galaxy S24 Ultra</option>
+              </select>
+            </div>
+
+            <div class="repair-form-group">
+              <label for="estimator-service">Service Required:</label>
+              <select id="estimator-service" style="width:100%;">
+                <option value="screen">Display / OLED Screen Replacement</option>
+                <option value="battery">Original Battery Replacement (100% Health)</option>
+                <option value="charging">Charging Port & Type-C Repair</option>
+                <option value="backglass">Laser Back Glass Replacement</option>
+                <option value="water">Water Damage Diagnostic & Cleaning</option>
+                <option value="camera">Camera Sensor & Lens Repair</option>
+              </select>
+            </div>
+
+            <div class="estimate-output-box">
+              <div>
+                <h4>Estimated Cost Range:</h4>
+                <div id="estimator-price-display" class="price-tag">Rs. 18,500 - 22,000</div>
+              </div>
+              <div style="text-align:right;">
+                <div id="estimator-time-display" class="time-tag">⏱️ Est. Time: 30 - 45 Mins</div>
+                <div id="estimator-warranty-display" style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">🛡️ Includes 6-Month Warranty</div>
+              </div>
+            </div>
+
+            <button class="btn-primary-glow" style="width:100%; justify-content:center;" onclick="App.openRepairBookingModal()">
+              Reserve Repair Slot at Physical Store
+            </button>
+          </div>
+
+          <!-- Real-Time Repair Tracker -->
+          <div class="repair-card-tracker">
+            <div class="step-indicator" style="color:var(--neon-purple);">STEP 2 • LIVE REPAIR STATUS TRACKER</div>
+            <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">Track Your Device in Our Lab</h3>
+            <p style="font-size:13px; color:var(--text-secondary);">Enter the tracking number from your physical receipt or booking confirmation.</p>
+
+            <form id="repair-track-form" class="track-input-row">
+              <input type="text" id="track-repair-input" placeholder="e.g. UH-8821 or UH-8902" value="UH-8821" required>
+              <button type="submit" class="btn-glass" style="background:var(--neon-purple); border-color:var(--neon-purple); color:#fff;">
+                Track Status
+              </button>
+            </form>
+
+            <div style="font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">
+              💡 <b>Demo Codes to test:</b> <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8821'; App.handleTrackRepair();" style="color:var(--neon-cyan); text-decoration:underline;">UH-8821 (In Repair)</a> | <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8902'; App.handleTrackRepair();" style="color:var(--neon-cyan); text-decoration:underline;">UH-8902 (Ready for Pickup)</a>
+            </div>
+
+            <!-- Dynamic Track Result Card -->
+            <div id="track-result-container" class="track-res-card active">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Customer Reviews Section (Physical Store Focus) -->
+    <section id="store-reviews" class="reviews-section">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Physical Store Customer Reviews</h2>
+            <p>Real feedback from customers who visited our Universe Hub outlet for phones, accessories, and repairs.</p>
+          </div>
+          <button class="btn-primary-glow" onclick="App.openWriteReviewModal()">
+            ✍️ Write Store Review
+          </button>
+        </div>
+
+        <!-- Rating Stat Banner -->
+        <div class="reviews-stat-banner">
+          <div class="stat-score-col">
+            <div class="big-rating-number">4.9</div>
+            <div>
+              <div class="big-stars">★★★★★</div>
+              <div class="rating-subtext">Overall Store Satisfaction Rate</div>
+              <div class="verified-store-badge">✓ 1,480+ Verified Physical Store Visitors</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:24px; flex-wrap:wrap;">
+            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:20px;">
+              <div style="font-size:20px; font-weight:800; color:#fff;">100%</div>
+              <div style="font-size:12px; color:var(--text-muted);">Genuine Guarantee</div>
+            </div>
+            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:20px;">
+              <div style="font-size:20px; font-weight:800; color:var(--neon-cyan);">30 Mins</div>
+              <div style="font-size:12px; color:var(--text-muted);">Avg. Screen/Battery Fix</div>
+            </div>
+            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:20px;">
+              <div style="font-size:20px; font-weight:800; color:var(--success);">6 Months</div>
+              <div style="font-size:12px; color:var(--text-muted);">Repair & Used Phone Warranty</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews Grid -->
+        <div id="reviews-grid-container" class="reviews-grid">
+          <!-- Dynamically Populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Physical Store Location & Contact Details -->
+    <section id="store-location" class="section-pad" style="background:#080b12; border-top:1px solid var(--border-subtle);">
+      <div class="container">
+        <div class="section-head">
+          <div class="section-title-wrap">
+            <h2>Visit Universe Hub Physical Store</h2>
+            <p>Drop by our outlet for testing used iPhones in person, screen glass fitment, or immediate repairs.</p>
+          </div>
+        </div>
+
+        <div class="store-location-grid">
+          <div class="store-info-box">
+            <div class="store-info-item">
+              <div class="store-icon-wrapper">📍</div>
+              <div class="store-text-data">
+                <h4>Flagship Outlet Address</h4>
+                <p id="store-display-address">188/8c, High Level Road, Maharagama, Sri Lanka<br><small style="color:var(--text-muted);">(Convenient Main Road Location / Dedicated Parking)</small></p>
+              </div>
+            </div>
+
+            <div class="store-info-item">
+              <div class="store-icon-wrapper">⏰</div>
+              <div class="store-text-data">
+                <h4>Store Opening Hours</h4>
+                <p id="store-display-hours">Monday – Saturday: 9:30 AM – 8:30 PM<br>Sunday & Poya Days: 10:00 AM – 6:30 PM</p>
+              </div>
+            </div>
+
+            <div class="store-info-item">
+              <div class="store-icon-wrapper">📞</div>
+              <div class="store-text-data">
+                <h4>Hotline & Physical Store Desk</h4>
+                <p>Call / WhatsApp: <b id="store-display-phone">074-0219239</b><br>Email: <a id="store-display-email-link" href="mailto:contact@universehub.lk" style="color:var(--neon-cyan); text-decoration:none;"><span id="store-display-email">contact@universehub.lk</span></a></p>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:20px;">
+              <a id="store-display-whatsapp-btn" href="https://wa.me/94740219239?text=Hello%20Universe%20Hub,%20I%20have%20an%20inquiry%20regarding%20iPhone%20/%20accessories" target="_blank" class="btn-primary-glow" style="background:#25d366; box-shadow:0 0 20px rgba(37,211,102,0.4);">
+                💬 WhatsApp Store Desk
+              </a>
+              <button class="btn-glass" onclick="App.openRepairBookingModal()">
+                Book In-Store Visit
+              </button>
+            </div>
+          </div>
+
+          <!-- Store Map Representation -->
+          <div class="store-map-preview">
+            <div class="store-map-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2" style="margin-bottom:14px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:6px;">Universe Hub Maharagama Flagship</h3>
+              <p style="font-size:13.5px; color:var(--text-secondary); max-width:320px; margin-bottom:16px;">188/8c, High Level Road, Maharagama • Dedicated customer parking available in front of the store.</p>
+              <a id="store-google-maps-btn" href="https://maps.app.goo.gl/r1BY5dMznxRunVC58" target="_blank" rel="noopener noreferrer" class="btn-glass" style="font-size:13px; padding:8px 18px; text-decoration:none;">
+                Open in Google Maps ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Perks Footer Bar (Matching Mobix Screenshot) -->
+    <div class="trust-footer-bar">
+      <div class="container trust-bar-grid">
+        <div class="trust-item">
+          <div class="trust-icon-box">👍</div>
+          <div class="trust-info">
+            <h5>Trusted by 50,000+ Customers</h5>
+            <p>4.9/5 Average verified rating</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-icon-box">💵</div>
+          <div class="trust-info">
+            <h5>Cash on Delivery</h5>
+            <p>Available on all island-wide postal pins</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-icon-box">↩️</div>
+          <div class="trust-info">
+            <h5>Easy 7-Day Returns</h5>
+            <p>Hassle-free exchange policy</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <div class="trust-icon-box">🎧</div>
+          <div class="trust-info">
+            <h5>24/7 Customer Support</h5>
+            <p>We're here to assist anytime</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Footer -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-columns-grid">
+          <div class="footer-col">
+            <div style="margin-bottom:14px;">
+              <img src="assets/universe_hub_logo.png?v=10" alt="Universe Hub" class="site-main-logo" style="height:44px; width:auto; max-width:220px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
+            </div>
+            <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+              Sri Lanka's trusted destination for genuine Apple iPhones, certified used phones with transparent battery diagnostics, GaN chargers, and physical store mobile repairs.
+            </p>
+            <div style="font-size:12px; color:var(--text-muted);">
+              TRCSL Approved Retailer • Registered Tech Hub
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h4>Quick Categories</h4>
+            <ul class="footer-links-list">
+              <li><a href="#catalog-section" onclick="App.filterByCategory('brand-new-iphones')">Brand New iPhones</a></li>
+              <li><a href="#catalog-section" onclick="App.filterByCategory('used-iphones')">Certified Pre-Owned</a></li>
+              <li><a href="#catalog-section" onclick="App.filterByCategory('back-covers')">MagSafe Cases & Covers</a></li>
+              <li><a href="#catalog-section" onclick="App.filterByCategory('chargers')">65W GaN Fast Chargers</a></li>
+              <li><a href="#catalog-section" onclick="App.filterByCategory('audio')">AirPods & Audio</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Services & Support</h4>
+            <ul class="footer-links-list">
+              <li><a href="javascript:void(0)" onclick="App.openAboutModal()">About Universe Hub</a></li>
+              <li><a href="#repair-center">Mobile Repair Lab</a></li>
+              <li><a href="#repair-center">Track Device Status</a></li>
+              <li><a href="#store-reviews">Store Customer Reviews</a></li>
+              <li><a href="javascript:void(0)" onclick="InvoiceService.showCustomerOrders()">🧾 Download Order Invoices (PDF)</a></li>
+              <li><a id="footer-store-location-link" href="https://maps.app.goo.gl/r1BY5dMznxRunVC58" target="_blank" rel="noopener noreferrer">Maharagama Flagship Location ↗</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Physical Shop & Hours</h4>
+            <p style="font-size:13px; color:var(--text-secondary); line-height:1.6;">
+              <span id="footer-display-address">188/8c, High Level Road, Maharagama</span><br>
+              <span id="footer-display-hours">Open Daily: 9:30 AM – 8:30 PM</span><br>
+              Direct WhatsApp: <b id="footer-display-phone">074-0219239</b><br>
+              Email: <a id="footer-display-email-link" href="mailto:contact@universehub.lk" style="color:#cbd5e1; text-decoration:none;"><span id="footer-display-email">contact@universehub.lk</span></a>
+            </p>
+            <div style="margin-top:16px;">
+              <span class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan);">Free Customer Parking</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom-row">
+          <div>© 2026 Universe Hub Mobile & Tech Lab. All Rights Reserved.</div>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <span>Visa / Master / Koko / Cash on Delivery</span>
+            <span style="color:var(--text-muted);">|</span>
+            <a href="javascript:void(0)" onclick="App.requestAdminAccess()" style="color:var(--text-muted); text-decoration:none; font-size:12px; display:inline-flex; align-items:center; gap:4px; transition:color 0.2s ease;" onmouseover="this.style.color='var(--neon-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
+              🔐 Staff Portal
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- =========================================================================
+       ADMIN PANEL VIEW (Seamlessly Toggled)
+       ========================================================================= -->
+  <div id="admin-view" class="admin-view-container">
+    <div class="admin-top-nav">
+      <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <img src="assets/universe_hub_logo.png?v=10" alt="Universe Hub Logo" class="site-main-logo" style="height:40px; width:auto; max-width:180px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
+          <div>
+            <h2 style="font-size:18px; font-weight:800; color:#fff;">Universe Hub • Admin Center</h2>
+            <small style="color:#d8b4fe;">Inventory, Repair Orders, Store &amp; Hero Banner</small>
+          </div>
+        </div>
+
+        <button class="btn-glass" onclick="App.toggleAdminView(false)" style="color:#fff; border-color:var(--neon-cyan);">
+          ← Return to Storefront
+        </button>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Admin Top Stats -->
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon">💰</div>
+          <div class="admin-stat-data">
+            <h3 id="admin-stat-revenue">Rs. 0</h3>
+            <p>Total Store Revenue</p>
+          </div>
+        </div>
+
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="color:var(--neon-cyan); background:rgba(0,210,255,0.15);">📦</div>
+          <div class="admin-stat-data">
+            <h3 id="admin-stat-orders">0</h3>
+            <p>Customer Orders Placed</p>
+          </div>
+        </div>
+
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="color:#f59e0b; background:rgba(245,158,11,0.15);">🔧</div>
+          <div class="admin-stat-data">
+            <h3 id="admin-stat-repairs">0</h3>
+            <p>Active Lab Repairs</p>
+          </div>
+        </div>
+
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="color:#10b981; background:rgba(16,185,129,0.15);">⭐</div>
+          <div class="admin-stat-data">
+            <h3 id="admin-stat-reviews">0</h3>
+            <p>Customer Store Reviews</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs in Admin -->
+      <div class="admin-tabs-list">
+        <button class="admin-tab-btn active" data-tab="products">📱 Products &amp; Inventory</button>
+        <button class="admin-tab-btn" data-tab="brands">🏷️ Brands &amp; Accessories</button>
+        <button class="admin-tab-btn" data-tab="categories">📂 Categories &amp; Navbar</button>
+        <button class="admin-tab-btn" data-tab="repairs">🔧 Repair Orders Queue</button>
+        <button class="admin-tab-btn" data-tab="reviews">⭐ Customer Reviews Moderation</button>
+        <button class="admin-tab-btn" data-tab="orders">🛍️ Storefront Orders</button>
+        <button class="admin-tab-btn" data-tab="store">🏪 Store &amp; Hero Banner</button>
+        <button class="admin-tab-btn" data-tab="payments">💳 Online Gateways</button>
+      </div>
+
+      <!-- TAB 1: PRODUCTS INVENTORY -->
+      <div id="admin-tab-products" class="admin-tab-content">
+        <!-- Add Product Form Card -->
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; margin-bottom:28px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+            <div>
+              <h3 style="font-size:17px; font-weight:800; color:#fff; margin:0;">+ Add New Product / Phone to Inventory</h3>
+              <p style="font-size:12.5px; color:var(--text-secondary); margin:3px 0 0 0;">Add single items manually or use bulk CSV import to add hundreds instantly.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" id="btn-admin-bulk-upload-prod" class="btn-primary-glow" style="padding:8px 14px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;" onclick="window.BulkUploader ? BulkUploader.openModal('products') : (window.AdminController && AdminController.openBulkUploader('products'))">
+                ⚡ Bulk Upload Products (CSV)
+              </button>
+              <button type="button" class="btn-glass" style="padding:8px 14px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.4);" onclick="window.BulkUploader ? BulkUploader.exportProductsCSV() : (window.AdminController && AdminController.exportProductsCSV())">
+                📤 Export Catalog (CSV)
+              </button>
+            </div>
+          </div>
+          <form id="admin-add-product-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px;">
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Product Title:</label>
+              <input type="text" id="adm-prod-name" placeholder="e.g. iPhone 15 Pro Max 256GB" required style="width:100%;">
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="font-size:12px; color:var(--text-secondary);">Brand / Maker:</label>
+                <button type="button" class="btn-inline-add-brand" onclick="AdminController.openQuickAddBrandModal()">+ New Brand</button>
+              </div>
+              <select id="adm-prod-brand" style="width:100%;"></select>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Category / Subcategory:</label>
+              <select id="adm-prod-category" style="width:100%;">
+                <optgroup label="📱 iPhones">
+                  <option value="brand-new-iphones">Brand New iPhones</option>
+                  <option value="used-iphones">Certified Used iPhones</option>
+                </optgroup>
+                <optgroup label="⚡ Accessories">
+                  <option value="back-covers">Back Covers & Cases</option>
+                  <option value="chargers">Fast Chargers & Adapters</option>
+                  <option value="cables">Charging Cables</option>
+                  <option value="tempered-glass">Tempered Glass</option>
+                  <option value="camera-protectors">Camera Protectors</option>
+                  <option value="audio">Audio & AirPods</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Condition:</label>
+              <select id="adm-prod-condition" style="width:100%;">
+                <option value="Brand New">Brand New (Sealed)</option>
+                <option value="Used - Grade A+">Used - Grade A+ (Mint)</option>
+                <option value="Used - Grade A">Used - Grade A</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Selling Price (Rs.):</label>
+              <input type="number" id="adm-prod-price" placeholder="245000" required style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Original / Slashed Price (Rs.):</label>
+              <input type="number" id="adm-prod-origprice" placeholder="270000" style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health % (Used phones):</label>
+              <input type="number" id="adm-prod-battery" placeholder="95 (Leave blank if brand new)" style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Stock Quantity:</label>
+              <input type="number" id="adm-prod-stock" value="5" min="1" style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Warranty Period:</label>
+              <input type="text" id="adm-prod-warranty" placeholder="6 Months Store Warranty" style="width:100%;">
+            </div>
+            <!-- Direct Drag-and-Drop Image Uploader -->
+            <div style="grid-column: 1 / -1;" class="media-upload-section">
+              <div class="media-upload-label">
+                <span>📸 Product Photos / PNGs (Drag &amp; Drop)</span>
+                <span class="media-upload-badge" id="adm-images-count-badge">0 photos added</span>
+              </div>
+              <div class="dropzone-box" id="adm-images-dropzone">
+                <input type="file" id="adm-images-input" accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml" multiple style="display:none;">
+                <div class="dropzone-inner">
+                  <div class="dropzone-icon-pulse">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                  </div>
+                  <div class="dropzone-text">
+                    <strong>Drag &amp; Drop Product PNG / Photos Here</strong>
+                    <span>or <button type="button" class="dropzone-browse-btn" onclick="document.getElementById('adm-images-input').click()">Browse Files</button> from your computer</span>
+                  </div>
+                  <div class="dropzone-formats">Direct PNG, JPG, WEBP upload • 📐 <strong>Optimal Resolution: 800 × 800 px (1:1 Square Ratio)</strong></div>
+                </div>
+              </div>
+              <!-- Uploaded Previews Grid -->
+              <div class="uploaded-previews-grid" id="adm-images-preview-grid"></div>
+              <!-- Fallback URL toggle -->
+              <div class="media-url-toggle-wrap">
+                <button type="button" class="btn-toggle-url" onclick="MediaUploader.toggleUrlBox('adm-img-url-box')">
+                  🔗 <span>Or paste external image URLs</span> ▾
+                </button>
+                <div id="adm-img-url-box" class="media-url-box" style="display:none;">
+                  <textarea id="adm-prod-image" rows="2" placeholder="https://example.com/front.png&#10;https://example.com/back.png" class="media-url-textarea"></textarea>
+                  <button type="button" class="btn-url-add" onclick="MediaUploader.addImagesFromUrl('adm')">+ Add URLs</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Direct Drag-and-Drop Video Uploader -->
+            <div style="grid-column: 1 / -1;" class="media-upload-section">
+              <div class="media-upload-label">
+                <span>🎬 Product Video Trailer / Showcase (Drag &amp; Drop)</span>
+                <span class="media-upload-badge" id="adm-video-count-badge">No video selected</span>
+              </div>
+              <div class="dropzone-box video-dropzone" id="adm-video-dropzone">
+                <input type="file" id="adm-video-input" accept="video/mp4, video/webm, video/quicktime" style="display:none;">
+                <div class="dropzone-inner">
+                  <div class="dropzone-icon-pulse video-pulse">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                    </svg>
+                  </div>
+                  <div class="dropzone-text">
+                    <strong>Drag &amp; Drop MP4 Video Showcase Here</strong>
+                    <span>or <button type="button" class="dropzone-browse-btn" onclick="document.getElementById('adm-video-input').click()">Browse Video</button> from your computer</span>
+                  </div>
+                  <div class="dropzone-formats">Direct MP4, WebM or MOV • Embedded in customer Quick View &amp; Product Gallery</div>
+                </div>
+              </div>
+              <!-- Uploaded Video Preview Card -->
+              <div class="uploaded-video-card" id="adm-video-preview-card" style="display:none;"></div>
+              <!-- Fallback Video URL toggle -->
+              <div class="media-url-toggle-wrap">
+                <button type="button" class="btn-toggle-url" onclick="MediaUploader.toggleUrlBox('adm-video-url-box')">
+                  🔗 <span>Or paste MP4 / YouTube Video link</span> ▾
+                </button>
+                <div id="adm-video-url-box" class="media-url-box" style="display:none;">
+                  <input type="text" id="adm-prod-video" placeholder="https://example.com/demo.mp4 or https://www.youtube.com/watch?v=..." class="media-url-input">
+                  <button type="button" class="btn-url-add" onclick="MediaUploader.setVideoFromUrl('adm')">+ Set Link</button>
+                </div>
+              </div>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brief Description:</label>
+              <input type="text" id="adm-prod-desc" placeholder="Full specs, color options, accessories included..." style="width:100%;">
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <button type="submit" class="btn-primary-glow" style="padding:10px 24px;">Add Product to Live Store</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Category Filter Pills Bar for Inventory -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:13px; font-weight:800; color:#fff; text-transform:uppercase; letter-spacing:0.5px;">📂 Filter Inventory by Category:</span>
+              <span id="admin-inventory-filter-label" class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); font-size:11px;">All Categories</span>
+            </div>
+            <span id="admin-inventory-items-count" style="font-size:12.5px; color:var(--text-secondary);">Showing All Items</span>
+          </div>
+          <div id="admin-inventory-filter-bar" class="admin-cat-filter-bar">
+            <!-- Dynamically populated category pills with count badges -->
+          </div>
+        </div>
+
+        <!-- Current Products List -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Condition</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-products-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: BRANDS & ACCESSORIES MANAGEMENT -->
+      <div id="admin-tab-brands" class="admin-tab-content" style="display:none;">
+        <!-- Add Brand Form Card -->
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; margin-bottom:28px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div>
+              <h3 style="font-size:17px; font-weight:800; color:#fff;">+ Add New Brand to Universe Hub</h3>
+              <p style="font-size:13px; color:var(--text-secondary); margin-top:3px;">
+                Add brands like Anker, Baseus, Ugreen, WiWU, Asper, Joyroom or any new brand you import. They will automatically sync to Navbar dropdown, storefront filters and product inventory!
+              </p>
+            </div>
+            <span class="badge-pill" style="background:rgba(224,86,253,0.15); color:#e056fd; font-weight:700;">Brand Ecosystem</span>
+          </div>
+
+          <form id="admin-add-brand-form" onsubmit="AdminController.handleAddBrand(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Name:</label>
+              <input type="text" id="adm-brand-name" placeholder="e.g. Joyroom or Torras" required style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Logo / Emoji Icon:</label>
+              <input type="text" id="adm-brand-icon" placeholder="e.g. ⚡ or 🔋 or 🎧" value="🏷️" required style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Specialty / Short Tagline:</label>
+              <input type="text" id="adm-brand-tagline" placeholder="e.g. GaN Fast Chargers & Audio" style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Identifier Slug (Optional):</label>
+              <input type="text" id="adm-brand-slug" placeholder="e.g. joyroom" style="width:100%;">
+            </div>
+            <div style="display:flex; align-items:center; gap:20px; grid-column: 1 / -1; background:rgba(255,255,255,0.02); padding:12px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#fff; cursor:pointer;">
+                <input type="checkbox" id="adm-brand-in-nav" checked style="accent-color:var(--neon-cyan); width:16px; height:16px;">
+                Show in "Shop by Brand" Navbar Dropdown
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#fff; cursor:pointer;">
+                <input type="checkbox" id="adm-brand-in-filter" checked style="accent-color:var(--neon-cyan); width:16px; height:16px;">
+                Show in Catalog Brand Filter Pills
+              </label>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <button type="submit" class="btn-primary-glow" style="padding:10px 24px;">Create Brand &amp; Sync Storefront</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Brands List Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Brand Icon &amp; Name</th>
+                <th>Specialty / Tagline</th>
+                <th>Slug</th>
+                <th>Inventory Items</th>
+                <th>In Navbar Dropdown</th>
+                <th>In Catalog Filter</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-brands-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: CATEGORIES & NAVBAR MANAGEMENT -->
+      <div id="admin-tab-categories" class="admin-tab-content" style="display:none;">
+        <!-- Add Category Form Card -->
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; margin-bottom:28px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+            <div>
+              <h3 style="font-size:17px; font-weight:800; color:#fff;">+ Create New Category & Configure Storefront Navbar</h3>
+              <p style="font-size:13px; color:var(--text-secondary); margin-top:3px;">
+                Categories added here will automatically appear in the website Navbar and catalog filter tabs!
+              </p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <button type="button" id="btn-admin-bulk-upload-cat" class="btn-primary-glow" style="padding:8px 14px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;" onclick="window.BulkUploader ? BulkUploader.openModal('categories') : (window.AdminController && AdminController.openBulkUploader('categories'))">
+                ⚡ Bulk Upload Categories (CSV)
+              </button>
+              <button type="button" class="btn-glass" style="padding:8px 14px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.4);" onclick="window.BulkUploader ? BulkUploader.exportCategoriesCSV() : (window.AdminController && AdminController.exportCategoriesCSV())">
+                📤 Export Categories (CSV)
+              </button>
+              <span class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); font-weight:700;">Dynamic Navbar Sync</span>
+            </div>
+          </div>
+
+          <form id="admin-add-category-form" onsubmit="AdminController.handleAddCategory(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Category Name:</label>
+              <input type="text" id="adm-cat-name" placeholder="e.g. Apple Watch Straps" required style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Parent Group:</label>
+              <select id="adm-cat-group" style="width:100%;" required>
+                <option value="accessories">⚡ Accessories</option>
+                <option value="iphones">📱 iPhones</option>
+                <option value="gadgets">✨ Smart Gadgets & Other</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Category Icon / Emoji:</label>
+              <input type="text" id="adm-cat-icon" placeholder="e.g. ⌚ or 🔋 or 🎧" value="🏷️" required style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Slug / ID (Optional):</label>
+              <input type="text" id="adm-cat-slug" placeholder="e.g. watch-straps" style="width:100%;">
+            </div>
+            <div style="display:flex; align-items:center; gap:20px; grid-column: 1 / -1; background:rgba(255,255,255,0.02); padding:12px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#fff; cursor:pointer;">
+                <input type="checkbox" id="adm-cat-in-nav" checked style="accent-color:var(--neon-cyan); width:16px; height:16px;">
+                Show in Top Sub-Navbar
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#fff; cursor:pointer;">
+                <input type="checkbox" id="adm-cat-in-filter" checked style="accent-color:var(--neon-cyan); width:16px; height:16px;">
+                Show in Catalog Filter Tabs
+              </label>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <button type="submit" class="btn-primary-glow" style="padding:10px 24px;">Create Category & Update Navbar</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Categories List Table -->
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Icon & Category Name</th>
+                <th>Group</th>
+                <th>Identifier (Slug)</th>
+                <th>Assigned Items</th>
+                <th>Show in Navbar</th>
+                <th>Catalog Filter Tab</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-categories-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: REPAIR ORDERS -->
+      <div id="admin-tab-repairs" class="admin-tab-content" style="display:none;">
+        <!-- Admin Manual Repair Booking Form -->
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; margin-bottom:24px;">
+          <h3 style="font-size:16px; font-weight:800; color:#fff; margin-bottom:12px;">+ Log New Physical Store Repair Job</h3>
+          <form id="admin-new-repair-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+            <input type="text" id="adm-rep-cust" placeholder="Customer Name" required>
+            <input type="text" id="adm-rep-phone" placeholder="Contact Number" required>
+            <input type="text" id="adm-rep-device" placeholder="Device Model (e.g. iPhone 14)" required>
+            <input type="text" id="adm-rep-issue" placeholder="Problem (e.g. Battery Swelling)" required>
+            <input type="number" id="adm-rep-cost" placeholder="Agreed Cost (Rs.)">
+            <button type="submit" class="btn-glass" style="background:var(--neon-purple); border-color:var(--neon-purple); color:#fff; font-weight:700;">
+              Generate Job Ticket
+            </button>
+          </form>
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Customer &amp; WhatsApp</th>
+                <th>Device &amp; Issue</th>
+                <th>Status (Click to Change)</th>
+                <th>Cost</th>
+                <th>Notes &amp; Notification Log</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-repairs-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: CUSTOMER REVIEWS -->
+      <div id="admin-tab-reviews" class="admin-tab-content" style="display:none;">
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Author</th>
+                <th>Rating</th>
+                <th>Customer Feedback & Store Reply</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-reviews-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: STORE ORDERS -->
+      <div id="admin-tab-orders" class="admin-tab-content" style="display:none;">
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer &amp; WhatsApp</th>
+                <th>Ordered Items</th>
+                <th>Total</th>
+                <th>Delivery / Method</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 7: STORE IDENTITY, HERO BANNER & ABOUT US SETTINGS -->
+      <div id="admin-tab-store" class="admin-tab-content" style="display:none;">
+        <div style="display:grid; grid-template-columns: 1fr; gap:24px;">
+
+          <!-- 1. HERO SHOWCASE BANNER MANAGER -->
+          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+              <div>
+                <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                  <span>🖼️ Hero Showcase Banner Customizer</span>
+                  <span class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); font-size:11px;">Storefront Main Header</span>
+                </h3>
+                <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
+                  Upload your own PNG or JPG banner image here. It immediately replaces the banner shown on the storefront homepage hero card.
+                </p>
+                <div class="dimension-guide-pill" style="margin-top:6px;">
+                  📐 Recommended Size: 1376 × 768 px (16:9 Aspect Ratio • Min 1200 × 675 px • PNG / JPG / WebP)
+                </div>
+              </div>
+              <button type="button" class="btn-primary-glow" onclick="AdminController.applyHeroBanner()" style="padding:8px 18px; font-size:13px;">
+                ⚡ Save &amp; Apply Hero Banner
+              </button>
+            </div>
+
+            <!-- Banner Live Preview & Upload Grid -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; align-items:start;">
+              <!-- Current Banner Live Preview Card -->
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label style="font-size:12px; color:var(--text-secondary); font-weight:600;">
+                    Live Storefront Banner Preview:
+                  </label>
+                  <span id="admin-hero-dims-badge" class="dimension-detected-badge">Detected: 1376 × 768 px</span>
+                </div>
+                <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:2px solid rgba(0,210,255,0.3); background:#0b0f19; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+                  <img id="admin-hero-banner-preview" src="assets/hero_showcase.jpg?v=3" alt="Hero Banner Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+                  <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); padding:4px 12px; border-radius:20px; border:1px solid rgba(0,210,255,0.4); font-size:11px; color:#fff; display:flex; align-items:center; gap:6px;">
+                    <span style="width:7px; height:7px; border-radius:50%; background:var(--neon-cyan); display:inline-block;"></span>
+                    Current Live Banner
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                  <span id="admin-banner-status-text" style="font-size:12px; color:var(--text-muted);">Exact Recommended: 1376 × 768 px (16:9 ratio)</span>
+                  <button type="button" class="btn-glass" onclick="AdminController.resetHeroBannerToDefault()" style="font-size:11px; padding:4px 10px;">Reset to Default</button>
+                </div>
+              </div>
+
+              <!-- Upload / Dropzone Controls -->
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:6px; font-weight:600;">
+                  Upload New PNG / JPG Banner:
+                </label>
+                <!-- Drag and Drop Zone -->
+                <div id="admin-banner-dropzone" class="media-dropzone" style="min-height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; border:2px dashed var(--neon-cyan); border-radius:14px; background:rgba(0,210,255,0.03); cursor:pointer; transition:all 0.25s ease;">
+                  <div style="font-size:32px; margin-bottom:8px;">📤</div>
+                  <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">Drag &amp; Drop PNG Banner Here</div>
+                  <div style="font-size:12px; color:var(--text-secondary); margin-bottom:4px;">or click to browse from your computer</div>
+                  <div style="font-size:11.5px; color:var(--neon-cyan); margin-bottom:12px;">Optimal Resolution: 1376W × 768H px (16:9)</div>
+                  <button type="button" class="btn-glass" style="font-size:12px; padding:6px 16px; border-color:var(--neon-cyan); color:#fff;" onclick="event.stopPropagation(); document.getElementById('admin-banner-file-input').click();">
+                    📁 Choose PNG / Image File
+                  </button>
+                  <input type="file" id="admin-banner-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
+                </div>
+
+                <!-- URL Alternative -->
+                <div style="margin-top:14px;">
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">
+                    Or enter Banner Image Path / URL:
+                  </label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" id="admin-banner-url-input" placeholder="assets/hero_showcase.jpg or /uploads/..." style="flex:1;">
+                    <button type="button" class="btn-glass" onclick="AdminController.previewBannerFromUrl()" style="white-space:nowrap; padding:0 14px; font-size:12px;">
+                      Preview
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. STORE BRANDING & LOGO -->
+          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+              <div>
+                <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                  <span>🏷️ Store Logo &amp; Identity</span>
+                </h3>
+                <div class="dimension-guide-pill" style="margin-top:6px;">
+                  📐 Recommended Size: 880 × 310 px (~2.8:1 Ratio • Pure Transparent PNG)
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; align-items:start;">
+              <!-- Current Logo Preview -->
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label style="font-size:12px; color:var(--text-secondary);">Current Official Logo:</label>
+                  <span id="admin-logo-dims-badge" class="dimension-detected-badge">Detected: 879 × 308 px</span>
+                </div>
+                <div style="background:#090d16; border:1px solid var(--border-subtle); border-radius:12px; padding:20px; display:flex; align-items:center; justify-content:center; min-height:100px;">
+                  <img id="admin-logo-preview" src="assets/universe_hub_logo.png?v=10" alt="Universe Hub Logo" style="height:52px; width:auto; max-width:100%; object-fit:contain; background:transparent !important; mix-blend-mode:screen;">
+                </div>
+                <small style="color:var(--text-muted); display:block; margin-top:6px; font-size:11px;">Displays in Header, Footer, Admin, and About Us modal.</small>
+              </div>
+
+              <!-- Logo Uploader -->
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:6px;">Upload New Logo PNG:</label>
+                <div id="admin-logo-dropzone" class="media-dropzone" style="min-height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:16px; border:2px dashed rgba(255,255,255,0.2); border-radius:12px; background:rgba(255,255,255,0.02); cursor:pointer;">
+                  <div style="font-size:22px; margin-bottom:4px;">✨</div>
+                  <div style="font-size:12px; color:#fff; font-weight:600;">Drop Logo PNG or Click to Browse</div>
+                  <div style="font-size:11px; color:var(--neon-cyan); margin-top:2px;">Optimal: 880W × 310H px (Transparent PNG)</div>
+                  <input type="file" id="admin-logo-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. HOMEPAGE DUAL PROMO BANNERS (Cases & Chargers) -->
+          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+              <div>
+                <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                  <span>🛍️ Homepage Dual Promo Banners (Cases &amp; Fast Chargers)</span>
+                  <span class="badge-pill" style="background:rgba(157,78,221,0.18); color:#d8b4fe; font-size:11px;">Storefront Mid Section</span>
+                </h3>
+                <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
+                  Upload new banner PNG/JPG images and customize the promotional headlines, descriptions, button text, and catalog category links.
+                </p>
+                <div class="dimension-guide-pill" style="margin-top:8px;">
+                  📐 Recommended Size: 1376 × 768 px or 1200 × 520 px (~2.3:1 Aspect Ratio • PNG / JPG / WebP)
+                </div>
+              </div>
+              <button type="button" class="btn-primary-glow" onclick="AdminController.savePromoBanners()" style="padding:8px 18px; font-size:13px;">
+                💾 Save Both Promo Banners &amp; Text
+              </button>
+            </div>
+
+            <!-- 2-Column Promo Banner Grid -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:24px;">
+              
+              <!-- Promo Banner 1: Cases & Protection -->
+              <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(0,210,255,0.15); border-radius:14px; padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                  <h4 style="font-size:15px; font-weight:700; color:var(--neon-cyan); display:flex; align-items:center; gap:6px;">
+                    <span>🛡️ Promo Banner 1 (Cases &amp; Armor)</span>
+                  </h4>
+                  <span id="admin-promo1-dims-badge" class="dimension-detected-badge">Detected: 1376 × 768 px</span>
+                </div>
+
+                <!-- Live Preview Card -->
+                <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:2.2/1; border-radius:12px; overflow:hidden; border:1px solid var(--border-subtle); background:#0b0f19; margin-bottom:14px;">
+                  <img id="admin-promo1-preview" src="assets/cases_banner.jpg" alt="Cases Banner Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+                  <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); pointer-events:none; padding:16px; display:flex; flex-direction:column; justify-content:center;">
+                    <div id="admin-promo1-preview-title" style="font-size:14px; font-weight:800; color:#fff; line-height:1.2; margin-bottom:4px;">Keep Your Phone Safe &amp; Stylish</div>
+                    <div id="admin-promo1-preview-desc" style="font-size:11px; color:rgba(255,255,255,0.7); max-width:85%; line-height:1.3; margin-bottom:8px;">Premium aerospace carbon fiber, MagSafe clear cases...</div>
+                    <span style="font-size:10px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:3px 8px; border-radius:12px; width:fit-content;" id="admin-promo1-preview-btn">Explore Cases →</span>
+                  </div>
+                </div>
+
+                <!-- Dropzone for Banner 1 -->
+                <div id="admin-promo1-dropzone" class="media-dropzone" style="min-height:95px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:12px; border:2px dashed rgba(0,210,255,0.35); border-radius:10px; background:rgba(0,210,255,0.02); cursor:pointer; margin-bottom:12px; transition:all 0.25s ease;">
+                  <div style="font-size:20px; margin-bottom:2px;">📁</div>
+                  <div style="font-size:12px; font-weight:700; color:#fff;">Drop PNG / JPG Banner or Click to Browse</div>
+                  <div style="font-size:11px; color:var(--text-muted);">Exact Recommended: 1376 × 768 px (16:9 or 2.3:1)</div>
+                  <input type="file" id="admin-promo1-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
+                </div>
+
+                <!-- Image URL Alternative -->
+                <div style="margin-bottom:12px;">
+                  <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:3px;">Banner Image Path / URL:</label>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="admin-promo1-url-input" placeholder="assets/cases_banner.jpg or /uploads/..." style="flex:1; font-size:12px;">
+                    <button type="button" class="btn-glass" onclick="AdminController.previewPromo1FromUrl()" style="font-size:11px; padding:0 10px;">Preview</button>
+                  </div>
+                </div>
+
+                <!-- Editable Title -->
+                <div style="margin-bottom:10px;">
+                  <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:3px; font-weight:600;">Banner Headline (Title):</label>
+                  <input type="text" id="admin-promo1-title" style="width:100%; font-size:12.5px;" oninput="document.getElementById('admin-promo1-preview-title').textContent = this.value || 'Keep Your Phone Safe & Stylish'">
+                </div>
+
+                <!-- Editable Description -->
+                <div style="margin-bottom:10px;">
+                  <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:3px; font-weight:600;">Description Text (Over Banner):</label>
+                  <textarea id="admin-promo1-desc" rows="2" style="width:100%; font-size:12px;" oninput="document.getElementById('admin-promo1-preview-desc').textContent = this.value || 'Description text'"></textarea>
+                </div>
+
+                <!-- Button Text & Category Target Grid -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                  <div>
+                    <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:3px;">Button Text:</label>
+                    <input type="text" id="admin-promo1-btn-text" style="width:100%; font-size:12px;" oninput="document.getElementById('admin-promo1-preview-btn').textContent = (this.value || 'Explore Cases') + ' →'">
+                  </div>
+                  <div>
+                    <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:3px;">Target Category Filter:</label>
+                    <select id="admin-promo1-category" style="width:100%; font-size:12px;">
+                      <option value="cases">Back Covers & Cases</option>
+                      <option value="chargers">Fast Chargers & GaN</option>
+                      <option value="cables">Charging Cables</option>
+                      <option value="brand-new-iphones">Brand New iPhones</option>
+                      <option value="used-iphones">Certified Used iPhones</option>
+                      <option value="audio">Audio & AirPods</option>
+                      <option value="all">All Catalog Items</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <button type="button" class="btn-glass" onclick="AdminController.resetPromoBanner1()" style="font-size:11px; padding:4px 10px;">Reset to Default</button>
+                  <button type="button" class="btn-primary-glow" onclick="AdminController.applyPromoBanner1Only()" style="font-size:11px; padding:5px 14px;">Apply Banner 1</button>
+                </div>
+              </div>
+
+              <!-- Promo Banner 2: Chargers & GaN Power -->
+              <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(157,78,221,0.2); border-radius:14px; padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                  <h4 style="font-size:15px; font-weight:700; color:#d8b4fe; display:flex; align-items:center; gap:6px;">
+                    <span>⚡ Promo Banner 2 (Fast Chargers &amp; GaN)</span>
+                  </h4>
+                  <span id="admin-promo2-dims-badge" class="dimension-detected-badge">Detected: 1376 × 768 px</span>
+                </div>
+
+                <!-- Live Preview Card -->
+                <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:2.2/1; border-radius:12px; overflow:hidden; border:1px solid var(--border-subtle); background:#0b0f19; margin-bottom:14px;">
+                  <img id="admin-promo2-preview" src="assets/chargers_banner.jpg" alt="Chargers Banner Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+                  <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); pointer-events:none; padding:16px; display:flex; flex-direction:column; justify-content:center;">
+                    <div id="admin-promo2-preview-title" style="font-size:14px; font-weight:800; color:#fff; line-height:1.2; margin-bottom:4px;">Power Up Your Life</div>
+                    <div id="admin-promo2-preview-desc" style="font-size:11px; color:rgba(255,255,255,0.7); max-width:85%; line-height:1.3; margin-bottom:8px;">65W GaN fast dual chargers, 240W braided cables...</div>
+                    <span style="font-size:10px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:3px 8px; border-radius:12px; width:fit-content;" id="admin-promo2-preview-btn">Shop Chargers →</span>
+                  </div>
+                </div>
+
+                <!-- Dropzone for Banner 2 -->
+                <div id="admin-promo2-dropzone" class="media-dropzone" style="min-height:95px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:12px; border:2px dashed rgba(157,78,221,0.45); border-radius:10px; background:rgba(157,78,221,0.02); cursor:pointer; margin-bottom:12px; transition:all 0.25s ease;">
+                  <div style="font-size:20px; margin-bottom:2px;">📁</div>
+                  <div style="font-size:12px; font-weight:700; color:#fff;">Drop PNG / JPG Banner or Click to Browse</div>
+                  <div style="font-size:11px; color:var(--text-muted);">Exact Recommended: 1376 × 768 px (16:9 or 2.3:1)</div>
+                  <input type="file" id="admin-promo2-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
+                </div>
+
+                <!-- Image URL Alternative -->
+                <div style="margin-bottom:12px;">
+                  <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:3px;">Banner Image Path / URL:</label>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="admin-promo2-url-input" placeholder="assets/chargers_banner.jpg or /uploads/..." style="flex:1; font-size:12px;">
+                    <button type="button" class="btn-glass" onclick="AdminController.previewPromo2FromUrl()" style="font-size:11px; padding:0 10px;">Preview</button>
+                  </div>
+                </div>
+
+                <!-- Editable Title -->
+                <div style="margin-bottom:10px;">
+                  <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:3px; font-weight:600;">Banner Headline (Title):</label>
+                  <input type="text" id="admin-promo2-title" style="width:100%; font-size:12.5px;" oninput="document.getElementById('admin-promo2-preview-title').textContent = this.value || 'Power Up Your Life'">
+                </div>
+
+                <!-- Editable Description -->
+                <div style="margin-bottom:10px;">
+                  <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:3px; font-weight:600;">Description Text (Over Banner):</label>
+                  <textarea id="admin-promo2-desc" rows="2" style="width:100%; font-size:12px;" oninput="document.getElementById('admin-promo2-preview-desc').textContent = this.value || 'Description text'"></textarea>
+                </div>
+
+                <!-- Button Text & Category Target Grid -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
+                  <div>
+                    <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:3px;">Button Text:</label>
+                    <input type="text" id="admin-promo2-btn-text" style="width:100%; font-size:12px;" oninput="document.getElementById('admin-promo2-preview-btn').textContent = (this.value || 'Shop Chargers') + ' →'">
+                  </div>
+                  <div>
+                    <label style="font-size:11px; color:var(--text-secondary); display:block; margin-bottom:3px;">Target Category Filter:</label>
+                    <select id="admin-promo2-category" style="width:100%; font-size:12px;">
+                      <option value="chargers">Fast Chargers & GaN</option>
+                      <option value="cases">Back Covers & Cases</option>
+                      <option value="cables">Charging Cables</option>
+                      <option value="brand-new-iphones">Brand New iPhones</option>
+                      <option value="used-iphones">Certified Used iPhones</option>
+                      <option value="audio">Audio & AirPods</option>
+                      <option value="all">All Catalog Items</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <button type="button" class="btn-glass" onclick="AdminController.resetPromoBanner2()" style="font-size:11px; padding:4px 10px;">Reset to Default</button>
+                  <button type="button" class="btn-primary-glow" onclick="AdminController.applyPromoBanner2Only()" style="font-size:11px; padding:5px 14px;">Apply Banner 2</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 4. STORE CONTACT & LOCATION DETAILS -->
+          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+            <h3 style="font-size:18px; font-weight:800; color:#fff; margin-bottom:16px;">
+              📍 Store Contact &amp; Physical Location Details
+            </h3>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-bottom:16px;">
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Store Name:</label>
+                <input type="text" id="admin-store-name" value="Universe Hub" style="width:100%;">
+              </div>
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Official Phone / Hotline:</label>
+                <input type="text" id="admin-store-phone" value="074-0219239" style="width:100%;">
+              </div>
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Official WhatsApp Number:</label>
+                <input type="text" id="admin-store-whatsapp" value="074-0219239" style="width:100%;">
+              </div>
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Official Store Email:</label>
+                <input type="email" id="admin-store-email" value="contact@universehub.lk" placeholder="e.g. contact@universehub.lk" style="width:100%;">
+              </div>
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Opening Hours:</label>
+                <input type="text" id="admin-store-hours" value="Open Daily: 9:30 AM – 8:30 PM" style="width:100%;">
+              </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Physical Store Full Address:</label>
+              <input type="text" id="admin-store-address" value="188/8c, High Level Road, Maharagama" style="width:100%;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Google Maps Location Link:</label>
+              <input type="url" id="admin-store-maps" value="https://maps.app.goo.gl/r1BY5dMznxRunVC58" style="width:100%;">
+            </div>
+          </div>
+
+          <!-- 4. ABOUT US PAGE & DETAILS -->
+          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="font-size:18px; font-weight:800; color:#fff;">
+                ℹ️ About Us Content &amp; Guarantee
+              </h3>
+              <button type="button" class="btn-glass" onclick="App.openAboutModal()" style="font-size:12px; padding:6px 14px;">
+                👁️ Preview About Modal
+              </button>
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">About Page Main Heading:</label>
+              <input type="text" id="admin-about-heading" style="width:100%;">
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Store Story &amp; Tech Lab Description:</label>
+              <textarea id="admin-about-story" rows="4" style="width:100%;"></textarea>
+            </div>
+
+            <div style="margin-bottom:18px;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Our Mission &amp; Customer Guarantee:</label>
+              <textarea id="admin-about-mission" rows="3" style="width:100%;"></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end;">
+              <button type="button" class="btn-primary-glow" onclick="AdminController.handleSaveStoreSettings()" style="padding:10px 24px;">
+                💾 Save All Store &amp; About Settings
+              </button>
+            </div>
+          </div>
+
+          <!-- 5. ADMIN SECURITY & PASSWORD SETTINGS -->
+          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid rgba(157,78,221,0.3); border-radius:var(--radius-lg); padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                  <span>🔐 Admin Security &amp; Portal Password</span>
+                  <span class="badge-pill" style="background:rgba(157,78,221,0.2); color:#d8b4fe; font-size:11px;">Store Security</span>
+                </h3>
+                <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
+                  Set the admin password required for staff &amp; management to enter the Universe Hub Admin Center.
+                </p>
+              </div>
+              <button type="button" class="btn-primary-glow" onclick="AdminController.saveAdminPassword()" style="padding:8px 18px; font-size:13px; background:var(--neon-purple);">
+                🔒 Save Admin Password
+              </button>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Admin Email / Username:</label>
+                <input type="email" id="admin-cfg-email" value="admin@universehub.lk" style="width:100%;">
+              </div>
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">New Admin Password:</label>
+                <input type="text" id="admin-cfg-password" placeholder="e.g. admin or admin123" style="width:100%;">
+              </div>
+            </div>
+            <small style="color:var(--text-muted); display:block; margin-top:10px; font-size:11px;">
+              Note: Unauthenticated visitors will be prompted for this password when clicking the Admin Portal.
+            </small>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB: ONLINE PAYMENT GATEWAYS (PAYHERE & STRIPE) -->
+      <div id="admin-tab-payments" class="admin-tab-content" style="display:none;">
+        <div id="admin-payment-gateway-container">
+          <!-- Rendered dynamically via PaymentGateway.renderAdminGatewayManager() -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODALS & SLIDE-IN DRAWERS
+       ========================================================================= -->
+
+  <!-- Slide-in Cart Drawer -->
+  <div id="cart-drawer-overlay" class="cart-drawer-overlay"></div>
+  <aside id="cart-drawer" class="cart-drawer">
+    <div class="modal-header">
+      <h3>Your Shopping Cart</h3>
+      <button id="close-cart-btn" class="close-modal-btn">✕</button>
+    </div>
+    <div id="cart-items-scroll" class="cart-items-scroll">
+      <!-- Cart items inserted here -->
+    </div>
+    <div class="cart-drawer-footer">
+      <div class="cart-total-row">
+        <span>Subtotal:</span>
+        <span id="cart-subtotal" class="total-amount">Rs. 0</span>
+      </div>
+      <button id="cart-checkout-btn" class="btn-primary-glow" style="width:100%; justify-content:center;" onclick="App.openCheckout()">
+        Proceed to Checkout →
+      </button>
+      <div style="text-align:center; margin-top:10px; font-size:11.5px; color:var(--text-muted);">
+        🔒 Instant WhatsApp & Courier Confirmation
+      </div>
+    </div>
+  </aside>
+
+  <!-- Quick View Product Modal -->
+  <div id="quickview-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:720px;">
+      <div class="modal-header">
+        <h3>Product Details</h3>
+        <button class="close-modal-btn" data-close="quickview-modal">✕</button>
+      </div>
+      <div id="quickview-modal-body" class="modal-body">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Complete Your Order</h3>
+        <button class="close-modal-btn" data-close="checkout-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="checkout-items-summary"></div>
+        <form onsubmit="App.handleCompleteCheckout(event)">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Your Full Name:</label>
+            <input type="text" id="checkout-name" placeholder="Kamal Perera" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:14px; background:rgba(37,211,102,0.06); border:1px solid rgba(37,211,102,0.3); border-radius:10px; padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+              <label for="checkout-phone" style="font-size:12.5px; font-weight:700; color:#25d366; display:flex; align-items:center; gap:6px;">
+                💬 WhatsApp Contact Number <span style="color:#ef4444;">* (Required)</span>:
+              </label>
+              <span style="font-size:10px; font-weight:700; color:#059669; background:rgba(37,211,102,0.18); padding:2px 6px; border-radius:4px; text-transform:uppercase;">Mandatory</span>
+            </div>
+            <input type="tel" id="checkout-phone" placeholder="07XXXXXXXX or +947XXXXXXXX" required pattern="^(?:0|\+94)?[0-9\s\-]{9,12}$" style="width:100%; font-size:14px; font-weight:600; border-color:rgba(37,211,102,0.4);" title="Please enter a valid active WhatsApp number for order confirmation">
+            <small style="color:var(--text-muted); font-size:11px; display:block; margin-top:5px; line-height:1.35;">
+              ⚠️ Our store desk will contact you via WhatsApp for confirmation and courier tracking.
+            </small>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Email Address (For Confirmation &amp; Receipt):</label>
+            <input type="email" id="checkout-email" placeholder="kamal@example.com" style="width:100%;">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Delivery Option:</label>
+            <select id="checkout-delivery-method" style="width:100%;">
+              <option value="Physical Store Pickup (Maharagama Outlet - 188/8c High Level Rd)">🏬 Physical Store Pickup (Free - Maharagama Outlet, 188/8c High Level Rd)</option>
+              <option value="Island-wide Express Courier">🚚 Island-wide Courier (Free over Rs. 15,000)</option>
+            </select>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Delivery Address (If Courier):</label>
+            <textarea id="checkout-address" rows="2" placeholder="Street Address, City, Postal Code" style="width:100%;"></textarea>
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12.5px; font-weight:700; color:#fff; display:block; margin-bottom:6px;">Select Payment Method:</label>
+            <input type="hidden" id="checkout-payment-method-val" value="payhere">
+            <div class="payment-methods-grid">
+              <!-- PayHere -->
+              <div class="payment-method-card selected" data-method="payhere" onclick="PaymentGateway.selectPaymentMethod('payhere')">
+                <input type="radio" name="payment_method_radio" value="payhere" checked>
+                <div class="payment-radio-indicator"></div>
+                <div class="payment-method-icon-wrap" style="color:#38bdf8;">🇱🇰</div>
+                <div class="payment-method-details">
+                  <div class="payment-method-title">
+                    <span>PayHere Sri Lanka</span>
+                    <span class="payment-badge-pill badge-payhere">IPG Approved</span>
+                  </div>
+                  <div class="payment-method-desc">Pay with Visa, MasterCard, Genie, FriMi, eZ Cash &amp; Bank Direct</div>
+                  <div class="payment-badges-row">
+                    <span class="pay-brand-tag">Visa</span>
+                    <span class="pay-brand-tag">MasterCard</span>
+                    <span class="pay-brand-tag">Genie</span>
+                    <span class="pay-brand-tag">FriMi</span>
+                    <span class="pay-brand-tag">eZ Cash</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stripe -->
+              <div class="payment-method-card" data-method="stripe" onclick="PaymentGateway.selectPaymentMethod('stripe')">
+                <input type="radio" name="payment_method_radio" value="stripe">
+                <div class="payment-radio-indicator"></div>
+                <div class="payment-method-icon-wrap" style="color:#635bff;">⚡</div>
+                <div class="payment-method-details">
+                  <div class="payment-method-title">
+                    <span>Stripe International</span>
+                    <span class="payment-badge-pill badge-stripe">Global Cards</span>
+                  </div>
+                  <div class="payment-method-desc">Apple Pay, Google Pay, Visa, MasterCard, American Express</div>
+                  <div class="payment-badges-row">
+                    <span class="pay-brand-tag">Apple Pay</span>
+                    <span class="pay-brand-tag">Google Pay</span>
+                    <span class="pay-brand-tag">Amex</span>
+                    <span class="pay-brand-tag">3D-Secure</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Koko BNPL -->
+              <div class="payment-method-card" data-method="koko" onclick="PaymentGateway.selectPaymentMethod('koko')">
+                <input type="radio" name="payment_method_radio" value="koko">
+                <div class="payment-radio-indicator"></div>
+                <div class="payment-method-icon-wrap" style="color:#fb7185;">🛍️</div>
+                <div class="payment-method-details">
+                  <div class="payment-method-title">
+                    <span>Koko Buy Now Pay Later</span>
+                    <span class="payment-badge-pill badge-koko">3 Months 0%</span>
+                  </div>
+                  <div class="payment-method-desc">Split into 3 equal monthly debit card installments with 0% extra interest</div>
+                </div>
+              </div>
+
+              <!-- Koko installment breakdown container -->
+              <div id="koko-breakdown-container" style="display:none;"></div>
+
+              <!-- COD -->
+              <div class="payment-method-card" data-method="cod" onclick="PaymentGateway.selectPaymentMethod('cod')">
+                <input type="radio" name="payment_method_radio" value="cod">
+                <div class="payment-radio-indicator"></div>
+                <div class="payment-method-icon-wrap" style="color:#4ade80;">💵</div>
+                <div class="payment-method-details">
+                  <div class="payment-method-title">
+                    <span>Cash on Delivery / Store Pickup</span>
+                    <span class="payment-badge-pill badge-cod">Pay Later</span>
+                  </div>
+                  <div class="payment-method-desc">Pay cash or swipe card upon courier delivery or at Maharagama store counter</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="submit" id="checkout-submit-btn" class="btn-primary-glow" style="width:100%; justify-content:center; padding:13px; font-size:14.5px; font-weight:800;">
+            🔒 Proceed to PayHere Gateway (LKR)
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PayHere Sri Lanka Payment Modal -->
+  <div id="payhere-payment-modal" class="modal-overlay">
+    <div class="payhere-modal-box">
+      <!-- Top Header -->
+      <div class="payhere-top-header">
+        <div class="payhere-brand-lockup">
+          <div class="payhere-logo-pill">
+            <span>payhere</span>
+          </div>
+          <span class="payhere-secure-badge">🔒 256-Bit SSL IPG</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="payhere-mode-badge" class="payment-badge-pill badge-payhere">🧪 SANDBOX / DEMO</span>
+          <button type="button" class="close-modal-btn" onclick="PaymentGateway.closePayHereModal()" style="color:#fff;">✕</button>
+        </div>
+      </div>
+
+      <!-- Order Strip -->
+      <div class="payhere-order-strip">
+        <div>
+          <small>Order Ref: <span id="payhere-order-id" style="color:#38bdf8; font-weight:700;">ORD-XXXX</span></small>
+          <strong>Billed to: <span id="payhere-cust-name">Customer</span></strong>
+        </div>
+        <div class="payhere-amount-tag" id="payhere-order-amount">Rs. 0 LKR</div>
+      </div>
+
+      <!-- Channel Tabs -->
+      <div class="payhere-channel-tabs">
+        <button type="button" class="payhere-channel-btn active" data-channel="card" onclick="PaymentGateway.switchPayHereChannel('card')">
+          <span>💳</span>
+          <span>Credit / Debit</span>
+        </button>
+        <button type="button" class="payhere-channel-btn" data-channel="qr" onclick="PaymentGateway.switchPayHereChannel('qr')">
+          <span>📱</span>
+          <span>LANKAQR</span>
+        </button>
+        <button type="button" class="payhere-channel-btn" data-channel="bank" onclick="PaymentGateway.switchPayHereChannel('bank')">
+          <span>🏦</span>
+          <span>Internet Bank</span>
+        </button>
+        <button type="button" class="payhere-channel-btn" data-channel="wallet" onclick="PaymentGateway.switchPayHereChannel('wallet')">
+          <span>📲</span>
+          <span>Mobile Wallet</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="payhere-modal-body">
+        <!-- Error banner -->
+        <div id="payhere-error-banner" style="display:none; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#fca5a5; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px;"></div>
+
+        <!-- Sandbox Hint & Quick Fill -->
+        <div class="payhere-sandbox-banner">
+          <span>🧪 <strong>Sandbox Demo Mode:</strong> Use test card below:</span>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn-glass" onclick="PaymentGateway.autofillPayHereCard('success')" style="font-size:11px; padding:3px 8px; color:#38bdf8; border-color:rgba(56,189,248,0.4);">
+              ✓ Auto-fill Success
+            </button>
+            <button type="button" class="btn-glass" onclick="PaymentGateway.autofillPayHereCard('declined')" style="font-size:11px; padding:3px 8px; color:#f87171; border-color:rgba(248,113,113,0.4);">
+              ✕ Auto-fill Decline
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Section -->
+        <div id="payhere-form-section">
+          <!-- Card View -->
+          <div id="ph-channel-card-view">
+            <div class="payhere-field-group">
+              <label class="payhere-field-label">Cardholder Name:</label>
+              <div class="payhere-input-wrap">
+                <input type="text" id="ph-card-name" class="payhere-input" placeholder="Kamal Perera">
+              </div>
+            </div>
+
+            <div class="payhere-field-group">
+              <label class="payhere-field-label">
+                <span>Card Number:</span>
+                <span style="font-size:11px; color:#38bdf8;">Visa / Master / Amex</span>
+              </label>
+              <div class="payhere-input-wrap">
+                <input type="text" id="ph-card-number" class="payhere-input" placeholder="4532 1123 4567 8901" maxlength="19">
+                <span class="payhere-card-icon">💳</span>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+              <div class="payhere-field-group">
+                <label class="payhere-field-label">Expiry (MM/YY):</label>
+                <input type="text" id="ph-card-exp" class="payhere-input" placeholder="12/28" maxlength="5">
+              </div>
+              <div class="payhere-field-group">
+                <label class="payhere-field-label">
+                  <span>CVV / CVC:</span>
+                  <span style="font-size:10px; color:var(--text-muted);">3 digits on back</span>
+                </label>
+                <input type="password" id="ph-card-cvv" class="payhere-input" placeholder="882" maxlength="4">
+              </div>
+            </div>
+          </div>
+
+          <!-- QR View -->
+          <div id="ph-channel-qr-view" style="display:none; text-align:center; padding:10px 0;">
+            <div style="background:#fff; padding:14px; display:inline-block; border-radius:12px; margin-bottom:12px; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+              <svg width="150" height="150" viewBox="0 0 100 100" fill="none">
+                <rect width="100" height="100" fill="#ffffff"/>
+                <rect x="8" y="8" width="28" height="28" rx="2" stroke="#004b97" stroke-width="5" fill="none"/>
+                <rect x="16" y="16" width="12" height="12" fill="#004b97"/>
+                <rect x="64" y="8" width="28" height="28" rx="2" stroke="#004b97" stroke-width="5" fill="none"/>
+                <rect x="72" y="16" width="12" height="12" fill="#004b97"/>
+                <rect x="8" y="64" width="28" height="28" rx="2" stroke="#004b97" stroke-width="5" fill="none"/>
+                <rect x="16" y="72" width="12" height="12" fill="#004b97"/>
+                <rect x="42" y="12" width="6" height="6" fill="#0f172a"/>
+                <rect x="50" y="24" width="6" height="6" fill="#0f172a"/>
+                <rect x="42" y="44" width="16" height="16" fill="#004b97"/>
+                <rect x="64" y="44" width="8" height="8" fill="#0f172a"/>
+                <rect x="76" y="64" width="12" height="12" fill="#004b97"/>
+                <rect x="44" y="74" width="8" height="8" fill="#0f172a"/>
+              </svg>
+            </div>
+            <div style="font-size:13px; color:#fff; font-weight:700; margin-bottom:4px;">Scan with LankaQR Compatible Banking App</div>
+            <div style="font-size:11.5px; color:var(--text-muted);">Commercial Bank Q+, Sampath WePay, HNB SOLO, Genie, Flash</div>
+          </div>
+
+          <!-- Bank View -->
+          <div id="ph-channel-bank-view" style="display:none;">
+            <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:12px;">Select your bank for direct secure payment:</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px; font-size:12px; font-weight:700; color:#fff; cursor:pointer;">🏦 Commercial Bank</div>
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px; font-size:12px; font-weight:700; color:#fff; cursor:pointer;">🏦 Sampath Vishwa</div>
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px; font-size:12px; font-weight:700; color:#fff; cursor:pointer;">🏦 HNB Internet Banking</div>
+              <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px; font-size:12px; font-weight:700; color:#fff; cursor:pointer;">🏦 Seylan Bank Online</div>
+            </div>
+          </div>
+
+          <!-- Wallet View -->
+          <div id="ph-channel-wallet-view" style="display:none;">
+            <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:12px;">Authorize via your mobile wallet:</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:12px; text-align:center; cursor:pointer;">
+                <div style="font-size:22px; margin-bottom:4px;">📲</div>
+                <strong style="color:#fbbf24; font-size:13px;">eZ Cash</strong>
+                <small style="color:var(--text-muted); display:block;">Dialog / Hutch</small>
+              </div>
+              <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:8px; padding:12px; text-align:center; cursor:pointer;">
+                <div style="font-size:22px; margin-bottom:4px;">📲</div>
+                <strong style="color:#60a5fa; font-size:13px;">mCash</strong>
+                <small style="color:var(--text-muted); display:block;">Mobitel / SLT</small>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" id="btn-submit-payhere-pay" class="btn-payhere-submit" onclick="PaymentGateway.handlePayHereSubmit()">
+            🔒 Pay Now With Card
+          </button>
+        </div>
+
+        <!-- OTP 3D Secure Section -->
+        <div id="payhere-otp-section" style="display:none;">
+          <div class="otp-simulation-card">
+            <div style="font-size:28px; margin-bottom:6px;">🛡️</div>
+            <h3 style="color:#fff; font-size:16px; font-weight:800; margin-bottom:4px;">Bank Verified 3D-Secure OTP</h3>
+            <p style="font-size:12px; color:var(--text-secondary); line-height:1.4;">
+              A one-time verification code has been dispatched to your bank registered mobile number:
+              <strong id="ph-otp-phone-mask" style="color:#38bdf8;">07X •••• XXX</strong>
+            </p>
+
+            <div class="otp-inputs-row">
+              <input type="text" id="ph-otp-1" class="otp-box" maxlength="1" oninput="if(this.value && document.getElementById('ph-otp-2')) document.getElementById('ph-otp-2').focus()">
+              <input type="text" id="ph-otp-2" class="otp-box" maxlength="1" oninput="if(this.value && document.getElementById('ph-otp-3')) document.getElementById('ph-otp-3').focus()">
+              <input type="text" id="ph-otp-3" class="otp-box" maxlength="1" oninput="if(this.value && document.getElementById('ph-otp-4')) document.getElementById('ph-otp-4').focus()">
+              <input type="text" id="ph-otp-4" class="otp-box" maxlength="1" oninput="if(this.value && document.getElementById('ph-otp-5')) document.getElementById('ph-otp-5').focus()">
+              <input type="text" id="ph-otp-5" class="otp-box" maxlength="1" oninput="if(this.value && document.getElementById('ph-otp-6')) document.getElementById('ph-otp-6').focus()">
+              <input type="text" id="ph-otp-6" class="otp-box" maxlength="1">
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:10px; margin-bottom:14px;">
+              <button type="button" class="btn-glass" onclick="PaymentGateway.autofillOtp()" style="font-size:11px; padding:5px 12px; color:#38bdf8; border-color:rgba(56,189,248,0.4);">
+                ⚡ Auto-fill Sandbox OTP (123456)
+              </button>
+            </div>
+
+            <button type="button" class="btn-payhere-submit" onclick="PaymentGateway.handleOtpSubmit()">
+              ✓ Authorize &amp; Complete Payment
+            </button>
+          </div>
+        </div>
+
+        <!-- Success Section -->
+        <div id="payhere-success-section" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stripe International Payment Modal -->
+  <div id="stripe-payment-modal" class="modal-overlay">
+    <div class="stripe-modal-box">
+      <!-- Header -->
+      <div class="stripe-top-header">
+        <div class="stripe-brand-lockup">
+          <span class="stripe-logo-text">stripe</span>
+          <span class="payment-badge-pill badge-stripe">Certified IPG</span>
+        </div>
+        <button type="button" class="close-modal-btn" onclick="PaymentGateway.closeStripeModal()" style="color:#fff;">✕</button>
+      </div>
+
+      <!-- Order Strip -->
+      <div class="payhere-order-strip" style="background:#0e1222; border-bottom-color:rgba(99,91,255,0.2);">
+        <div>
+          <small>Universe Hub International Checkout</small>
+          <strong>Account: <span id="stripe-cust-email">customer@example.com</span></strong>
+        </div>
+        <div class="payhere-amount-tag" id="stripe-order-amount" style="color:#a5b4fc;">Rs. 0 LKR</div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="payhere-modal-body">
+        <!-- Error banner -->
+        <div id="stripe-error-banner" style="display:none; background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#fca5a5; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px;"></div>
+
+        <!-- Form View -->
+        <div id="stripe-form-view">
+          <!-- Express Pay Buttons (Apple Pay & Google Pay) -->
+          <div class="stripe-express-buttons">
+            <button type="button" class="btn-express-pay" onclick="PaymentGateway.handleStripeSubmit('Apple Pay')">
+              <span>🍏</span>
+              <span>Pay with <b>Apple Pay</b></span>
+            </button>
+            <button type="button" class="btn-express-pay" onclick="PaymentGateway.handleStripeSubmit('Google Pay')">
+              <span>G</span>
+              <span>Pay with <b>GPay</b></span>
+            </button>
+          </div>
+
+          <div class="stripe-divider">
+            <span>Or pay with debit or credit card</span>
+          </div>
+
+          <!-- Stripe Card Element Box -->
+          <div class="stripe-card-element">
+            <div>
+              <input type="text" id="stripe-card-num" placeholder="Card number (4242 4242 4242 4242)" maxlength="19">
+            </div>
+            <div class="stripe-subfield-row">
+              <input type="text" id="stripe-card-exp" placeholder="MM / YY" maxlength="5">
+              <input type="password" id="stripe-card-cvc" placeholder="CVC" maxlength="4">
+              <input type="text" id="stripe-card-zip" placeholder="ZIP" value="10230">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <button type="button" class="btn-glass" onclick="PaymentGateway.autofillStripeTestCard()" style="font-size:11px; padding:4px 10px; color:#a5b4fc; border-color:rgba(165,180,252,0.4);">
+              ⚡ Auto-fill Stripe 4242 Card
+            </button>
+            <span style="font-size:11px; color:var(--text-muted);">🔒 End-to-end encrypted</span>
+          </div>
+
+          <button type="button" id="btn-stripe-submit" class="btn-stripe-submit" onclick="PaymentGateway.handleStripeSubmit()">
+            💳 Pay with Card
+          </button>
+        </div>
+
+        <!-- Success View -->
+        <div id="stripe-success-view" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Write Physical Store Review Modal -->
+  <div id="review-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Review Universe Hub Physical Store</h3>
+        <button class="close-modal-btn" data-close="review-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="store-review-form">
+          <div style="text-align:center; margin-bottom:18px;">
+            <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">Rate Your Experience:</div>
+            <div style="font-size:28px; cursor:pointer; display:flex; justify-content:center; gap:6px;">
+              <span class="modal-star-pick" data-val="1" style="color:var(--warning);">★</span>
+              <span class="modal-star-pick" data-val="2" style="color:var(--warning);">★</span>
+              <span class="modal-star-pick" data-val="3" style="color:var(--warning);">★</span>
+              <span class="modal-star-pick" data-val="4" style="color:var(--warning);">★</span>
+              <span class="modal-star-pick" data-val="5" style="color:var(--warning);">★</span>
+            </div>
+            <input type="hidden" id="review-input-rating" value="5">
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Your Name:</label>
+            <input type="text" id="review-author-name" placeholder="e.g. Nimal Jayawardena" required style="width:100%;">
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Visit / Service Type:</label>
+            <input type="text" id="review-service-input" placeholder="e.g. Bought Used iPhone 13 / Display Replacement" required style="width:100%;">
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Your Review / Experience at our store:</label>
+            <textarea id="review-comment-input" rows="3" placeholder="How was the customer service, pricing, and phone condition?" required style="width:100%;"></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary-glow" style="width:100%; justify-content:center;">
+            Publish Review to Storefront
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Book Repair Slot Modal -->
+  <div id="repair-booking-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Reserve In-Store Repair Slot</h3>
+        <button class="close-modal-btn" data-close="repair-booking-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+          Skip the line! Reserve a direct technician desk at our Universe Hub physical store at 188/8c, High Level Road, Maharagama.
+        </p>
+        <form onsubmit="App.handleBookRepairAppointment(event)">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Your Name:</label>
+            <input type="text" id="book-cust-name" placeholder="Sunil Silva" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Phone / WhatsApp:</label>
+            <input type="tel" id="book-cust-phone" placeholder="074-0219239" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Phone Model:</label>
+            <input type="text" id="book-cust-device" placeholder="e.g. Apple iPhone 14 Pro" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Fault / Issue Details:</label>
+            <input type="text" id="book-cust-issue" placeholder="Cracked front screen / Battery dying fast" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Preferred Visit Date & Time:</label>
+            <input type="text" id="book-cust-date" placeholder="Today 4:00 PM or Tomorrow Morning" style="width:100%;">
+          </div>
+          <button type="submit" class="btn-primary-glow" style="width:100%; justify-content:center;">
+            Confirm In-Store Reservation
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- User / Customer Login & Registration Modal -->
+  <div id="auth-modal" class="modal-overlay">
+    <div class="modal-box" id="auth-modal-box" style="max-width:440px; width:92%;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:20px;">👤</span>
+          <h3 id="auth-modal-title" style="margin:0;">Account Portal</h3>
+        </div>
+        <button class="close-modal-btn" data-close="auth-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Cart Addition Alert (Only visible when triggered by Add to Cart / Checkout) -->
+        <div id="auth-cart-notice" class="auth-notice-banner" style="display:none;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:18px;">🛒</span>
+            <span id="auth-cart-notice-text">Please sign in or create an account to add items to your cart &amp; checkout.</span>
+          </div>
+        </div>
+
+        <!-- Auth Switch Tabs -->
+        <div class="auth-tabs" style="display:flex; gap:8px; margin-bottom:18px; background:rgba(255,255,255,0.04); padding:4px; border-radius:10px;">
+          <button type="button" id="tab-btn-signin" class="auth-tab-btn active" onclick="App.switchCustomerAuthTab('signin')" style="flex:1; padding:8px 12px; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;">
+            🔑 Sign In
+          </button>
+          <button type="button" id="tab-btn-register" class="auth-tab-btn" onclick="App.switchCustomerAuthTab('register')" style="flex:1; padding:8px 12px; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;">
+            ✨ Create Account
+          </button>
+        </div>
+
+        <!-- Form 1: Sign In -->
+        <form id="customer-signin-form" onsubmit="event.preventDefault(); App.handleCustomerLogin();">
+          <div id="signin-error-msg" class="auth-error-banner" style="display:none;"></div>
+          
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Email Address:</label>
+            <input type="email" id="auth-signin-email" placeholder="e.g. name@example.com" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-size:12px; color:var(--text-secondary);">Password:</label>
+              <button type="button" onclick="App.togglePasswordVisibility('auth-signin-password')" style="background:none; border:none; color:var(--neon-cyan); font-size:11px; cursor:pointer;">Show / Hide</button>
+            </div>
+            <input type="password" id="auth-signin-password" placeholder="Enter your password..." required style="width:100%;">
+          </div>
+          <button type="submit" class="btn-primary-glow" style="width:100%; justify-content:center; margin-bottom:14px; padding:10px;">
+            Sign In &amp; Continue
+          </button>
+          
+          <!-- 1-Click Demo Customer -->
+          <button type="button" class="btn-glass" style="width:100%; justify-content:center; color:var(--neon-cyan); margin-bottom:8px; font-size:12px;" onclick="App.quickDemoCustomerLogin()">
+            👤 1-Click Demo Customer Sign In (Kasun)
+          </button>
+          
+          <!-- 1-Click Store Admin -->
+          <button type="button" class="btn-glass" style="width:100%; justify-content:center; color:#c084fc; margin-bottom:16px; font-size:12px;" onclick="App.quickDemoAdminLogin()">
+            🛡️ 1-Click Store Admin Sign In (Demo)
+          </button>
+        </form>
+
+        <!-- Form 2: Register (Create Account) -->
+        <form id="customer-register-form" style="display:none;" onsubmit="event.preventDefault(); App.handleCustomerRegister();">
+          <div id="register-error-msg" class="auth-error-banner" style="display:none;"></div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Full Name:</label>
+            <input type="text" id="auth-reg-name" placeholder="e.g. Kasun Silva" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">
+              💬 WhatsApp Number <span style="color:#25d366; font-weight:700;">* (Required for Order Updates)</span>:
+            </label>
+            <input type="tel" id="auth-reg-phone" placeholder="e.g. 077 123 4567 or 074 021 9239" required pattern="^(?:0|\+94)?[0-9\s\-]{9,12}$" style="width:100%;" title="Please enter a valid active WhatsApp number">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Email Address:</label>
+            <input type="email" id="auth-reg-email" placeholder="name@example.com" required style="width:100%;">
+          </div>
+          <div style="margin-bottom:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label style="font-size:12px; color:var(--text-secondary);">Choose Password:</label>
+              <button type="button" onclick="App.togglePasswordVisibility('auth-reg-password')" style="background:none; border:none; color:var(--neon-cyan); font-size:11px; cursor:pointer;">Show / Hide</button>
+            </div>
+            <input type="password" id="auth-reg-password" placeholder="At least 6 characters" required minlength="4" style="width:100%;">
+          </div>
+          <button type="submit" class="btn-primary-glow" style="width:100%; justify-content:center; margin-bottom:14px; padding:10px;">
+            ✨ Create Account &amp; Continue
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Admin Edit Product Modal -->
+  <div id="admin-edit-product-modal" class="modal-overlay">
+    <div class="modal-box admin-edit-modal-box">
+      <div class="modal-header">
+        <h3>Edit Product Details & Media</h3>
+        <button class="close-modal-btn" data-close="admin-edit-product-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="admin-edit-product-form" onsubmit="AdminController.handleSaveEditProduct(event)">
+          <input type="hidden" id="edit-prod-id">
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Product Title:</label>
+              <input type="text" id="edit-prod-name" required style="width:100%;">
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="font-size:12px; color:var(--text-secondary);">Brand / Maker:</label>
+                <button type="button" class="btn-inline-add-brand" onclick="AdminController.openQuickAddBrandModal()">+ New Brand</button>
+              </div>
+              <select id="edit-prod-brand" style="width:100%;"></select>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Category / Subcategory:</label>
+              <select id="edit-prod-category" style="width:100%;">
+                <optgroup label="📱 iPhones">
+                  <option value="brand-new-iphones">Brand New iPhones</option>
+                  <option value="used-iphones">Certified Used iPhones</option>
+                </optgroup>
+                <optgroup label="⚡ Accessories">
+                  <option value="back-covers">Back Covers & Cases</option>
+                  <option value="chargers">Fast Chargers & Adapters</option>
+                  <option value="cables">Charging Cables</option>
+                  <option value="tempered-glass">Tempered Glass</option>
+                  <option value="camera-protectors">Camera Protectors</option>
+                  <option value="audio">Audio & AirPods</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Condition:</label>
+              <select id="edit-prod-condition" style="width:100%;">
+                <option value="Brand New">Brand New (Sealed)</option>
+                <option value="Used - Grade A+">Used - Grade A+ (Mint)</option>
+                <option value="Used - Grade A">Used - Grade A</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Selling Price (Rs.):</label>
+              <input type="number" id="edit-prod-price" required style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Original Price (Rs.):</label>
+              <input type="number" id="edit-prod-origprice" style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health %:</label>
+              <input type="number" id="edit-prod-battery" placeholder="Leave empty for new" style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Stock Units:</label>
+              <input type="number" id="edit-prod-stock" min="0" required style="width:100%;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Warranty Period:</label>
+              <input type="text" id="edit-prod-warranty" style="width:100%;">
+            </div>
+          </div>
+
+          <!-- Direct Drag-and-Drop Image Uploader (Edit Modal) -->
+          <div class="media-upload-section" style="margin-bottom:14px;">
+            <div class="media-upload-label">
+              <span>📸 Product Photos / PNGs (Drag &amp; Drop)</span>
+              <span class="media-upload-badge" id="edit-images-count-badge">0 photos added</span>
+            </div>
+            <div class="dropzone-box" id="edit-images-dropzone">
+              <input type="file" id="edit-images-input" accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml" multiple style="display:none;">
+              <div class="dropzone-inner">
+                <div class="dropzone-icon-pulse">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                  </svg>
+                </div>
+                <div class="dropzone-text">
+                  <strong>Drag &amp; Drop PNG Photos Here</strong>
+                  <span>or <button type="button" class="dropzone-browse-btn" onclick="document.getElementById('edit-images-input').click()">Browse Files</button></span>
+                </div>
+                <div class="dropzone-formats">Direct PNG, JPG upload • 📐 <strong>Optimal Resolution: 800 × 800 px (1:1 Square Ratio)</strong></div>
+              </div>
+            </div>
+            <div class="uploaded-previews-grid" id="edit-images-preview-grid"></div>
+            <div class="media-url-toggle-wrap">
+              <button type="button" class="btn-toggle-url" onclick="MediaUploader.toggleUrlBox('edit-img-url-box')">
+                🔗 <span>Or paste image URLs manually</span> ▾
+              </button>
+              <div id="edit-img-url-box" class="media-url-box" style="display:none;">
+                <textarea id="edit-prod-images" rows="2" placeholder="https://image1.jpg&#10;https://image2.jpg" class="media-url-textarea"></textarea>
+                <button type="button" class="btn-url-add" onclick="MediaUploader.addImagesFromUrl('edit')">+ Add URLs</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Direct Drag-and-Drop Video Uploader (Edit Modal) -->
+          <div class="media-upload-section" style="margin-bottom:14px;">
+            <div class="media-upload-label">
+              <span>🎬 Product Video Showcase (Drag &amp; Drop)</span>
+              <span class="media-upload-badge" id="edit-video-count-badge">No video selected</span>
+            </div>
+            <div class="dropzone-box video-dropzone" id="edit-video-dropzone">
+              <input type="file" id="edit-video-input" accept="video/mp4, video/webm, video/quicktime" style="display:none;">
+              <div class="dropzone-inner">
+                <div class="dropzone-icon-pulse video-pulse">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                  </svg>
+                </div>
+                <div class="dropzone-text">
+                  <strong>Drag &amp; Drop MP4 Video Here</strong>
+                  <span>or <button type="button" class="dropzone-browse-btn" onclick="document.getElementById('edit-video-input').click()">Browse Video</button></span>
+                </div>
+                <div class="dropzone-formats">Direct MP4 or WebM upload • High definition stream</div>
+              </div>
+            </div>
+            <div class="uploaded-video-card" id="edit-video-preview-card" style="display:none;"></div>
+            <div class="media-url-toggle-wrap">
+              <button type="button" class="btn-toggle-url" onclick="MediaUploader.toggleUrlBox('edit-video-url-box')">
+                🔗 <span>Or paste Video URL link</span> ▾
+              </button>
+              <div id="edit-video-url-box" class="media-url-box" style="display:none;">
+                <input type="text" id="edit-prod-video" placeholder="https://example.com/phone.mp4 or YouTube link" class="media-url-input">
+                <button type="button" class="btn-url-add" onclick="MediaUploader.setVideoFromUrl('edit')">+ Set Link</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Description:</label>
+            <textarea id="edit-prod-desc" rows="2" style="width:100%;"></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" class="btn-glass" data-close="admin-edit-product-modal" onclick="App.closeModal('admin-edit-product-modal')">Cancel</button>
+            <button type="submit" class="btn-primary-glow">Save Changes & Update Store</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Add Brand Modal -->
+  <div id="admin-quick-brand-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width:440px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">🏷️</span>
+          <h3 style="font-size:17px; font-weight:800; color:#fff;">Add New Brand to Store</h3>
+        </div>
+        <button class="modal-close" onclick="AdminController.closeQuickAddBrandModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:18px;">
+        <p style="font-size:12.5px; color:var(--text-secondary); margin-bottom:16px;">
+          Add a new accessory or device brand (e.g. Joyroom, Torras, Remax). It will immediately appear in Navbar, Filters and Inventory!
+        </p>
+        <form id="quick-add-brand-form" onsubmit="AdminController.handleQuickAddBrandSubmit(event)">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Name (e.g. Joyroom, WiWU, Torras):</label>
+            <input type="text" id="quick-brand-name" placeholder="Brand Name" required style="width:100%;">
+          </div>
+          <div style="display:grid; grid-template-columns: 100px 1fr; gap:10px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Icon / Emoji:</label>
+              <input type="text" id="quick-brand-icon" value="🏷️" style="width:100%; text-align:center; font-size:18px;">
+            </div>
+            <div>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Short Tagline / Focus:</label>
+              <input type="text" id="quick-brand-tagline" placeholder="e.g. Wireless Audio &amp; Chargers" style="width:100%;">
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px; background:rgba(255,255,255,0.03); padding:10px 14px; border-radius:8px;">
+            <label style="font-size:12px; color:#cbd5e1; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="quick-brand-in-nav" checked style="accent-color:var(--neon-cyan);">
+              <span>Show in "Shop by Brand" Navbar Dropdown</span>
+            </label>
+            <label style="font-size:12px; color:#cbd5e1; display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="quick-brand-in-filter" checked style="accent-color:var(--neon-cyan);">
+              <span>Show in Catalog Filter Pills</span>
+            </label>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button type="button" class="btn-glass" onclick="AdminController.closeQuickAddBrandModal()">Cancel</button>
+            <button type="submit" class="btn-primary-glow">Save Brand &amp; Select</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated About Us Modal -->
+  <div id="about-modal" class="modal-overlay">
+    <div class="modal-box about-modal-box" style="max-width:680px; width:92%; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:28px; box-shadow:0 16px 48px rgba(0,0,0,0.6); max-height:90vh; overflow-y:auto;">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img src="assets/universe_hub_logo.png?v=10" alt="Universe Hub" class="site-main-logo" style="height:40px; width:auto; max-width:180px; object-fit:contain; background:transparent !important; mix-blend-mode:screen;">
+          <span class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); font-size:11px;">Official Flagship</span>
+        </div>
+        <button class="close-modal-btn" onclick="App.closeAboutModal()" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="modal-body" style="color:var(--text-primary); line-height:1.65;">
+        <h2 id="about-display-heading" style="font-size:22px; font-weight:800; color:#fff; margin-bottom:12px;">
+          Sri Lanka's Premier Destination for Apple &amp; Flagship Tech
+        </h2>
+        <p id="about-display-story" style="font-size:14px; color:var(--text-secondary); margin-bottom:20px;">
+          Located at 188/8c, High Level Road, Maharagama, Universe Hub is your trusted physical retail store and certified repair lab. We specialize in official sealed Apple devices, thoroughly tested Grade-A+ pre-owned iPhones with transparent 3uTools battery diagnostics, and 100% genuine charging essentials and protective armor.
+        </p>
+
+        <!-- 4 Core Pillars -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:20px;">
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px;">
+            <div style="font-size:22px; margin-bottom:6px;">🍏</div>
+            <h4 style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">100% Genuine Apple</h4>
+            <p style="font-size:12px; color:var(--text-muted); margin:0;">Brand new sealed boxes with Apple Care and TRCSL certification.</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px;">
+            <div style="font-size:22px; margin-bottom:6px;">🔍</div>
+            <h4 style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">3uTools Battery Verification</h4>
+            <p style="font-size:12px; color:var(--text-muted); margin:0;">Transparent pre-owned testing with verified 100% genuine parts.</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px;">
+            <div style="font-size:22px; margin-bottom:6px;">⚡</div>
+            <h4 style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">30-Min In-Store Repairs</h4>
+            <p style="font-size:12px; color:var(--text-muted); margin:0;">Laser back glass, OLED swaps, and chip diagnostics at our Maharagama lab.</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px;">
+            <div style="font-size:22px; margin-bottom:6px;">🚚</div>
+            <h4 style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">Island-Wide Delivery</h4>
+            <p style="font-size:12px; color:var(--text-muted); margin:0;">Safe courier with Cash on Delivery or physical store pickup.</p>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg, rgba(0,210,255,0.08), rgba(157,78,221,0.08)); border:1px solid rgba(0,210,255,0.2); border-radius:12px; padding:16px; margin-bottom:20px;">
+          <h4 style="font-size:13px; font-weight:700; color:var(--neon-cyan); margin-bottom:4px;">Our Mission</h4>
+          <p id="about-display-mission" style="font-size:13px; color:var(--text-secondary); margin:0;">
+            To deliver 100% authentic Apple flagships and top-tier accessories with complete transparency, verified battery health, honest pricing, and express in-store repairs backed by comprehensive warranties.
+          </p>
+        </div>
+
+        <!-- Contact & Visit Info Footer -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background:rgba(0,0,0,0.3); border-radius:10px; padding:14px 18px;">
+          <div>
+            <div style="font-size:13px; font-weight:700; color:#fff;">📍 Maharagama Flagship Store</div>
+            <div id="about-display-subtext" style="font-size:12px; color:var(--text-muted);">188/8c, High Level Road, Maharagama • Open Daily 9:30 AM – 8:30 PM</div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <a id="about-display-whatsapp-link" href="https://wa.me/94740219239?text=Hello%20Universe%20Hub,%20I%20have%20an%20inquiry%20regarding%20iPhone%20/%20accessories" target="_blank" class="btn-primary-glow" style="background:#25d366; box-shadow:0 0 16px rgba(37,211,102,0.3); font-size:12px; padding:8px 16px;">
+              💬 WhatsApp 074-0219239
+            </a>
+            <button class="btn-glass" onclick="App.closeAboutModal()" style="font-size:12px; padding:8px 16px;">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Success Confirmation Modal -->
+  <div id="order-success-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width:500px; text-align:center;">
+      <div class="modal-body" style="padding:32px 24px;">
+        <div style="width:68px; height:68px; border-radius:50%; background:linear-gradient(135deg, rgba(0,210,255,0.2), rgba(37,211,102,0.2)); border:2px solid #25d366; display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto; font-size:32px; box-shadow:0 0 30px rgba(37,211,102,0.3); color:#25d366;">
+          ✓
+        </div>
+        <h2 style="font-size:22px; font-weight:800; color:#fff; margin-bottom:6px;">Order Placed Successfully!</h2>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">
+          Thank you for choosing Universe Hub! Your order has been registered in our system and our dispatch desk has received your details.
+        </p>
+
+        <!-- Order Summary Pill Card -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; margin-bottom:20px; text-align:left;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12.5px;">
+            <span style="color:var(--text-muted);">Order Tracking ID:</span>
+            <strong id="order-success-id" style="color:var(--neon-cyan); font-family:monospace; font-size:14px;">ORD-0000</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12.5px;">
+            <span style="color:var(--text-muted);">Customer:</span>
+            <span id="order-success-cust" style="color:#fff; font-weight:600;">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12.5px;">
+            <span style="color:var(--text-muted);">Delivery Mode:</span>
+            <span id="order-success-method" style="color:#cbd5e1;">-</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); font-size:14px;">
+            <span style="color:#fff; font-weight:700;">Total Payable:</span>
+            <strong id="order-success-total" style="color:var(--neon-cyan); font-size:16px;">Rs. 0</strong>
+          </div>
+        </div>
+
+        <!-- Download & WhatsApp Action Buttons -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button type="button" id="btn-success-download-pdf" class="btn-primary-glow" style="width:100%; justify-content:center; padding:12px; font-size:14px;">
+            📥 Download Official Invoice (PDF)
+          </button>
+          
+          <button type="button" id="btn-success-view-invoice" class="btn-glass" style="width:100%; justify-content:center; padding:10px; font-size:13px; color:#cbd5e1;">
+            📄 View Full Printable Invoice
+          </button>
+
+          <a id="btn-success-whatsapp" href="#" target="_blank" class="btn-primary-glow" style="background:#25d366; box-shadow:0 0 16px rgba(37,211,102,0.3); width:100%; justify-content:center; padding:10px; font-size:13px; text-decoration:none;">
+            💬 Send to WhatsApp Store Desk
+          </a>
+
+          <button type="button" class="btn-glass" onclick="App.closeModal('order-success-modal')" style="width:100%; justify-content:center; padding:8px; font-size:12px; color:var(--text-muted); margin-top:4px;">
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Tax Invoice Modal with High-Res Preview & PDF Export -->
+  <div id="invoice-modal" class="modal-overlay">
+    <div class="invoice-modal-card">
+      <div class="invoice-modal-toolbar">
+        <div class="invoice-toolbar-title">
+          <span>🧾</span>
+          <span>Official Tax Invoice &amp; Warranty Receipt</span>
+        </div>
+        <div class="invoice-actions-group">
+          <button type="button" id="btn-download-pdf-action" class="btn-invoice-download">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download PDF</span>
+          </button>
+          <button type="button" id="btn-print-invoice-action" class="btn-invoice-print">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Print</span>
+          </button>
+          <a id="btn-wa-invoice-action" href="#" target="_blank" class="btn-invoice-wa">
+            💬 <span>WhatsApp</span>
+          </a>
+          <button type="button" class="close-modal-btn" onclick="App.closeModal('invoice-modal')" style="margin-left:6px;">✕</button>
+        </div>
+      </div>
+
+      <div class="invoice-preview-scroll">
+        <div id="invoice-preview-container" style="width:100%; display:flex; justify-content:center;">
+          <!-- Dynamically generated invoice document -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Orders History Modal -->
+  <div id="customer-orders-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width:680px; width:92%;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">📦</span>
+          <h3 style="font-size:17px; font-weight:800; color:#fff;">My Orders &amp; Invoices</h3>
+        </div>
+        <button class="close-modal-btn" onclick="App.closeModal('customer-orders-modal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding:20px; max-height:75vh; overflow-y:auto;">
+        <p style="font-size:12.5px; color:var(--text-secondary); margin-bottom:16px;">
+          View your Universe Hub purchases, check order fulfillment status, and download official A4 PDF invoices anytime.
+        </p>
+        <div id="customer-orders-list">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Repair Notification Modal (WhatsApp / SMS) -->
+  <div id="admin-repair-notify-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:560px; width:92%;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:22px;">🔔</span>
+          <h3 style="font-size:17px; font-weight:800; color:#fff;">Send Customer Repair Notification</h3>
+        </div>
+        <button class="close-modal-btn" onclick="App.closeModal('admin-repair-notify-modal')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding:20px;">
+        <input type="hidden" id="notify-rep-code">
+
+        <!-- Job Summary Card -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 16px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong id="notify-rep-code-display" style="color:var(--neon-cyan); font-size:15px; font-family:monospace;">UH-8821</strong>
+            <span id="notify-rep-status-badge" class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); font-size:11px;">In Progress</span>
+          </div>
+          <div style="font-size:14px; color:#fff; font-weight:700;" id="notify-rep-cust-name">Customer Name</div>
+          <div style="font-size:12.5px; color:var(--text-secondary); margin-top:2px;" id="notify-rep-device-info">Apple iPhone 15 Pro • Screen Replacement</div>
+          <div style="font-size:12.5px; color:#25d366; font-weight:700; margin-top:6px;" id="notify-rep-phone-display">💬 WhatsApp: 077 123 4567</div>
+        </div>
+
+        <!-- Quick Status Template Selector -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:6px; font-weight:700;">
+            Select Status Template to Auto-compose:
+          </label>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="btn-glass btn-notify-template" data-status="Received" onclick="AdminController.selectNotificationTemplate('Received')" style="padding:5px 10px; font-size:11.5px;">📥 Received</button>
+            <button type="button" class="btn-glass btn-notify-template" data-status="Diagnostic" onclick="AdminController.selectNotificationTemplate('Diagnostic')" style="padding:5px 10px; font-size:11.5px;">🔍 Diagnostic</button>
+            <button type="button" class="btn-glass btn-notify-template" data-status="In Progress" onclick="AdminController.selectNotificationTemplate('In Progress')" style="padding:5px 10px; font-size:11.5px;">⚙️ In Progress</button>
+            <button type="button" class="btn-glass btn-notify-template" data-status="Ready for Pickup" onclick="AdminController.selectNotificationTemplate('Ready for Pickup')" style="padding:5px 10px; font-size:11.5px; color:#25d366; border-color:rgba(37,211,102,0.4);">✅ Ready for Pickup</button>
+            <button type="button" class="btn-glass btn-notify-template" data-status="Completed" onclick="AdminController.selectNotificationTemplate('Completed')" style="padding:5px 10px; font-size:11.5px;">🎉 Completed</button>
+          </div>
+        </div>
+
+        <!-- Message Editor -->
+        <div style="margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-size:12px; color:var(--text-secondary); font-weight:700;">
+              Message Content (WhatsApp / SMS):
+            </label>
+            <span style="font-size:10.5px; color:var(--neon-cyan);">Editable before sending</span>
+          </div>
+          <textarea id="notify-message-textarea" rows="6" style="width:100%; font-size:12.5px; line-height:1.5; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:#0c101a; color:#f1f5f9; box-sizing:border-box;"></textarea>
+        </div>
+
+        <!-- Action Buttons: WhatsApp & SMS -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
+          <button type="button" id="btn-send-notify-whatsapp" class="btn-primary-glow" style="background:#25d366; box-shadow:0 0 16px rgba(37,211,102,0.3); justify-content:center; padding:12px; font-size:13px;" onclick="AdminController.sendRepairWhatsAppNotification()">
+            💬 Send via WhatsApp
+          </button>
+          <button type="button" id="btn-send-notify-sms" class="btn-glass" style="justify-content:center; padding:12px; font-size:13px; color:#38bdf8; border-color:rgba(56,189,248,0.4);" onclick="AdminController.sendRepairSmsNotification()">
+            📱 Send via SMS / Copy Text
+          </button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+          <span>📍 Maharagama Flagship Lab</span>
+          <span>Hotline: 074-0219239</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Bulk Upload Products & Categories Engine -->
+  <div id="admin-bulk-upload-modal" class="modal-overlay" style="z-index:9999;">
+    <div class="modal-card" style="max-width:920px; width:95%; max-height:90vh; overflow-y:auto; background:var(--bg-card); border:1px solid rgba(0,210,255,0.25); box-shadow:0 12px 48px rgba(0,0,0,0.85); border-radius:18px; padding:28px;">
+      
+      <!-- Modal Header -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:1px solid var(--border-subtle); padding-bottom:16px;">
+        <div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, var(--neon-purple), var(--neon-cyan)); display:flex; align-items:center; justify-content:center; font-size:18px;">
+              ⚡
+            </div>
+            <div>
+              <h2 style="font-size:20px; font-weight:800; color:#fff; margin:0;">Bulk Upload &amp; Catalog Import Engine</h2>
+              <p style="font-size:13px; color:var(--text-secondary); margin:2px 0 0 0;">
+                Quickly import or synchronize hundreds of Products &amp; Categories using Excel CSV or TSV.
+              </p>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="BulkUploader.closeModal()" style="background:transparent; border:none; color:var(--text-secondary); font-size:22px; cursor:pointer; padding:4px 8px; border-radius:8px;">✕</button>
+      </div>
+
+      <!-- Type Switcher Tabs -->
+      <div style="display:flex; gap:10px; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:12px;">
+        <button type="button" class="bulk-tab-btn active" data-tab="products" onclick="BulkUploader.switchTab('products')">
+          📱 Products Catalog (CSV / TSV)
+        </button>
+        <button type="button" class="bulk-tab-btn" data-tab="categories" onclick="BulkUploader.switchTab('categories')">
+          📂 Categories &amp; Navbar (CSV / TSV)
+        </button>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 1: PRODUCTS BULK UPLOAD -->
+      <!-- ================================================================= -->
+      <div id="bulk-tab-content-products">
+        
+        <!-- Step 1: Download Sample Template Banner -->
+        <div style="background:linear-gradient(135deg, rgba(0,210,255,0.08), rgba(157,78,221,0.08)); border:1px solid rgba(0,210,255,0.25); border-radius:12px; padding:16px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+          <div>
+            <div style="font-weight:700; color:#fff; font-size:14px; margin-bottom:3px;">
+              📄 Need the standard Excel CSV template for Products?
+            </div>
+            <div style="font-size:12.5px; color:var(--text-secondary); line-height:1.4;">
+              Includes column headers: <code style="color:var(--neon-cyan); background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;">name, brand, category, condition, price, originalPrice, stock, batteryHealth, warranty, image, description</code>
+            </div>
+          </div>
+          <button type="button" class="btn-glass" onclick="BulkUploader.downloadProductTemplate()" style="color:var(--neon-cyan); border-color:rgba(0,210,255,0.4); padding:9px 16px; font-size:12.5px; font-weight:700; white-space:nowrap;">
+            📥 Download Sample Products CSV
+          </button>
+        </div>
+
+        <!-- Step 2: Drag & Drop Area or Browse -->
+        <div style="margin-bottom:16px;">
+          <input type="file" id="bulk-prod-file-input" accept=".csv,.tsv,.txt,.json" style="display:none;">
+          <div id="bulk-prod-dropzone" class="bulk-dropzone-box">
+            <div style="font-size:32px; margin-bottom:8px;">📁</div>
+            <div style="font-weight:700; color:#fff; font-size:14px; margin-bottom:4px;">
+              Drag &amp; Drop your Products CSV file here, or <span style="color:var(--neon-cyan); text-decoration:underline;">Click to Browse</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted);">
+              Supports .CSV, .TSV (tab-separated from Excel), and .JSON files
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Copy-Paste Textarea Alternative -->
+        <div style="margin-bottom:16px;">
+          <details style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 14px;">
+            <summary style="font-size:13px; font-weight:700; color:var(--text-secondary); cursor:pointer;">
+              📋 Or Paste CSV / Excel rows directly here
+            </summary>
+            <div style="margin-top:10px;">
+              <textarea id="bulk-prod-paste-textarea" rows="6" placeholder="name,brand,category,condition,price,stock&#10;&quot;iPhone 15 Pro Max 256GB&quot;,&quot;Apple&quot;,&quot;brand-new-iphones&quot;,&quot;Brand New&quot;,385000,10" style="width:100%; font-family:monospace; font-size:12px; line-height:1.4; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:#0c101a; color:#f1f5f9; box-sizing:border-box;"></textarea>
+              <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                <button type="button" class="btn-primary-glow" onclick="BulkUploader.processProductsInput()" style="padding:7px 16px; font-size:12px;">
+                  🔍 Parse &amp; Preview Rows
+                </button>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Step 4: Import Mode & Controls -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <label style="font-size:12.5px; font-weight:700; color:#fff; margin-right:12px;">Import Mode:</label>
+            <label style="font-size:12.5px; color:var(--text-secondary); margin-right:14px; cursor:pointer;">
+              <input type="radio" name="bulk-prod-mode" value="append" checked style="margin-right:4px;"> 
+              Append &amp; Update Inventory (Safe)
+            </label>
+            <label style="font-size:12.5px; color:#f87171; cursor:pointer;">
+              <input type="radio" name="bulk-prod-mode" value="replace" style="margin-right:4px;"> 
+              Replace Entire Catalog (Clear old items)
+            </label>
+          </div>
+          <div id="bulk-prod-preview-badge" style="font-size:13px;"></div>
+        </div>
+
+        <!-- Step 5: Live Preview Table -->
+        <div id="bulk-prod-preview-wrap" style="display:none; margin-bottom:18px;">
+          <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:8px;">
+            Live Product Validation Preview:
+          </div>
+          <div class="bulk-preview-table-container">
+            <table class="bulk-preview-table">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">#</th>
+                  <th>Product Title &amp; Details</th>
+                  <th>Condition</th>
+                  <th>Selling Price</th>
+                  <th style="text-align:center;">Stock</th>
+                  <th style="text-align:center;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="bulk-prod-preview-tbody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-top:14px; gap:10px;">
+            <button type="button" class="btn-glass" onclick="BulkUploader.closeModal()">Cancel</button>
+            <button type="button" id="btn-execute-import-prod" class="btn-primary-glow" onclick="BulkUploader.executeImport('products')" style="padding:10px 24px; font-size:13.5px;">
+              🚀 Commit &amp; Import Products to Store
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 2: CATEGORIES BULK UPLOAD -->
+      <!-- ================================================================= -->
+      <div id="bulk-tab-content-categories" style="display:none;">
+        
+        <!-- Step 1: Download Sample Category Template Banner -->
+        <div style="background:linear-gradient(135deg, rgba(0,210,255,0.08), rgba(157,78,221,0.08)); border:1px solid rgba(0,210,255,0.25); border-radius:12px; padding:16px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+          <div>
+            <div style="font-weight:700; color:#fff; font-size:14px; margin-bottom:3px;">
+              📂 Need the standard Excel CSV template for Categories &amp; Navbar?
+            </div>
+            <div style="font-size:12.5px; color:var(--text-secondary); line-height:1.4;">
+              Includes column headers: <code style="color:var(--neon-cyan); background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;">id, name, group, icon, inNav, inFilter, order</code>
+            </div>
+          </div>
+          <button type="button" class="btn-glass" onclick="BulkUploader.downloadCategoryTemplate()" style="color:var(--neon-cyan); border-color:rgba(0,210,255,0.4); padding:9px 16px; font-size:12.5px; font-weight:700; white-space:nowrap;">
+            📥 Download Sample Categories CSV
+          </button>
+        </div>
+
+        <!-- Step 2: Drag & Drop Area or Browse -->
+        <div style="margin-bottom:16px;">
+          <input type="file" id="bulk-cat-file-input" accept=".csv,.tsv,.txt,.json" style="display:none;">
+          <div id="bulk-cat-dropzone" class="bulk-dropzone-box">
+            <div style="font-size:32px; margin-bottom:8px;">📂</div>
+            <div style="font-weight:700; color:#fff; font-size:14px; margin-bottom:4px;">
+              Drag &amp; Drop your Categories CSV file here, or <span style="color:var(--neon-cyan); text-decoration:underline;">Click to Browse</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted);">
+              Supports .CSV, .TSV (Excel copy-paste), and .JSON files
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Copy-Paste Textarea Alternative -->
+        <div style="margin-bottom:16px;">
+          <details style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 14px;">
+            <summary style="font-size:13px; font-weight:700; color:var(--text-secondary); cursor:pointer;">
+              📋 Or Paste CSV / Excel rows directly here
+            </summary>
+            <div style="margin-top:10px;">
+              <textarea id="bulk-cat-paste-textarea" rows="6" placeholder="id,name,group,icon,inNav,inFilter&#10;&quot;powerbanks&quot;,&quot;Fast Charge Powerbanks&quot;,&quot;accessories&quot;,&quot;🔋&quot;,true,true" style="width:100%; font-family:monospace; font-size:12px; line-height:1.4; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:#0c101a; color:#f1f5f9; box-sizing:border-box;"></textarea>
+              <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                <button type="button" class="btn-primary-glow" onclick="BulkUploader.processCategoriesInput()" style="padding:7px 16px; font-size:12px;">
+                  🔍 Parse &amp; Preview Rows
+                </button>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Step 4: Import Mode & Controls -->
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <label style="font-size:12.5px; font-weight:700; color:#fff; margin-right:12px;">Import Mode:</label>
+            <label style="font-size:12.5px; color:var(--text-secondary); margin-right:14px; cursor:pointer;">
+              <input type="radio" name="bulk-cat-mode" value="append" checked style="margin-right:4px;"> 
+              Append &amp; Update Categories (Safe)
+            </label>
+            <label style="font-size:12.5px; color:#f87171; cursor:pointer;">
+              <input type="radio" name="bulk-cat-mode" value="replace" style="margin-right:4px;"> 
+              Replace Entire Categories List
+            </label>
+          </div>
+          <div id="bulk-cat-preview-badge" style="font-size:13px;"></div>
+        </div>
+
+        <!-- Step 5: Live Preview Table -->
+        <div id="bulk-cat-preview-wrap" style="display:none; margin-bottom:18px;">
+          <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:8px;">
+            Live Categories Validation Preview:
+          </div>
+          <div class="bulk-preview-table-container">
+            <table class="bulk-preview-table">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">#</th>
+                  <th>Category Name &amp; ID</th>
+                  <th>Parent Group</th>
+                  <th style="text-align:center;">Show in Navbar</th>
+                  <th style="text-align:center;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="bulk-cat-preview-tbody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-top:14px; gap:10px;">
+            <button type="button" class="btn-glass" onclick="BulkUploader.closeModal()">Cancel</button>
+            <button type="button" id="btn-execute-import-cat" class="btn-primary-glow" onclick="BulkUploader.executeImport('categories')" style="padding:10px 24px; font-size:13.5px;">
+              🚀 Commit &amp; Sync Categories to Navbar
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/html2pdf.bundle.min.js"></script>
+  <script src="js/data.js?v=11"></script>
+  <script src="js/invoice.js?v=2"></script>
+  <script src="js/uploader.js?v=11"></script>
+  <script src="js/bulk-uploader.js?v=5"></script>
+  <script src="js/payment-gateway.js?v=1"></script>
+  <script src="js/admin.js?v=15"></script>
+  <script src="js/app.js?v=16"></script>
+</body>
+</html>

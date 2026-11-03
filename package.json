@@ -1,0 +1,19 @@
+{
+  "name": "universe-hub-store",
+  "version": "1.0.0",
+  "description": "Universe Hub - Premium Mobile, Certified iPhones & Repair Lab E-Commerce Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "iphone",
+    "ecommerce",
+    "apple",
+    "repairs",
+    "universe-hub"
+  ],
+  "author": "Universe Hub",
+  "license": "ISC"
+}

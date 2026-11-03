@@ -1,0 +1,608 @@
+/* ==========================================================================
+   Universe Hub - Online Payment Gateway Integration (PayHere & Stripe)
+   Styles for Checkout Payment Selector, PayHere Modal, and Stripe Elements
+   ========================================================================== */
+
+/* --- Checkout Payment Method Radio Cards --- */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.payment-method-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.payment-method-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(0, 210, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.payment-method-card.selected {
+  background: linear-gradient(135deg, rgba(0, 210, 255, 0.12), rgba(157, 78, 221, 0.12));
+  border-color: var(--neon-cyan, #00d2ff);
+  box-shadow: 0 0 16px rgba(0, 210, 255, 0.25);
+}
+
+.payment-method-card input[type="radio"] {
+  display: none;
+}
+
+.payment-radio-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.payment-method-card.selected .payment-radio-indicator {
+  border-color: var(--neon-cyan, #00d2ff);
+  background: rgba(0, 210, 255, 0.2);
+}
+
+.payment-radio-indicator::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--neon-cyan, #00d2ff);
+  transform: scale(0);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.payment-method-card.selected .payment-radio-indicator::after {
+  transform: scale(1);
+}
+
+.payment-method-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.payment-method-details {
+  flex: 1;
+}
+
+.payment-method-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.payment-badge-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-payhere {
+  background: rgba(0, 150, 255, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.badge-stripe {
+  background: rgba(99, 91, 255, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(165, 180, 252, 0.35);
+}
+
+.badge-koko {
+  background: rgba(244, 63, 94, 0.18);
+  color: #fb7185;
+  border: 1px solid rgba(251, 113, 133, 0.35);
+}
+
+.badge-cod {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+.payment-method-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary, #94a3b8);
+  line-height: 1.35;
+}
+
+.payment-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.pay-brand-tag {
+  font-size: 9.5px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+/* Koko Installment Banner */
+.koko-breakdown-box {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  font-size: 12px;
+}
+
+.koko-installments-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.koko-inst-card {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.koko-inst-card small {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted, #64748b);
+  margin-bottom: 2px;
+}
+
+.koko-inst-card strong {
+  color: #fff;
+  font-size: 11.5px;
+}
+
+/* ==========================================================================
+   PayHere Sri Lanka Authentic Modal Styling
+   ========================================================================== */
+.payhere-modal-box {
+  max-width: 540px;
+  width: 95%;
+  background: #0b1329;
+  border: 1px solid rgba(0, 150, 255, 0.35);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 120, 255, 0.2);
+}
+
+.payhere-top-header {
+  background: linear-gradient(135deg, #022047, #033675);
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.payhere-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.payhere-logo-pill {
+  background: #fff;
+  color: #004b97;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: -0.5px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.payhere-secure-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.payhere-order-strip {
+  background: #0e1a38;
+  padding: 14px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.payhere-order-strip small {
+  color: var(--text-muted, #64748b);
+  display: block;
+  font-size: 11px;
+}
+
+.payhere-order-strip strong {
+  color: #fff;
+  font-size: 14px;
+}
+
+.payhere-amount-tag {
+  font-size: 18px;
+  font-weight: 800;
+  color: #38bdf8;
+  text-align: right;
+}
+
+.payhere-channel-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-x: auto;
+}
+
+.payhere-channel-btn {
+  flex: 1;
+  min-width: 90px;
+  padding: 11px 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.payhere-channel-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.payhere-channel-btn.active {
+  color: #38bdf8;
+  border-bottom-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.payhere-modal-body {
+  padding: 22px;
+}
+
+.payhere-sandbox-banner {
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #fef08a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payhere-field-group {
+  margin-bottom: 14px;
+}
+
+.payhere-field-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #94a3b8);
+  margin-bottom: 6px;
+}
+
+.payhere-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.payhere-input {
+  width: 100%;
+  background: #070d1e !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 8px;
+  padding: 11px 14px;
+  color: #fff !important;
+  font-size: 13.5px;
+  letter-spacing: 0.5px;
+  transition: border-color 0.2s ease;
+}
+
+.payhere-input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+  outline: none;
+}
+
+.payhere-card-icon {
+  position: absolute;
+  right: 12px;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.btn-payhere-submit {
+  width: 100%;
+  background: linear-gradient(135deg, #0072ff, #00d2ff);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(0, 114, 255, 0.4);
+  transition: all 0.2s ease;
+  margin-top: 18px;
+}
+
+.btn-payhere-submit:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 24px rgba(0, 210, 255, 0.5);
+}
+
+.btn-payhere-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* PayHere 3D-Secure OTP Simulation Card */
+.otp-simulation-card {
+  background: #081229;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-top: 14px;
+}
+
+.otp-inputs-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.otp-box {
+  width: 42px;
+  height: 48px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: #0c1836;
+  color: #38bdf8;
+}
+
+/* ==========================================================================
+   Stripe Elements Modal Styling
+   ========================================================================== */
+.stripe-modal-box {
+  max-width: 520px;
+  width: 95%;
+  background: #0a0d18;
+  border: 1px solid rgba(99, 91, 255, 0.35);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(99, 91, 255, 0.2);
+}
+
+.stripe-top-header {
+  background: linear-gradient(135deg, #1b193d, #272361);
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stripe-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stripe-logo-text {
+  font-size: 20px;
+  font-weight: 900;
+  color: #635bff;
+  letter-spacing: -0.5px;
+}
+
+.stripe-express-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.btn-express-pay {
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-express-pay:hover {
+  background: #111;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.stripe-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 14px 0 18px 0;
+  color: var(--text-muted, #64748b);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stripe-divider::before,
+.stripe-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stripe-divider span {
+  padding: 0 10px;
+}
+
+.stripe-card-element {
+  background: #111524;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.stripe-card-element input {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-size: 13.5px !important;
+  padding: 12px 14px !important;
+}
+
+.stripe-card-element input:focus {
+  outline: none !important;
+}
+
+.stripe-subfield-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stripe-subfield-row input {
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.stripe-subfield-row input:last-child {
+  border-right: none !important;
+}
+
+.btn-stripe-submit {
+  width: 100%;
+  background: linear-gradient(135deg, #635bff, #7a73ff);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(99, 91, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-stripe-submit:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 24px rgba(99, 91, 255, 0.55);
+}
+
+/* Spinner and Animation */
+.payment-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: paySpin 0.8s linear infinite;
+}
+
+@keyframes paySpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Success Checkmark Circle */
+.payment-success-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: #10b981;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
+  animation: payPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes payPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
