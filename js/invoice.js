@@ -333,6 +333,12 @@ const InvoiceService = {
       waBtn.href = `https://wa.me/94740219239?text=${waText}`;
     }
 
+    // Auto dispatch email & Auto open WhatsApp
+    if (typeof NotificationService !== 'undefined') {
+      NotificationService.sendOrderEmail(order);
+      NotificationService.autoOpenWhatsApp(order);
+    }
+
     App.openModal("order-success-modal");
   },
 

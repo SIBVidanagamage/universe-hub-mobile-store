@@ -1684,6 +1684,11 @@ const App = {
       window.SupabaseSync.createRepairOrder(newJob);
     }
 
+    // Auto Email Alert to Store Owner
+    if (typeof NotificationService !== 'undefined') {
+      NotificationService.sendRepairEmail(newJob);
+    }
+
     this.closeModal("repair-booking-modal");
     
     const sendWa = confirm(`⚡ Repair Slot Reserved!\n\nTracking Code: ${trackingCode}\nDevice: ${device}\n\nWould you like to send this repair reservation directly to Universe Hub WhatsApp Desk (074-0219239)?`);
