@@ -1583,13 +1583,13 @@ const AdminController = {
     if (aboutMInput) aboutMInput.value = settings.aboutMission || "";
 
     // 5. Admin Security Configuration
-    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "admin@universehub.lk", password: "admin" };
+    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "admin@universehub.store", password: "admin" };
     try {
       const savedAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
       if (savedAdmin) adminCfg = { ...adminCfg, ...JSON.parse(savedAdmin) };
     } catch (e) {}
     const adminEmailInput = document.getElementById("admin-cfg-email");
-    if (adminEmailInput) adminEmailInput.value = adminCfg.email || "admin@universehub.lk";
+    if (adminEmailInput) adminEmailInput.value = adminCfg.email || "admin@universehub.store";
     const adminPassInput = document.getElementById("admin-cfg-password");
     if (adminPassInput) adminPassInput.value = adminCfg.password || "admin";
 
@@ -2244,7 +2244,7 @@ const AdminController = {
       return;
     }
 
-    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "admin@universehub.lk", password: "admin", secondaryPassword: "admin123", name: "Store Administrator" };
+    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "admin@universehub.store", password: "admin", secondaryPassword: "admin123", name: "Store Administrator" };
     try {
       const saved = localStorage.getItem("UH_ADMIN_CONFIG");
       if (saved) adminCfg = { ...adminCfg, ...JSON.parse(saved) };

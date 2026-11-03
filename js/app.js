@@ -464,33 +464,11 @@ const App = {
   },
 
   quickDemoCustomerLogin() {
-    let users = JSON.parse(localStorage.getItem("UH_USERS")) || (typeof INITIAL_USERS !== 'undefined' ? INITIAL_USERS : []);
-    const demo = users.find(u => u.role === "customer") || {
-      id: "usr-demo-1",
-      name: "Kasun Ranasinghe",
-      email: "customer@universehub.lk",
-      phone: "077 123 4567",
-      role: "customer"
-    };
-    this.onCustomerAuthSuccess(demo);
+    showToast("Demo sign-in disabled in production. Please enter your email and password.");
   },
 
   quickDemoAdminLogin() {
-    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "admin@universehub.lk", password: "admin", name: "Store Administrator" };
-    try {
-      const saved = localStorage.getItem("UH_ADMIN_CONFIG");
-      if (saved) adminCfg = { ...adminCfg, ...JSON.parse(saved) };
-    } catch (e) {}
-
-    const adminUser = {
-      id: "usr-admin-1",
-      name: adminCfg.name || "Store Administrator",
-      email: adminCfg.email || "admin@universehub.lk",
-      phone: "074-0219239",
-      role: "admin"
-    };
-    this.onCustomerAuthSuccess(adminUser);
-    this.toggleAdminView(true);
+    showToast("Please enter official Store Administrator credentials.");
   },
 
   onCustomerAuthSuccess(user) {
