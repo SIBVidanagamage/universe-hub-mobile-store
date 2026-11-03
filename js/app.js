@@ -129,7 +129,7 @@ const App = {
     }
 
     // 6.1 Store Official Email
-    const activeEmail = settings.email || "contact@universehub.lk";
+    const activeEmail = settings.email || "contact@universehub.store";
     const storeEmail = document.getElementById("store-display-email");
     if (storeEmail) {
       storeEmail.textContent = activeEmail;
@@ -351,14 +351,15 @@ const App = {
     // 1. Check if Admin credentials are provided in standard login form
     let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' 
       ? DEFAULT_ADMIN_CONFIG 
-      : { email: "admin@universehub.lk", password: "admin", secondaryPassword: "admin123", name: "Store Administrator" };
+      : { email: "admin@universehub.store", password: "admin", secondaryPassword: "admin123", name: "Store Administrator" };
     try {
       const savedAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
       if (savedAdmin) adminCfg = { ...adminCfg, ...JSON.parse(savedAdmin) };
     } catch (e) {}
 
-    const isAdminEmail = (email === (adminCfg.email || "admin@universehub.lk").toLowerCase()) || 
+    const isAdminEmail = (email === (adminCfg.email || "admin@universehub.store").toLowerCase()) || 
                          (email === "admin") || 
+                         (email === "admin@universehub.store") ||
                          (email === "admin@universehub.lk");
     const isAdminPassword = (password === adminCfg.password) || 
                             (adminCfg.secondaryPassword && password === adminCfg.secondaryPassword) || 
@@ -368,7 +369,7 @@ const App = {
     if (isAdminEmail && isAdminPassword) {
       if (errBanner) errBanner.style.display = "none";
       this.closeModal("auth-modal");
-      this.login(adminCfg.email || "admin@universehub.lk", "admin", adminCfg.name || "Store Administrator");
+      this.login(adminCfg.email || "admin@universehub.store", "admin", adminCfg.name || "Store Administrator");
       this.toggleAdminView(true);
       showToast("⚡ Welcome, Store Administrator! Accessing Admin Center...");
       return;

@@ -1122,7 +1122,7 @@ const DEFAULT_STORE_SETTINGS = {
   phone: "074-0219239",
   whatsapp: "074-0219239",
   whatsappLink: "https://wa.me/94740219239?text=Hello%20Universe%20Hub,%20I%20have%20an%20inquiry%20regarding%20iPhone%20/%20accessories",
-  email: "contact@universehub.lk",
+  email: "contact@universehub.store",
   address: "188/8c, High Level Road, Maharagama",
   locationShort: "Maharagama Flagship Store",
   openingHours: "Open Daily: 9:30 AM – 8:30 PM",
@@ -1148,7 +1148,7 @@ const DEFAULT_STORE_SETTINGS = {
 
 // Default Admin Security Credentials (Configurable from Admin Portal)
 const DEFAULT_ADMIN_CONFIG = {
-  email: "admin@universehub.lk",
+  email: "admin@universehub.store",
   password: "admin",
   secondaryPassword: "admin123",
   name: "Store Administrator"
@@ -1159,7 +1159,7 @@ const INITIAL_USERS = [
   {
     id: "usr-admin-1",
     name: "Store Administrator",
-    email: "admin@universehub.lk",
+    email: "admin@universehub.store",
     password: "admin",
     phone: "074-0219239",
     role: "admin"
@@ -1167,7 +1167,7 @@ const INITIAL_USERS = [
   {
     id: "usr-demo-1",
     name: "Kasun Ranasinghe",
-    email: "customer@universehub.lk",
+    email: "customer@universehub.store",
     password: "password123",
     phone: "077 123 4567",
     role: "customer"

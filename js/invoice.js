@@ -75,7 +75,7 @@ const InvoiceService = {
             <div class="invoice-address-lines">
               📍 188/8c, High Level Road, Maharagama, Sri Lanka<br>
               📞 Hotline / WhatsApp: <strong>074-0219239</strong><br>
-              ✉️ contact@universehub.lk • 🌐 universehub.lk<br>
+              ✉️ contact@universehub.store • 🌐 universehub.store<br>
               <span style="display:inline-block; margin-top:3px; color:#0284c7; font-weight:700;">
                 TRCSL Approved • Certified Apple Repair Lab
               </span>
