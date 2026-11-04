@@ -150,6 +150,7 @@
               reviews: item.review_count || 0,
               image: item.image,
               images: item.images || [item.image],
+              video: item.specs?.video || item.video || null,
               description: item.description || "",
               specs: item.specs || {}
             }));
@@ -197,7 +198,7 @@
             image: product.image,
             images: product.images || [product.image],
             description: product.description || "",
-            specs: product.specs || {},
+            specs: { ...(product.specs || {}), video: product.video || "" },
             updated_at: new Date().toISOString()
           };
 

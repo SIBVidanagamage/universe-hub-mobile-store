@@ -844,11 +844,6 @@ const AdminController = {
 
     // Sync to Supabase Cloud Database
     if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
-      window.SupabaseSync.saveProduct(prod);
-    }
-
-    // Sync to Supabase Cloud Database
-    if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
       window.SupabaseSync.saveProduct(newProduct);
     }
 
