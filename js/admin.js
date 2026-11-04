@@ -1861,6 +1861,11 @@ const AdminController = {
     settings.heroBannerImg = finalUrl;
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+
     // Instantly update storefront
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
@@ -1913,6 +1918,11 @@ const AdminController = {
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
     settings.logoImg = finalUrl;
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
 
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
@@ -1971,6 +1981,11 @@ const AdminController = {
     settings[`promoBanner${num}Img`] = finalUrl;
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
     }
@@ -2017,6 +2032,11 @@ const AdminController = {
     settings.promoBanner1Category = p1Category;
 
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
     }
@@ -2038,6 +2058,11 @@ const AdminController = {
     settings.promoBanner2Category = p2Category;
 
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
     }
@@ -2127,6 +2152,11 @@ const AdminController = {
 
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
     }
@@ -2155,6 +2185,11 @@ const AdminController = {
     settings.heroBannerImg = bannerUrl;
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
     }
@@ -2176,6 +2211,11 @@ const AdminController = {
     settings.heroBannerImg = defaultBanner;
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+
     if (window.App && typeof App.applyStoreSettings === "function") {
       App.applyStoreSettings();
     }
@@ -2189,7 +2229,7 @@ const AdminController = {
     const nameVal = document.getElementById("admin-store-name")?.value.trim() || settings.storeName;
     const phoneVal = document.getElementById("admin-store-phone")?.value.trim() || settings.phone;
     const waVal = document.getElementById("admin-store-whatsapp")?.value.trim() || settings.whatsapp;
-    const emailVal = document.getElementById("admin-store-email")?.value.trim() || settings.email || "contact@universehub.lk";
+    const emailVal = document.getElementById("admin-store-email")?.value.trim() || settings.email || "contact@universehub.store";
     const hoursVal = document.getElementById("admin-store-hours")?.value.trim() || settings.openingHours;
     const addrVal = document.getElementById("admin-store-address")?.value.trim() || settings.address;
     const mapsVal = document.getElementById("admin-store-maps")?.value.trim() || settings.googleMapsUrl || "https://maps.app.goo.gl/r1BY5dMznxRunVC58";
@@ -2219,6 +2259,11 @@ const AdminController = {
     settings.aboutMission = aboutM;
 
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
 
     // Also auto-save admin credentials if populated
     const adminPassVal = document.getElementById("admin-cfg-password")?.value?.trim();

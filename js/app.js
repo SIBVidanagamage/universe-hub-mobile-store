@@ -47,12 +47,17 @@ const App = {
     this.bindEvents();
     this.setupRepairEstimator();
 
-    // Fetch fresh cloud products if Supabase is connected
+    // Fetch fresh cloud products & settings if Supabase is connected
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchProducts === "function") {
       window.SupabaseSync.fetchProducts().then(() => {
         this.renderCatalog();
         this.renderCategories();
         this.renderBrandsSection();
+      });
+    }
+    if (window.SupabaseSync && typeof window.SupabaseSync.fetchStoreSettings === "function") {
+      window.SupabaseSync.fetchStoreSettings().then(() => {
+        this.applyStoreSettings();
       });
     }
 

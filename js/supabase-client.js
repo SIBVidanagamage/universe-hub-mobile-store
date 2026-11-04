@@ -332,6 +332,47 @@
       return review;
     },
 
+    // --- STORE SETTINGS SYNC ---
+    async fetchStoreSettings() {
+      if (this.isConnected && this.client) {
+        try {
+          const { data, error } = await this.client
+            .from("store_settings")
+            .select("value")
+            .eq("key", "general")
+            .maybeSingle();
+
+          if (!error && data && data.value) {
+            let localSettings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+            localSettings = { ...localSettings, ...data.value };
+            localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(localSettings));
+            return localSettings;
+          }
+        } catch (e) {
+          console.warn("[Supabase] Failed to fetch cloud settings:", e);
+        }
+      }
+      return JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== "undefined" ? DEFAULT_STORE_SETTINGS : {});
+    },
+
+    async saveStoreSettings(settings) {
+      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+      if (this.isConnected && this.client) {
+        try {
+          const { error } = await this.client.from("store_settings").upsert({
+            key: "general",
+            value: settings,
+            updated_at: new Date().toISOString()
+          });
+          if (error) console.error("[Supabase] Upsert store_settings error:", error);
+          else console.log("⚡ [Supabase] Store settings synced to cloud!");
+        } catch (e) {
+          console.error("[Supabase] Settings sync network error:", e);
+        }
+      }
+    },
+
     // --- ONE-CLICK BULK SEED TO SUPABASE ---
     async seedAllDataToSupabase(onProgress) {
       if (!this.client) {
