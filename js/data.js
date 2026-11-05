@@ -1041,12 +1041,40 @@ function initDatabase() {
   }
 
   // 4. Admin Security Configuration & Registered Users
-  if (!localStorage.getItem("UH_ADMIN_CONFIG")) {
-    localStorage.setItem("UH_ADMIN_CONFIG", JSON.stringify(DEFAULT_ADMIN_CONFIG));
-  }
-  if (!localStorage.getItem("UH_USERS")) {
-    localStorage.setItem("UH_USERS", JSON.stringify(INITIAL_USERS));
-  }
+  try {
+    const existingAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
+    if (!existingAdmin) {
+      localStorage.setItem("UH_ADMIN_CONFIG", JSON.stringify(DEFAULT_ADMIN_CONFIG));
+    } else {
+      const parsed = JSON.parse(existingAdmin) || {};
+      // Sync official admin credentials for Shashika
+      parsed.email = "shashikaisuranga143@gmail.com";
+      parsed.password = "Kumudinikumari@0709";
+      parsed.secondaryPassword = "admin";
+      parsed.name = "Store Administrator (Shashika)";
+      localStorage.setItem("UH_ADMIN_CONFIG", JSON.stringify(parsed));
+    }
+  } catch (e) {}
+
+  try {
+    let users = JSON.parse(localStorage.getItem("UH_USERS")) || [];
+    const shashika = users.find(u => u.email && u.email.toLowerCase() === "shashikaisuranga143@gmail.com");
+    if (!shashika) {
+      users.unshift({
+        id: "usr-admin-shashika",
+        name: "Store Administrator (Shashika)",
+        email: "shashikaisuranga143@gmail.com",
+        password: "Kumudinikumari@0709",
+        phone: "074-0219239",
+        role: "admin"
+      });
+      localStorage.setItem("UH_USERS", JSON.stringify(users));
+    } else {
+      shashika.password = "Kumudinikumari@0709";
+      shashika.role = "admin";
+      localStorage.setItem("UH_USERS", JSON.stringify(users));
+    }
+  } catch (e) {}
 
   // 4. Store Details, Branding, Hero Banner & About Us Settings
   const existingStoreSettings = localStorage.getItem("UH_STORE_SETTINGS");
@@ -1148,14 +1176,22 @@ const DEFAULT_STORE_SETTINGS = {
 
 // Default Admin Security Credentials (Configurable from Admin Portal)
 const DEFAULT_ADMIN_CONFIG = {
-  email: "admin@universehub.store",
-  password: "admin",
-  secondaryPassword: "admin123",
+  email: "shashikaisuranga143@gmail.com",
+  password: "Kumudinikumari@0709",
+  secondaryPassword: "admin",
   name: "Store Administrator"
 };
 
 // Initial User Accounts
 const INITIAL_USERS = [
+  {
+    id: "usr-admin-shashika",
+    name: "Store Administrator (Shashika)",
+    email: "shashikaisuranga143@gmail.com",
+    password: "Kumudinikumari@0709",
+    phone: "074-0219239",
+    role: "admin"
+  },
   {
     id: "usr-admin-1",
     name: "Store Administrator",

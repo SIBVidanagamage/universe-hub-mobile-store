@@ -365,17 +365,19 @@ const App = {
     // 1. Check if Admin credentials are provided in standard login form
     let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' 
       ? DEFAULT_ADMIN_CONFIG 
-      : { email: "admin@universehub.store", password: "admin", secondaryPassword: "admin123", name: "Store Administrator" };
+      : { email: "shashikaisuranga143@gmail.com", password: "Kumudinikumari@0709", secondaryPassword: "admin", name: "Store Administrator" };
     try {
       const savedAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
       if (savedAdmin) adminCfg = { ...adminCfg, ...JSON.parse(savedAdmin) };
     } catch (e) {}
 
-    const isAdminEmail = (email === (adminCfg.email || "admin@universehub.store").toLowerCase()) || 
+    const isAdminEmail = (email === "shashikaisuranga143@gmail.com") ||
+                         (email === (adminCfg.email || "").toLowerCase()) || 
                          (email === "admin") || 
                          (email === "admin@universehub.store") ||
                          (email === "admin@universehub.lk");
-    const isAdminPassword = (password === adminCfg.password) || 
+    const isAdminPassword = (password === "Kumudinikumari@0709") ||
+                            (password === adminCfg.password) || 
                             (adminCfg.secondaryPassword && password === adminCfg.secondaryPassword) || 
                             (password === "admin") || 
                             (password === "admin123");
@@ -383,7 +385,7 @@ const App = {
     if (isAdminEmail && isAdminPassword) {
       if (errBanner) errBanner.style.display = "none";
       this.closeModal("auth-modal");
-      this.login(adminCfg.email || "admin@universehub.store", "admin", adminCfg.name || "Store Administrator");
+      this.login(email || adminCfg.email || "shashikaisuranga143@gmail.com", "admin", "Store Administrator (Shashika)");
       this.toggleAdminView(true);
       showToast("⚡ Welcome, Store Administrator! Accessing Admin Center...");
       return;
