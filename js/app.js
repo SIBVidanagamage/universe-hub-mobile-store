@@ -365,27 +365,26 @@ const App = {
     // 1. Check if Admin credentials are provided in standard login form
     let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' 
       ? DEFAULT_ADMIN_CONFIG 
-      : { email: "shashikaisuranga143@gmail.com", password: "Kumudinikumari@0709", secondaryPassword: "admin", name: "Store Administrator" };
+      : { email: "shashikaisuranga143@gmail.com", password: "Kumudinikumari@0709", name: "Store Administrator" };
     try {
       const savedAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
       if (savedAdmin) adminCfg = { ...adminCfg, ...JSON.parse(savedAdmin) };
     } catch (e) {}
 
-    const isAdminEmail = (email === "shashikaisuranga143@gmail.com") ||
-                         (email === (adminCfg.email || "").toLowerCase()) || 
-                         (email === "admin") || 
-                         (email === "admin@universehub.store") ||
-                         (email === "admin@universehub.lk");
-    const isAdminPassword = (password === "Kumudinikumari@0709") ||
-                            (password === adminCfg.password) || 
-                            (adminCfg.secondaryPassword && password === adminCfg.secondaryPassword) || 
-                            (password === "admin") || 
-                            (password === "admin123");
+    // Strictly block generic demo emails and passwords so nobody can guess them
+    const blockedEmails = ["admin@universehub.store", "admin@universehub.lk", "admin"];
+    const blockedPasswords = ["admin", "admin123"];
 
-    if (isAdminEmail && isAdminPassword) {
+    const isAuthorizedAdminEmail = !blockedEmails.includes(email) && 
+      (email === "shashikaisuranga143@gmail.com" || email === (adminCfg.email || "").toLowerCase());
+
+    const isAuthorizedAdminPassword = !blockedPasswords.includes(password) && 
+      (password === "Kumudinikumari@0709" || password === adminCfg.password);
+
+    if (isAuthorizedAdminEmail && isAuthorizedAdminPassword) {
       if (errBanner) errBanner.style.display = "none";
       this.closeModal("auth-modal");
-      this.login(email || adminCfg.email || "shashikaisuranga143@gmail.com", "admin", "Store Administrator (Shashika)");
+      this.login(email, "admin", adminCfg.name || "Store Administrator (Shashika)");
       this.toggleAdminView(true);
       showToast("⚡ Welcome, Store Administrator! Accessing Admin Center...");
       return;

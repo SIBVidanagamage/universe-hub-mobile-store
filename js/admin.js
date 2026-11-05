@@ -1683,15 +1683,15 @@ const AdminController = {
     if (aboutMInput) aboutMInput.value = settings.aboutMission || "";
 
     // 5. Admin Security Configuration
-    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "admin@universehub.store", password: "admin" };
+    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "shashikaisuranga143@gmail.com", password: "Kumudinikumari@0709" };
     try {
       const savedAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
       if (savedAdmin) adminCfg = { ...adminCfg, ...JSON.parse(savedAdmin) };
     } catch (e) {}
     const adminEmailInput = document.getElementById("admin-cfg-email");
-    if (adminEmailInput) adminEmailInput.value = adminCfg.email || "admin@universehub.store";
+    if (adminEmailInput) adminEmailInput.value = adminCfg.email || "shashikaisuranga143@gmail.com";
     const adminPassInput = document.getElementById("admin-cfg-password");
-    if (adminPassInput) adminPassInput.value = adminCfg.password || "admin";
+    if (adminPassInput) adminPassInput.value = adminCfg.password || "Kumudinikumari@0709";
 
     // Bind Dropzones once
     if (!this.hasBoundStoreEvents) {
@@ -2381,7 +2381,7 @@ const AdminController = {
   saveAdminPassword(silent = false) {
     const emailInput = document.getElementById("admin-cfg-email");
     const passInput = document.getElementById("admin-cfg-password");
-    const email = (emailInput?.value || "admin@universehub.lk").trim();
+    const email = (emailInput?.value || "shashikaisuranga143@gmail.com").trim();
     const password = (passInput?.value || "").trim();
 
     if (!password) {
@@ -2389,7 +2389,7 @@ const AdminController = {
       return;
     }
 
-    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "admin@universehub.store", password: "admin", secondaryPassword: "admin123", name: "Store Administrator" };
+    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' ? DEFAULT_ADMIN_CONFIG : { email: "shashikaisuranga143@gmail.com", password: "Kumudinikumari@0709", name: "Store Administrator" };
     try {
       const saved = localStorage.getItem("UH_ADMIN_CONFIG");
       if (saved) adminCfg = { ...adminCfg, ...JSON.parse(saved) };
@@ -2397,22 +2397,26 @@ const AdminController = {
 
     adminCfg.email = email;
     adminCfg.password = password;
+    delete adminCfg.secondaryPassword;
     localStorage.setItem("UH_ADMIN_CONFIG", JSON.stringify(adminCfg));
 
     // Keep UH_USERS synced for admin role
     let users = JSON.parse(localStorage.getItem("UH_USERS")) || [];
+    users = users.filter(u => u.email !== "admin@universehub.store" && u.email !== "admin@universehub.lk");
     const adminUser = users.find(u => u.role === "admin");
     if (adminUser) {
       adminUser.email = email;
       adminUser.password = password;
     } else {
       users.push({
-        id: "usr-admin-1",
-        name: "Store Administrator",
+        id: "usr-admin-shashika",
+        name: "Store Administrator (Shashika)",
         email: email,
         password: password,
         role: "admin"
       });
+    }
+    localStorage.setItem("UH_USERS", JSON.stringify(users));
     }
     localStorage.setItem("UH_USERS", JSON.stringify(users));
 

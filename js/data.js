@@ -1047,10 +1047,10 @@ function initDatabase() {
       localStorage.setItem("UH_ADMIN_CONFIG", JSON.stringify(DEFAULT_ADMIN_CONFIG));
     } else {
       const parsed = JSON.parse(existingAdmin) || {};
-      // Sync official admin credentials for Shashika
+      // Sync official admin credentials for Shashika and remove legacy demo passwords
       parsed.email = "shashikaisuranga143@gmail.com";
       parsed.password = "Kumudinikumari@0709";
-      parsed.secondaryPassword = "admin";
+      delete parsed.secondaryPassword;
       parsed.name = "Store Administrator (Shashika)";
       localStorage.setItem("UH_ADMIN_CONFIG", JSON.stringify(parsed));
     }
@@ -1058,6 +1058,8 @@ function initDatabase() {
 
   try {
     let users = JSON.parse(localStorage.getItem("UH_USERS")) || [];
+    // Strictly purge old generic admin accounts to prevent unauthorized access
+    users = users.filter(u => u.email !== "admin@universehub.store" && u.email !== "admin@universehub.lk" && u.email !== "admin");
     const shashika = users.find(u => u.email && u.email.toLowerCase() === "shashikaisuranga143@gmail.com");
     if (!shashika) {
       users.unshift({
@@ -1178,7 +1180,6 @@ const DEFAULT_STORE_SETTINGS = {
 const DEFAULT_ADMIN_CONFIG = {
   email: "shashikaisuranga143@gmail.com",
   password: "Kumudinikumari@0709",
-  secondaryPassword: "admin",
   name: "Store Administrator"
 };
 
@@ -1189,14 +1190,6 @@ const INITIAL_USERS = [
     name: "Store Administrator (Shashika)",
     email: "shashikaisuranga143@gmail.com",
     password: "Kumudinikumari@0709",
-    phone: "074-0219239",
-    role: "admin"
-  },
-  {
-    id: "usr-admin-1",
-    name: "Store Administrator",
-    email: "admin@universehub.store",
-    password: "admin",
     phone: "074-0219239",
     role: "admin"
   },
