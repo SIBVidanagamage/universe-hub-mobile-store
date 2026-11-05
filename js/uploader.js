@@ -35,6 +35,84 @@ const MediaUploader = {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   },
 
+  // Check if any media is still actively processing/compressing
+  isProcessing(formType) {
+    const images = (this.state && this.state[formType] && this.state[formType].images) || [];
+    const video = this.state && this.state[formType] && this.state[formType].video;
+    return images.some(img => img.isUploading) || (video && video.isUploading);
+  },
+
+  // Client-Side Image Compression & Resizing using HTML5 Canvas
+  // Scales down high-res phone camera photos (up to 12MB) to lightweight, fast-loading ~45KB Web/Mobile assets
+  compressImageToDataUrl(file, maxWidth = 800, maxHeight = 800, quality = 0.82) {
+    return new Promise((resolve) => {
+      if (!file || !file.type) return resolve('');
+      if (file.type === 'image/svg+xml') {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(file);
+        return;
+      }
+
+      const img = new Image();
+      const tempUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        try {
+          URL.revokeObjectURL(tempUrl);
+          let width = img.naturalWidth || img.width || 800;
+          let height = img.naturalHeight || img.height || 800;
+
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            if (file.type === 'image/png') {
+              ctx.clearRect(0, 0, width, height);
+            } else {
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, width, height);
+            }
+            ctx.drawImage(img, 0, 0, width, height);
+            const outputFormat = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+            let compressed = canvas.toDataURL(outputFormat, quality);
+            // If still larger than 400KB and was PNG, convert to JPEG for safe storage
+            if (compressed.length > 400000 && outputFormat === 'image/png') {
+              compressed = canvas.toDataURL('image/jpeg', 0.82);
+            }
+            resolve(compressed);
+          } else {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => resolve('');
+            reader.readAsDataURL(file);
+          }
+        } catch (err) {
+          console.warn('Canvas compression fallback:', err);
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(file);
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(tempUrl);
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(file);
+      };
+      img.src = tempUrl;
+    });
+  },
+
   // Setup drag & drop and file input events for a dropzone
   setupDropzone(formType, mediaType) {
     const dropzone = document.getElementById(`${formType}-${mediaType}-dropzone`);
@@ -118,25 +196,22 @@ const MediaUploader = {
         this.state[formType].images.push(imgItem);
         this.renderImages(formType);
 
-        // Upload directly to server in background
-        this.uploadFile(file)
-          .then(serverUrl => {
-            imgItem.url = serverUrl;
-            imgItem.isUploading = false;
-            this.renderImages(formType);
-          })
-          .catch(err => {
-            console.warn('Server upload failed, converting to DataURL fallback:', err);
-            this.fileToDataUrl(file).then(dataUrl => {
-              imgItem.url = dataUrl;
-              imgItem.isUploading = false;
-              this.renderImages(formType);
-            });
-          });
+        // Compress image immediately to lightweight mobile-optimized asset
+        this.compressImageToDataUrl(file).then(compressedUrl => {
+          imgItem.url = compressedUrl;
+          imgItem.sizeStr = this.formatBytes(Math.round(compressedUrl.length * 0.75));
+          imgItem.isUploading = false;
+          this.renderImages(formType);
+        }).catch(err => {
+          console.warn('Image compression fallback:', err);
+          imgItem.url = tempBlobUrl;
+          imgItem.isUploading = false;
+          this.renderImages(formType);
+        });
       }
 
       if (typeof showToast === 'function') {
-        showToast(`Added ${validImages.length} photo${validImages.length > 1 ? 's' : ''}!`);
+        showToast(`Added & optimized ${validImages.length} photo${validImages.length > 1 ? 's' : ''}!`);
       }
     } else if (mediaType === 'video') {
       const videoFile = files.find(f => f.type.startsWith('video/') || /\.(mp4|webm|mov|ogg)$/i.test(f.name));
@@ -150,31 +225,15 @@ const MediaUploader = {
         url: tempBlobUrl,
         name: videoFile.name,
         sizeStr: this.formatBytes(videoFile.size),
-        isUploading: true
+        isUploading: false
       };
 
       this.state[formType].video = videoItem;
       this.renderVideo(formType);
 
       if (typeof showToast === 'function') {
-        showToast(`Uploading video "${videoFile.name}"...`);
+        showToast(`🎬 Video "${videoFile.name}" attached successfully!`);
       }
-
-      this.uploadFile(videoFile)
-        .then(serverUrl => {
-          videoItem.url = serverUrl;
-          videoItem.isUploading = false;
-          this.renderVideo(formType);
-          if (typeof showToast === 'function') {
-            showToast(`Video uploaded successfully!`);
-          }
-        })
-        .catch(err => {
-          console.warn('Video upload to server failed:', err);
-          videoItem.url = tempBlobUrl;
-          videoItem.isUploading = false;
-          this.renderVideo(formType);
-        });
     }
   },
 

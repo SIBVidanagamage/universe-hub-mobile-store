@@ -775,90 +775,195 @@ const AdminController = {
     showToast(`Category removed from system and Navbar.`);
   },
 
-  handleAddProduct() {
-    const name = document.getElementById("adm-prod-name").value.trim();
-    const category = document.getElementById("adm-prod-category").value;
-    const condition = document.getElementById("adm-prod-condition").value;
-    const price = parseInt(document.getElementById("adm-prod-price").value, 10);
-    const origPrice = parseInt(document.getElementById("adm-prod-origprice").value, 10) || price;
-    const battery = parseInt(document.getElementById("adm-prod-battery").value, 10) || null;
-    const stock = parseInt(document.getElementById("adm-prod-stock").value, 10) || 5;
-    const warranty = document.getElementById("adm-prod-warranty").value.trim() || "1 Year Warranty";
-    const rawImages = document.getElementById("adm-prod-image") ? document.getElementById("adm-prod-image").value.trim() : "";
-    const video = (window.MediaUploader && MediaUploader.getVideo('adm')) || (document.getElementById("adm-prod-video") ? document.getElementById("adm-prod-video").value.trim() : "");
-    const desc = document.getElementById("adm-prod-desc").value.trim() || name;
-
-    if (!name || isNaN(price)) {
-      alert("Please enter a valid product name and price.");
-      return;
+  async handleAddProduct(event) {
+    if (event) {
+      if (typeof event.preventDefault === "function") event.preventDefault();
+      if (typeof event.stopPropagation === "function") event.stopPropagation();
     }
 
-    // Determine parent group from UH_CATEGORIES
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
-    const catObj = categories.find(c => c.id === category);
-    const mainCategory = catObj ? catObj.group : (category.includes("iphone") ? "iphones" : "accessories");
+    const btn = document.getElementById("btn-admin-add-product");
+    const originalBtnText = btn ? btn.innerHTML : "Add Product to Live Store";
 
-    // Brand Selection
-    const brandSelect = document.getElementById("adm-prod-brand");
-    const brand = (brandSelect && brandSelect.value && brandSelect.value !== "__NEW__") 
-      ? brandSelect.value 
-      : (typeof detectProductBrand === "function" ? detectProductBrand({ name }) : "Apple");
+    try {
+      const nameInput = document.getElementById("adm-prod-name");
+      const name = nameInput ? nameInput.value.trim() : "";
+      if (!name) {
+        if (typeof showToast === "function") showToast("⚠️ Please enter a Product Title (e.g. iPhone 15 Pro Max)!");
+        if (nameInput) {
+          nameInput.focus();
+          nameInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
 
-    // Get direct drag & drop uploaded images (or fallback to manual textarea)
-    let imagesList = (window.MediaUploader) ? MediaUploader.getImages('adm') : [];
-    if (imagesList.length === 0 && rawImages) {
-      imagesList = rawImages.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
-    }
-    if (imagesList.length === 0) {
-      imagesList = ["assets/hero_showcase.jpg"];
-    }
+      const priceInput = document.getElementById("adm-prod-price");
+      const priceVal = priceInput ? priceInput.value.trim() : "";
+      const price = parseInt(priceVal, 10);
+      if (isNaN(price) || price <= 0) {
+        if (typeof showToast === "function") showToast("⚠️ Please enter a valid Selling Price in Rupees!");
+        if (priceInput) {
+          priceInput.focus();
+          priceInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
 
-    const newProduct = {
-      id: "prod-" + Date.now(),
-      name,
-      brand,
-      mainCategory,
-      category,
-      subCategory: condition.includes("Used") ? "used" : "brand-new",
-      condition,
-      conditionBadge: condition.includes("Used") ? (battery ? `${battery}% Battery` : "Used Grade A") : "Brand New",
-      batteryHealth: battery,
-      price,
-      originalPrice: origPrice,
-      discount: origPrice > price ? `${Math.round(((origPrice - price)/origPrice)*100)}% OFF` : "Best Price",
-      rating: 5.0,
-      reviewsCount: 1,
-      stock,
-      isFeatured: true,
-      warranty,
-      image: imagesList[0],
-      images: imagesList,
-      video: video,
-      tags: [condition, category, battery ? `${battery}% Health` : "Official Genuine"],
-      description: desc
-    };
+      // Check if media is still compressing/processing
+      if (window.MediaUploader && typeof MediaUploader.isProcessing === "function" && MediaUploader.isProcessing("adm")) {
+        if (typeof showToast === "function") showToast("⏳ Processing and optimizing photos, please wait a moment...");
+        return;
+      }
 
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-    products.unshift(newProduct);
-    localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span style="display:inline-block; width:13px; height:13px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite; margin-right:8px; vertical-align:middle;"></span> Adding Product...`;
+      }
 
-    // Sync to Supabase Cloud Database
-    if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
-      window.SupabaseSync.saveProduct(newProduct);
-    }
+      const catEl = document.getElementById("adm-prod-category");
+      const category = (catEl && catEl.value) ? catEl.value : "brand-new-iphones";
 
-    // Reset Form
-    document.getElementById("admin-add-product-form").reset();
-    if (window.MediaUploader) MediaUploader.reset('adm');
-    showToast(`Product "${name}" added to inventory with ${imagesList.length} images!`);
-    this.renderProductsTable();
-    this.renderInventoryFilterBar();
-    this.renderStats();
+      const condEl = document.getElementById("adm-prod-condition");
+      const condition = (condEl && condEl.value) ? condEl.value : "Brand New";
 
-    // Trigger re-render of storefront catalog if open
-    if (window.App && typeof App.renderCatalog === "function") {
-      App.renderCatalog();
-      App.renderCategories();
+      const origEl = document.getElementById("adm-prod-origprice");
+      const origPrice = origEl && parseInt(origEl.value, 10) ? parseInt(origEl.value, 10) : price;
+
+      const battEl = document.getElementById("adm-prod-battery");
+      const battery = battEl && battEl.value ? parseInt(battEl.value, 10) : null;
+
+      const stockEl = document.getElementById("adm-prod-stock");
+      const stock = stockEl && parseInt(stockEl.value, 10) ? parseInt(stockEl.value, 10) : 5;
+
+      const warEl = document.getElementById("adm-prod-warranty");
+      const warranty = (warEl && warEl.value.trim()) ? warEl.value.trim() : "1 Year Warranty";
+
+      const descEl = document.getElementById("adm-prod-desc");
+      const desc = (descEl && descEl.value.trim()) ? descEl.value.trim() : name;
+
+      const rawImages = document.getElementById("adm-prod-image") ? document.getElementById("adm-prod-image").value.trim() : "";
+      let video = (window.MediaUploader && MediaUploader.getVideo("adm")) || (document.getElementById("adm-prod-video") ? document.getElementById("adm-prod-video").value.trim() : "");
+
+      // Determine parent group from UH_CATEGORIES
+      const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== "undefined" ? INITIAL_CATEGORIES : []);
+      const catObj = categories.find(c => c && c.id === category);
+      const mainCategory = catObj ? catObj.group : (category && category.includes("iphone") ? "iphones" : "accessories");
+
+      // Brand Selection
+      const brandSelect = document.getElementById("adm-prod-brand");
+      const brand = (brandSelect && brandSelect.value && brandSelect.value !== "__NEW__") 
+        ? brandSelect.value 
+        : (typeof detectProductBrand === "function" ? detectProductBrand({ name }) : "Apple");
+
+      // Images list from MediaUploader or manual textarea fallback
+      let imagesList = (window.MediaUploader) ? MediaUploader.getImages("adm") : [];
+      if (imagesList.length === 0 && rawImages) {
+        imagesList = rawImages.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
+      }
+      if (imagesList.length === 0) {
+        imagesList = ["assets/hero_showcase.jpg"];
+      }
+
+      const isUsed = condition && condition.toLowerCase().includes("used");
+      const newProduct = {
+        id: "prod-" + Date.now(),
+        name,
+        title: name,
+        brand,
+        mainCategory,
+        category,
+        subCategory: isUsed ? "used" : "brand-new",
+        condition,
+        conditionBadge: isUsed ? (battery ? `${battery}% Battery` : "Used Grade A") : "Brand New",
+        batteryHealth: battery,
+        price,
+        originalPrice: origPrice,
+        discount: origPrice > price ? `${Math.round(((origPrice - price)/origPrice)*100)}% OFF` : "Best Price",
+        rating: 5.0,
+        reviewsCount: 1,
+        stock,
+        isFeatured: true,
+        warranty,
+        image: imagesList[0],
+        images: imagesList,
+        video: video,
+        tags: [condition, category, battery ? `${battery}% Health` : "Official Genuine"],
+        description: desc
+      };
+
+      // 1. Safe Save to localStorage with Quota Guard
+      let products = [];
+      try {
+        products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      } catch (e) {
+        products = [];
+      }
+      products.unshift(newProduct);
+
+      try {
+        localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+      } catch (quotaErr) {
+        console.warn("⚠️ LocalStorage quota exceeded, sanitizing cached images...", quotaErr);
+        try {
+          // If quota hit, strip heavy base64 strings from local products list so storage doesn't crash
+          const sanitized = products.map(p => {
+            const clean = { ...p };
+            if (clean.image && clean.image.startsWith("data:") && clean.image.length > 80000) {
+              clean.image = "assets/hero_showcase.jpg";
+            }
+            if (Array.isArray(clean.images)) {
+              clean.images = clean.images.map(img => (img && img.startsWith("data:") && img.length > 80000) ? "assets/hero_showcase.jpg" : img);
+            }
+            if (clean.video && (clean.video.startsWith("data:") || clean.video.startsWith("blob:"))) {
+              clean.video = "";
+            }
+            return clean;
+          });
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(sanitized.slice(0, 30)));
+        } catch (err2) {
+          console.warn("Could not save to localStorage, continuing with Supabase cloud save:", err2);
+        }
+      }
+
+      // 2. Sync to Supabase Cloud Database
+      if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
+        try {
+          await window.SupabaseSync.saveProduct(newProduct);
+        } catch (cloudErr) {
+          console.error("Supabase cloud save error:", cloudErr);
+        }
+      }
+
+      // 3. Reset Form and UI
+      const form = document.getElementById("admin-add-product-form");
+      if (form) form.reset();
+      if (window.MediaUploader) MediaUploader.reset("adm");
+
+      if (typeof showToast === "function") {
+        showToast(`✅ Product "${name}" added to Live Store with ${imagesList.length} photos!`);
+      }
+
+      if (typeof this.renderProductsTable === "function") this.renderProductsTable();
+      if (typeof this.renderInventoryFilterBar === "function") this.renderInventoryFilterBar();
+      if (typeof this.renderStats === "function") this.renderStats();
+
+      // Trigger re-render of storefront catalog if open
+      if (window.App && typeof App.renderCatalog === "function") {
+        App.renderCatalog();
+        App.renderCategories();
+        App.renderBrandsSection();
+      }
+    } catch (criticalErr) {
+      console.error("Critical error in handleAddProduct:", criticalErr);
+      if (typeof showToast === "function") {
+        showToast("❌ Error adding product: " + (criticalErr.message || criticalErr));
+      } else {
+        alert("Error adding product: " + (criticalErr.message || criticalErr));
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnText;
+      }
     }
   },
 

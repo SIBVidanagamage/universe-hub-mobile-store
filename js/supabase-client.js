@@ -169,15 +169,37 @@
     },
 
     async saveProduct(product) {
-      // 1. Always update local storage first for snappy UI
-      let localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      // 1. Always update local storage first for snappy UI (with quota protection)
+      let localProducts = [];
+      try {
+        localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      } catch (e) {
+        localProducts = [];
+      }
+
       const existingIdx = localProducts.findIndex(p => p.id === product.id);
       if (existingIdx >= 0) {
         localProducts[existingIdx] = product;
       } else {
         localProducts.unshift(product);
       }
-      localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts));
+
+      try {
+        localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts));
+      } catch (quotaErr) {
+        console.warn("[Supabase] LocalStorage full, saving trimmed cache...", quotaErr);
+        try {
+          const trimmed = localProducts.slice(0, 25).map(p => ({
+            ...p,
+            image: (p.image && p.image.length > 80000) ? "assets/hero_showcase.jpg" : p.image,
+            images: (Array.isArray(p.images)) ? p.images.map(img => (img && img.length > 80000) ? "assets/hero_showcase.jpg" : img) : ["assets/hero_showcase.jpg"],
+            video: (p.video && (p.video.startsWith("data:") || p.video.startsWith("blob:"))) ? "" : p.video
+          }));
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(trimmed));
+        } catch (e2) {
+          // ignore local fallback failure, cloud will save
+        }
+      }
 
       // 2. Sync to Supabase if connected
       if (this.isConnected && this.client) {
@@ -190,24 +212,24 @@
             brand: product.brand || "Apple",
             price: Number(product.price),
             original_price: product.originalPrice ? Number(product.originalPrice) : null,
-            badge: product.badge || null,
+            badge: product.badge || product.conditionBadge || null,
             is_featured: !!product.isFeatured,
             stock: product.stock !== undefined ? Number(product.stock) : 10,
             rating: product.rating !== undefined ? Number(product.rating) : 5.0,
-            review_count: product.reviews || 0,
+            review_count: product.reviewsCount || product.review_count || product.reviews || 0,
             image: product.image,
             images: product.images || [product.image],
             description: product.description || "",
-            specs: { ...(product.specs || {}), video: product.video || "" },
+            specs: { ...(product.specs || {}), video: typeof product.video === "string" ? product.video : "" },
             updated_at: new Date().toISOString()
           };
 
           const { error } = await this.client.from("products").upsert(payload);
           if (error) {
             console.error("[Supabase] Upsert error:", error);
-            if (typeof showToast === "function") showToast("Saved locally (Cloud sync failed: " + error.message + ")");
+            if (typeof showToast === "function") showToast("Saved locally (Cloud sync notice: " + error.message + ")");
           } else {
-            console.log("⚡ [Supabase] Product saved to cloud:", product.title);
+            console.log("⚡ [Supabase] Product saved to cloud:", payload.title);
           }
         } catch (e) {
           console.error("[Supabase] Save product network error:", e);
