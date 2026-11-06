@@ -158,6 +158,12 @@
                 image: item.image,
                 images: item.images || [item.image],
                 video: item.specs?.video || item.video || null,
+                condition: item.specs?.condition || item.condition || item.badge || "Brand New",
+                conditionBadge: item.badge || item.specs?.conditionBadge || "Brand New",
+                batteryHealth: item.specs?.batteryHealth || item.batteryHealth || null,
+                storageOptions: item.specs?.storageOptions || item.storageOptions || [],
+                colorOptions: item.specs?.colorOptions || item.colorOptions || [],
+                warranty: item.specs?.warranty || item.warranty || "1 Year Store Warranty",
                 description: item.description || "",
                 specs: item.specs || {}
               }));
@@ -243,7 +249,15 @@
             image: product.image,
             images: product.images || [product.image],
             description: product.description || "",
-            specs: { ...(product.specs || {}), video: typeof product.video === "string" ? product.video : "" },
+            specs: { 
+              ...(product.specs || {}), 
+              video: typeof product.video === "string" ? product.video : "",
+              storageOptions: product.storageOptions || [],
+              colorOptions: product.colorOptions || [],
+              condition: product.condition || "",
+              batteryHealth: product.batteryHealth || null,
+              warranty: product.warranty || ""
+            },
             updated_at: new Date().toISOString()
           };
 

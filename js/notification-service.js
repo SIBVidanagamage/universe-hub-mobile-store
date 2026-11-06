@@ -36,7 +36,8 @@
         const title = item.name || item.title || "Product";
         const qty = item.qty || 1;
         const lineTotal = (item.price || 0) * qty;
-        return `${idx + 1}. ${title} x${qty} - Rs. ${lineTotal.toLocaleString()}`;
+        const variant = [item.storage, item.color].filter(Boolean).join(" • ");
+        return `${idx + 1}. ${title}${variant ? ` [${variant}]` : ''} x${qty} - Rs. ${lineTotal.toLocaleString()}`;
       }).join("\n");
 
       const payload = {
@@ -180,7 +181,10 @@
       const delivery = order.deliveryMethod || order.method || "Standard Delivery";
       const total = `Rs. ${(order.total || 0).toLocaleString()}`;
       
-      const itemsList = (order.items || []).map(i => `• ${i.name || i.title} x${i.qty} (Rs. ${((i.price || 0) * i.qty).toLocaleString()})`).join('%0A');
+      const itemsList = (order.items || []).map(i => {
+        const variant = [i.storage, i.color].filter(Boolean).join(" • ");
+        return `• ${i.name || i.title}${variant ? ` (${variant})` : ''} x${i.qty} (Rs. ${((i.price || 0) * i.qty).toLocaleString()})`;
+      }).join('%0A');
       const waText = `*New Order - Universe Hub*%0A*Order ID:* ${orderId}%0A*Customer:* ${encodeURIComponent(customerName)}%0A*Phone:* ${encodeURIComponent(phone)}%0A*Delivery:* ${encodeURIComponent(delivery)}%0A*Total:* ${encodeURIComponent(total)}%0A%0A*Items:*%0A${itemsList}%0A%0APlease confirm my order.`;
       const waUrl = `https://wa.me/${this.config.storeWhatsApp}?text=${waText}`;
 

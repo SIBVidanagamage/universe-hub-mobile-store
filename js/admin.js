@@ -12,6 +12,7 @@ const AdminController = {
     this.bindEvents();
     this.populateCategoryDropdowns();
     this.populateBrandDropdowns();
+    this.initStorageAndColorVariants();
     this.renderCurrentTab();
     if (typeof BulkUploader !== 'undefined') {
       BulkUploader.init();
@@ -64,6 +65,191 @@ const AdminController = {
         this.handleAdminAddRepair();
       });
     }
+  },
+
+  // ==========================================
+  // DYNAMIC STORAGE & COLOR VARIANT CONTROLLER
+  // ==========================================
+  PRESET_STORAGE_CAPACITIES: ["64GB", "128GB", "256GB", "512GB", "1TB"],
+  PRESET_STOCK_COLORS: [
+    { name: "Midnight / Black", hex: "#0f172a" },
+    { name: "Starlight / Silver", hex: "#f1f5f9" },
+    { name: "Blue / Sierra Blue", hex: "#2563eb" },
+    { name: "Pink", hex: "#f472b6" },
+    { name: "Green / Alpine", hex: "#15803d" },
+    { name: "Deep Purple", hex: "#6b21a8" },
+    { name: "Natural Titanium", hex: "#94a3b8" },
+    { name: "Desert Titanium / Gold", hex: "#d97706" },
+    { name: "White", hex: "#ffffff" },
+    { name: "Product RED", hex: "#ef4444" }
+  ],
+
+  initStorageAndColorVariants() {
+    this.renderStorageTiersInputs('adm');
+    this.renderColorPillSelectors('adm');
+  },
+
+  renderStorageTiersInputs(prefix, existingTiers = []) {
+    const grid = document.getElementById(`${prefix}-storage-tiers-grid`);
+    if (!grid) return;
+
+    grid.innerHTML = this.PRESET_STORAGE_CAPACITIES.map(cap => {
+      const match = (existingTiers || []).find(t => t && (t.capacity === cap || t.storage === cap));
+      const isChecked = !!match;
+      const priceVal = match ? (match.price || '') : '';
+      const origVal = match ? (match.originalPrice || '') : '';
+
+      return `
+        <div class="storage-tier-card ${isChecked ? 'checked' : ''}" id="${prefix}-tier-card-${cap}">
+          <label class="storage-tier-header">
+            <input type="checkbox" id="${prefix}-storage-chk-${cap}" ${isChecked ? 'checked' : ''} onchange="AdminController.handleStorageCheckChange('${prefix}', '${cap}')">
+            <span>💾 ${cap}</span>
+          </label>
+          <div class="storage-tier-inputs">
+            <div>
+              <label>Selling Price (Rs.):</label>
+              <input type="number" id="${prefix}-storage-price-${cap}" placeholder="e.g. 165000" value="${priceVal}" ${isChecked ? '' : 'disabled'}>
+            </div>
+            <div>
+              <label>Original Price (Rs.):</label>
+              <input type="number" id="${prefix}-storage-orig-${cap}" placeholder="Optional (e.g. 180000)" value="${origVal}" ${isChecked ? '' : 'disabled'}>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  },
+
+  handleStorageCheckChange(prefix, cap) {
+    const chk = document.getElementById(`${prefix}-storage-chk-${cap}`);
+    const card = document.getElementById(`${prefix}-tier-card-${cap}`);
+    const priceInput = document.getElementById(`${prefix}-storage-price-${cap}`);
+    const origInput = document.getElementById(`${prefix}-storage-orig-${cap}`);
+    if (!chk || !card || !priceInput || !origInput) return;
+
+    const checked = chk.checked;
+    card.classList.toggle("checked", checked);
+    priceInput.disabled = !checked;
+    origInput.disabled = !checked;
+
+    if (checked) {
+      if (!priceInput.value) {
+        const mainPriceInput = document.getElementById(prefix === 'adm' ? 'adm-prod-price' : 'edit-prod-price');
+        if (mainPriceInput && mainPriceInput.value) {
+          priceInput.value = mainPriceInput.value;
+        }
+      }
+      priceInput.focus();
+    }
+  },
+
+  quickEnableCommonTiers(prefix) {
+    const mainPriceInput = document.getElementById(prefix === 'adm' ? 'adm-prod-price' : 'edit-prod-price');
+    const basePrice = parseInt(mainPriceInput?.value, 10) || 165000;
+
+    const tiers = [
+      { capacity: "128GB", price: basePrice, originalPrice: basePrice + 15000 },
+      { capacity: "256GB", price: basePrice + 15000, originalPrice: basePrice + 30000 },
+      { capacity: "512GB", price: basePrice + 35000, originalPrice: basePrice + 55000 }
+    ];
+    this.renderStorageTiersInputs(prefix, tiers);
+    if (typeof showToast === "function") showToast("⚡ Enabled 128GB, 256GB & 512GB tiers with smart step pricing!");
+  },
+
+  resetStorageTiers(prefix) {
+    this.renderStorageTiersInputs(prefix, []);
+  },
+
+  renderColorPillSelectors(prefix, selectedColors = []) {
+    const wrap = document.getElementById(`${prefix}-color-presets-wrap`);
+    if (!wrap) return;
+
+    const activeNames = (selectedColors || []).map(c => typeof c === 'string' ? c.trim().toLowerCase() : (c.name || '').trim().toLowerCase());
+    let allColors = [...this.PRESET_STOCK_COLORS];
+
+    (selectedColors || []).forEach(custom => {
+      const cName = typeof custom === 'string' ? custom : custom.name;
+      if (cName && !allColors.some(p => p.name.toLowerCase() === cName.toLowerCase())) {
+        allColors.push({ name: cName, hex: "#38bdf8" });
+      }
+    });
+
+    wrap.innerHTML = allColors.map(c => {
+      const isActive = activeNames.includes(c.name.toLowerCase());
+      return `
+        <div class="color-preset-pill ${isActive ? 'active' : ''}" data-color="${c.name}" onclick="AdminController.toggleColorPill('${prefix}', '${c.name}', this)">
+          <span class="color-dot" style="background:${c.hex};"></span>
+          <span>${c.name}</span>
+        </div>
+      `;
+    }).join("");
+  },
+
+  toggleColorPill(prefix, colorName, elem) {
+    if (!elem) return;
+    elem.classList.toggle("active");
+  },
+
+  addCustomColor(prefix) {
+    const input = document.getElementById(`${prefix}-custom-color-input`);
+    const val = input ? input.value.trim() : "";
+    if (!val) {
+      if (typeof showToast === "function") showToast("Please type a color name first!");
+      return;
+    }
+
+    const wrap = document.getElementById(`${prefix}-color-presets-wrap`);
+    if (!wrap) return;
+
+    const existing = wrap.querySelector(`.color-preset-pill[data-color="${val}"]`);
+    if (existing) {
+      existing.classList.add("active");
+      existing.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+      input.value = "";
+      return;
+    }
+
+    const div = document.createElement("div");
+    div.className = "color-preset-pill active";
+    div.dataset.color = val;
+    div.onclick = (e) => this.toggleColorPill(prefix, val, div);
+    div.innerHTML = `<span class="color-dot" style="background:#38bdf8;"></span><span>${val}</span>`;
+    wrap.appendChild(div);
+    input.value = "";
+    if (typeof showToast === "function") showToast(`Added color "${val}"!`);
+  },
+
+  getStorageOptionsFromForm(prefix) {
+    const options = [];
+    this.PRESET_STORAGE_CAPACITIES.forEach(cap => {
+      const chk = document.getElementById(`${prefix}-storage-chk-${cap}`);
+      const priceInput = document.getElementById(`${prefix}-storage-price-${cap}`);
+      const origInput = document.getElementById(`${prefix}-storage-orig-${cap}`);
+      if (chk && chk.checked) {
+        const price = parseInt(priceInput?.value, 10);
+        if (!isNaN(price) && price > 0) {
+          const orig = parseInt(origInput?.value, 10) || price;
+          options.push({
+            capacity: cap,
+            price: price,
+            originalPrice: orig
+          });
+        }
+      }
+    });
+    return options;
+  },
+
+  getColorOptionsFromForm(prefix) {
+    const wrap = document.getElementById(`${prefix}-color-presets-wrap`);
+    if (!wrap) return [];
+    const activePills = wrap.querySelectorAll(".color-preset-pill.active");
+    const colors = [];
+    activePills.forEach(p => {
+      const c = p.getAttribute("data-color");
+      if (c && !colors.includes(c)) colors.push(c);
+    });
+    return colors;
   },
 
   switchTab(tabName) {
@@ -867,13 +1053,13 @@ const AdminController = {
       const category = (catEl && catEl.value) ? catEl.value : "brand-new-iphones";
 
       const condEl = document.getElementById("adm-prod-condition");
-      const condition = (condEl && condEl.value) ? condEl.value : "Brand New";
+      const condition = (condEl && condEl.value) ? condEl.value : "Brand New (100% Sealed Box)";
 
       const origEl = document.getElementById("adm-prod-origprice");
       const origPrice = origEl && parseInt(origEl.value, 10) ? parseInt(origEl.value, 10) : price;
 
       const battEl = document.getElementById("adm-prod-battery");
-      const battery = battEl && battEl.value ? parseInt(battEl.value, 10) : null;
+      const battery = battEl && battEl.value.trim() ? battEl.value.trim() : null;
 
       const stockEl = document.getElementById("adm-prod-stock");
       const stock = stockEl && parseInt(stockEl.value, 10) ? parseInt(stockEl.value, 10) : 5;
@@ -907,7 +1093,17 @@ const AdminController = {
         imagesList = ["assets/hero_showcase.jpg"];
       }
 
-      const isUsed = condition && condition.toLowerCase().includes("used");
+      const isUsed = condition && !condition.toLowerCase().includes("brand new");
+      const storageOptions = this.getStorageOptionsFromForm('adm');
+      const colorOptions = this.getColorOptionsFromForm('adm');
+
+      let effectivePrice = price;
+      let effectiveOrigPrice = origPrice;
+      if (storageOptions.length > 0) {
+        effectivePrice = storageOptions[0].price;
+        effectiveOrigPrice = storageOptions[0].originalPrice || effectivePrice;
+      }
+
       const newProduct = {
         id: "prod-" + Date.now(),
         name,
@@ -917,11 +1113,13 @@ const AdminController = {
         category,
         subCategory: isUsed ? "used" : "brand-new",
         condition,
-        conditionBadge: isUsed ? (battery ? `${battery}% Battery` : "Used Grade A") : "Brand New",
+        conditionBadge: isUsed 
+          ? (battery ? `${battery} Battery` : (condition.includes("Grade A+") ? "99% Mint" : condition.includes("Grade A") ? "Grade A" : "Grade B"))
+          : "Brand New Sealed",
         batteryHealth: battery,
-        price,
-        originalPrice: origPrice,
-        discount: origPrice > price ? `${Math.round(((origPrice - price)/origPrice)*100)}% OFF` : "Best Price",
+        price: effectivePrice,
+        originalPrice: effectiveOrigPrice,
+        discount: effectiveOrigPrice > effectivePrice ? `${Math.round(((effectiveOrigPrice - effectivePrice)/effectiveOrigPrice)*100)}% OFF` : "Best Price",
         rating: 5.0,
         reviewsCount: 1,
         stock,
@@ -930,7 +1128,9 @@ const AdminController = {
         image: imagesList[0],
         images: imagesList,
         video: video,
-        tags: [condition, category, battery ? `${battery}% Health` : "Official Genuine"],
+        storageOptions: storageOptions,
+        colorOptions: colorOptions,
+        tags: [condition, category, battery ? `${battery} Battery` : "Official Genuine"],
         description: desc
       };
 
@@ -980,6 +1180,8 @@ const AdminController = {
       // 3. Reset Form and UI
       const form = document.getElementById("admin-add-product-form");
       if (form) form.reset();
+      this.resetStorageTiers("adm");
+      this.renderColorPillSelectors("adm");
       if (window.MediaUploader) MediaUploader.reset("adm");
 
       if (typeof showToast === "function") {
@@ -1026,7 +1228,7 @@ const AdminController = {
       document.getElementById("edit-prod-brand").value = prod.brand || "Apple";
     }
     document.getElementById("edit-prod-category").value = prod.category;
-    document.getElementById("edit-prod-condition").value = prod.condition;
+    document.getElementById("edit-prod-condition").value = prod.condition || "Brand New (100% Sealed Box)";
     document.getElementById("edit-prod-price").value = prod.price;
     document.getElementById("edit-prod-origprice").value = prod.originalPrice || prod.price;
     document.getElementById("edit-prod-battery").value = prod.batteryHealth || "";
@@ -1034,6 +1236,10 @@ const AdminController = {
     document.getElementById("edit-prod-warranty").value = prod.warranty || "";
     document.getElementById("edit-prod-desc").value = prod.description || "";
     document.getElementById("edit-prod-video").value = prod.video || "";
+
+    // Render storage matrix and stock colors for edit modal
+    this.renderStorageTiersInputs('edit', prod.storageOptions || []);
+    this.renderColorPillSelectors('edit', prod.colorOptions || []);
 
     // Fill images and video into MediaUploader dropzones & previews
     const imgArray = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? prod.images : [prod.image || ""];
@@ -1062,7 +1268,7 @@ const AdminController = {
     const condition = document.getElementById("edit-prod-condition").value;
     const price = parseInt(document.getElementById("edit-prod-price").value, 10);
     const origPrice = parseInt(document.getElementById("edit-prod-origprice").value, 10) || price;
-    const battery = parseInt(document.getElementById("edit-prod-battery").value, 10) || null;
+    const battery = (document.getElementById("edit-prod-battery")?.value || "").trim() || null;
     const stock = parseInt(document.getElementById("edit-prod-stock").value, 10) || 1;
     const warranty = document.getElementById("edit-prod-warranty") ? document.getElementById("edit-prod-warranty").value.trim() : "1 Year Warranty";
     const video = (window.MediaUploader && MediaUploader.getVideo('edit')) || (document.getElementById("edit-prod-video") ? document.getElementById("edit-prod-video").value.trim() : "");
@@ -1072,6 +1278,10 @@ const AdminController = {
     const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
     const catObj = categories.find(c => c.id === category);
     const mainCategory = catObj ? catObj.group : (category.includes("iphone") ? "iphones" : "accessories");
+
+    // Gather storage options & stock colors
+    const storageOptions = this.getStorageOptionsFromForm('edit');
+    const colorOptions = this.getColorOptionsFromForm('edit');
 
     // Parse image URLs from direct dropzone or textarea
     let imagesList = (window.MediaUploader) ? MediaUploader.getImages('edit') : [];
@@ -1087,13 +1297,17 @@ const AdminController = {
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 
+    const isUsed = condition && !condition.toLowerCase().includes("brand new");
+
     prod.name = name;
     prod.brand = brand;
     prod.mainCategory = mainCategory;
     prod.category = category;
-    prod.subCategory = condition.includes("Used") ? "used" : "brand-new";
+    prod.subCategory = isUsed ? "used" : "brand-new";
     prod.condition = condition;
-    prod.conditionBadge = condition.includes("Used") ? (battery ? `${battery}% Battery` : "Used Grade A") : "Brand New";
+    prod.conditionBadge = isUsed 
+      ? (battery ? `${battery} Battery` : (condition.includes("Grade A+") ? "99% Mint" : condition.includes("Grade A") ? "Grade A" : "Grade B"))
+      : "Brand New Sealed";
     prod.batteryHealth = battery;
     prod.price = price;
     prod.originalPrice = origPrice;
@@ -1103,6 +1317,8 @@ const AdminController = {
     prod.images = imagesList;
     prod.image = imagesList[0];
     prod.video = video;
+    prod.storageOptions = storageOptions;
+    prod.colorOptions = colorOptions;
     prod.description = desc;
 
     localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));

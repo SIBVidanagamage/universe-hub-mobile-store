@@ -1048,17 +1048,30 @@ const App = {
       const isWishlisted = wishlist.includes(prod.id);
       const prodBrand = prod.brand || 'Apple';
 
+      const hasStorageVariants = Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0;
+      const hasColorVariants = Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0;
+      const minPrice = hasStorageVariants ? Math.min(...prod.storageOptions.map(t => Number(t.price) || prod.price)) : prod.price;
+
+      const isUsed = prod.condition && !prod.condition.toLowerCase().includes("brand new");
+      let conditionLabel = "Brand New (Sealed)";
+      if (isUsed) {
+        if (prod.condition.includes("Grade A+")) conditionLabel = "Grade A+ (99% Mint)";
+        else if (prod.condition.includes("Grade A")) conditionLabel = "Grade A (95%-98%)";
+        else if (prod.condition.includes("Grade B")) conditionLabel = "Grade B (90% Good)";
+        else conditionLabel = prod.condition;
+      }
+
       return `
         <div class="product-card" data-id="${prod.id}">
           <div class="card-top-badges">
-            ${prod.condition.includes("Used") 
-              ? `<span class="badge-pill badge-used">${prod.condition}</span>` 
-              : `<span class="badge-pill badge-new">Brand New</span>`
+            ${isUsed 
+              ? `<span class="badge-pill badge-used">${conditionLabel}</span>` 
+              : `<span class="badge-pill badge-new">Brand New Sealed</span>`
             }
             <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
               🏷️ ${prodBrand}
             </span>
-            ${prod.batteryHealth ? `<span class="badge-pill badge-battery">${prod.batteryHealth}% Battery</span>` : ''}
+            ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>` : ''}
             ${prod.discount ? `<span class="badge-pill badge-discount">${prod.discount}</span>` : ''}
           </div>
 
@@ -1068,7 +1081,7 @@ const App = {
 
           <div class="card-media" onclick="App.openQuickView('${prod.id}')">
             <img src="${prod.image}" alt="${prod.name}" loading="lazy" onerror="this.src='assets/hero_showcase.jpg'">
-            <button class="quick-view-btn">Quick Specs</button>
+            <button class="quick-view-btn">Quick Specs &amp; Storage</button>
           </div>
 
           <div class="card-details">
@@ -1079,17 +1092,19 @@ const App = {
             <h3 class="card-title" title="${prod.name}" onclick="App.openQuickView('${prod.id}')">${prod.name}</h3>
 
             <div class="card-meta-tags">
-              ${(prod.tags || []).slice(0, 3).map(tag => `<span class="meta-chip">${tag}</span>`).join("")}
+              ${hasStorageVariants ? `<span class="meta-chip" style="color:var(--neon-cyan); border-color:rgba(0,210,255,0.3); font-weight:600;">💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}</span>` : ''}
+              ${hasColorVariants ? `<span class="meta-chip" style="color:#e056fd; border-color:rgba(224,86,253,0.3);">🎨 ${prod.colorOptions.length} Colors</span>` : ''}
+              ${(prod.tags || []).slice(0, 2).map(tag => `<span class="meta-chip">${tag}</span>`).join("")}
             </div>
 
             <div class="card-price-row">
-              <span class="current-price">Rs. ${prod.price.toLocaleString()}</span>
-              ${prod.originalPrice > prod.price ? `<span class="original-price">Rs. ${prod.originalPrice.toLocaleString()}</span>` : ''}
+              <span class="current-price">${hasStorageVariants ? `<small style="font-size:12px; font-weight:normal; color:var(--text-muted);">From </small>` : ''}Rs. ${minPrice.toLocaleString()}</span>
+              ${prod.originalPrice > minPrice ? `<span class="original-price">Rs. ${prod.originalPrice.toLocaleString()}</span>` : ''}
             </div>
 
-            <button class="add-to-cart-btn" onclick="App.addToCart('${prod.id}')">
+            <button class="add-to-cart-btn" onclick="${(hasStorageVariants || hasColorVariants) ? `App.openQuickView('${prod.id}')` : `App.addToCart('${prod.id}')`}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-              <span>Add to Cart</span>
+              <span>${(hasStorageVariants || hasColorVariants) ? 'Select Capacity & Color' : 'Add to Cart'}</span>
             </button>
           </div>
         </div>
@@ -1131,14 +1146,88 @@ const App = {
     dropdown.classList.add("active");
   },
 
-  // 4. Quick View Modal with Multi-Image & Video Gallery
+  // 4. Quick View Modal with Multi-Image & Video Gallery & Dynamic Storage/Color Matrix
   quickViewMediaList: [],
   quickViewActiveIndex: 0,
+  quickViewCurrentProdId: null,
+  quickViewSelectedStorage: null,
+  quickViewSelectedColor: null,
+  quickViewSelectedPrice: 0,
+  quickViewSelectedOrigPrice: 0,
+
+  getColorHex(colorName) {
+    if (!colorName) return "#38bdf8";
+    const c = String(colorName).toLowerCase();
+    if (c.includes("black") || c.includes("midnight") || c.includes("space gray")) return "#0f172a";
+    if (c.includes("starlight") || c.includes("silver") || c.includes("white")) return "#f1f5f9";
+    if (c.includes("blue") || c.includes("sierra") || c.includes("pacific")) return "#2563eb";
+    if (c.includes("pink") || c.includes("rose")) return "#f472b6";
+    if (c.includes("green") || c.includes("alpine")) return "#15803d";
+    if (c.includes("purple")) return "#7e22ce";
+    if (c.includes("titanium") && !c.includes("desert")) return "#94a3b8";
+    if (c.includes("desert") || c.includes("gold")) return "#d97706";
+    if (c.includes("red")) return "#ef4444";
+    if (c.includes("yellow")) return "#eab308";
+    return "#38bdf8";
+  },
+
+  selectQuickViewStorage(capacity, price, origPrice) {
+    this.quickViewSelectedStorage = capacity;
+    this.quickViewSelectedPrice = price;
+    this.quickViewSelectedOrigPrice = origPrice || price;
+
+    document.querySelectorAll(".storefront-storage-pill").forEach(pill => {
+      const match = pill.getAttribute("data-capacity") === capacity;
+      pill.classList.toggle("active", match);
+    });
+
+    const priceEl = document.getElementById("qv-price-display");
+    if (priceEl) priceEl.textContent = `Rs. ${Number(price).toLocaleString()}`;
+
+    const origEl = document.getElementById("qv-origprice-display");
+    if (origEl) {
+      if (origPrice && origPrice > price) {
+        origEl.textContent = `Rs. ${Number(origPrice).toLocaleString()}`;
+        origEl.style.display = "inline";
+      } else {
+        origEl.style.display = "none";
+      }
+    }
+
+    const btn = document.getElementById("qv-add-cart-btn");
+    if (btn) {
+      btn.innerHTML = `Add to Cart • ${capacity} (Rs. ${Number(price).toLocaleString()})`;
+    }
+  },
+
+  selectQuickViewColor(colorName) {
+    this.quickViewSelectedColor = colorName;
+
+    document.querySelectorAll(".storefront-color-pill").forEach(pill => {
+      const match = pill.getAttribute("data-color") === colorName;
+      pill.classList.toggle("active", match);
+    });
+  },
+
+  executeAddToCartFromQuickView() {
+    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const prod = products.find(p => p.id === this.quickViewCurrentProdId);
+    if (!prod) return;
+
+    this.executeAddToCart(
+      prod, 
+      this.quickViewSelectedStorage, 
+      this.quickViewSelectedColor, 
+      this.quickViewSelectedPrice
+    );
+  },
 
   openQuickView(prodId) {
     const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
+
+    this.quickViewCurrentProdId = prodId;
 
     // Prepare media items list
     let mediaList = [];
@@ -1156,13 +1245,41 @@ const App = {
       mediaList.push({ type: 'video', url: prod.video.trim() });
     }
 
-    // Fallback if empty
     if (mediaList.length === 0) {
       mediaList.push({ type: 'image', url: 'https://placehold.co/600x600/0f172a/00d2ff?text=Universe+Hub' });
     }
 
     this.quickViewMediaList = mediaList;
     this.quickViewActiveIndex = 0;
+
+    // Handle Storage Variants
+    const hasStorage = Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0;
+    if (hasStorage) {
+      this.quickViewSelectedStorage = prod.storageOptions[0].capacity;
+      this.quickViewSelectedPrice = Number(prod.storageOptions[0].price) || prod.price;
+      this.quickViewSelectedOrigPrice = Number(prod.storageOptions[0].originalPrice) || this.quickViewSelectedPrice;
+    } else {
+      this.quickViewSelectedStorage = null;
+      this.quickViewSelectedPrice = Number(prod.price);
+      this.quickViewSelectedOrigPrice = Number(prod.originalPrice) || Number(prod.price);
+    }
+
+    // Handle Color Variants
+    const hasColor = Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0;
+    if (hasColor) {
+      this.quickViewSelectedColor = prod.colorOptions[0];
+    } else {
+      this.quickViewSelectedColor = null;
+    }
+
+    const isUsed = prod.condition && !prod.condition.toLowerCase().includes("brand new");
+    let condTitle = "🌟 Brand New (100% Sealed Box)";
+    if (isUsed) {
+      if (prod.condition.includes("Grade A+")) condTitle = "✨ Grade A+ (99% Mint / Like New)";
+      else if (prod.condition.includes("Grade A")) condTitle = "✨ Grade A (95% - 98% Super Clean)";
+      else if (prod.condition.includes("Grade B")) condTitle = "⚡ Grade B (90% Good Condition)";
+      else condTitle = `✨ ${prod.condition}`;
+    }
 
     const modalBody = document.getElementById("quickview-modal-body");
     if (!modalBody) return;
@@ -1191,37 +1308,76 @@ const App = {
         <!-- Right: Specs and Details -->
         <div>
           <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-            <span class="badge-pill ${prod.condition.includes('Used') ? 'badge-used' : 'badge-new'}">${prod.condition}</span>
-            ${prod.batteryHealth ? `<span class="badge-pill badge-battery">${prod.batteryHealth}% Battery Health</span>` : ''}
+            <span class="badge-pill ${isUsed ? 'badge-used' : 'badge-new'}">${condTitle}</span>
+            ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 Battery: ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''} Original</span>` : ''}
             ${mediaList.some(m => m.type === 'video') ? `<span class="badge-pill" style="background:rgba(224,86,253,0.18); border:1px solid rgba(224,86,253,0.4); color:#e056fd;">🎬 Video Showcase</span>` : ''}
           </div>
 
           <h2 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:12px; line-height:1.3;">${prod.name}</h2>
 
+          <!-- Dynamic Live Price Row -->
           <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:14px;">
-            <span style="font-size:24px; font-weight:900; color:var(--neon-cyan);">Rs. ${prod.price.toLocaleString()}</span>
-            ${prod.originalPrice > prod.price ? `<span style="font-size:14px; text-decoration:line-through; color:var(--text-muted);">Rs. ${prod.originalPrice.toLocaleString()}</span>` : ''}
+            <span id="qv-price-display" style="font-size:24px; font-weight:900; color:var(--neon-cyan);">Rs. ${this.quickViewSelectedPrice.toLocaleString()}</span>
+            <span id="qv-origprice-display" style="font-size:14px; text-decoration:line-through; color:var(--text-muted); ${this.quickViewSelectedOrigPrice > this.quickViewSelectedPrice ? '' : 'display:none;'}">Rs. ${this.quickViewSelectedOrigPrice.toLocaleString()}</span>
           </div>
+
+          <!-- Dynamic Storage Matrix Selection -->
+          ${hasStorage ? `
+            <div class="quickview-variant-group">
+              <label class="quickview-variant-label">💾 Select Storage Capacity:</label>
+              <div class="quickview-pills-row" id="qv-storage-pills">
+                ${prod.storageOptions.map((tier, idx) => `
+                  <button type="button" 
+                          class="storefront-storage-pill ${idx === 0 ? 'active' : ''}" 
+                          data-capacity="${tier.capacity}" 
+                          data-price="${tier.price}" 
+                          data-orig="${tier.originalPrice || tier.price}"
+                          onclick="App.selectQuickViewStorage('${tier.capacity}', ${tier.price}, ${tier.originalPrice || tier.price})">
+                    <span>${tier.capacity}</span>
+                    <small style="display:block; font-size:11px; opacity:0.85; margin-top:2px;">Rs. ${Number(tier.price).toLocaleString()}</small>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Dynamic Stock Colors Selection -->
+          ${hasColor ? `
+            <div class="quickview-variant-group">
+              <label class="quickview-variant-label">🎨 Select Available Color:</label>
+              <div class="quickview-pills-row" id="qv-color-pills">
+                ${prod.colorOptions.map((c, idx) => `
+                  <button type="button" 
+                          class="storefront-color-pill ${idx === 0 ? 'active' : ''}" 
+                          data-color="${c}"
+                          onclick="App.selectQuickViewColor('${c}')">
+                    <span class="color-dot" style="background:${App.getColorHex(c)};"></span>
+                    <span>${c}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          ` : ''}
 
           <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">${prod.description}</p>
 
           <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:12px; margin-bottom:20px; font-size:12.5px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
               <span style="color:var(--text-muted);">Physical Store Warranty:</span>
-              <span style="color:#fff; font-weight:600;">${prod.warranty}</span>
+              <span style="color:#fff; font-weight:600;">${prod.warranty || '1 Year Store Warranty'}</span>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
               <span style="color:var(--text-muted);">Stock Availability:</span>
               <span style="color:var(--success); font-weight:700;">In Stock (${prod.stock} units)</span>
             </div>
             <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">Pickup / Delivery:</span>
-              <span style="color:var(--neon-cyan); font-weight:600;">Colombo Store & Island-wide</span>
+              <span style="color:var(--text-muted);">Store Pickup &amp; Delivery:</span>
+              <span style="color:var(--neon-cyan); font-weight:600;">Maharagama Flagship &amp; Island-wide</span>
             </div>
           </div>
 
-          <button class="btn-primary-glow" style="width:100%; justify-content:center;" onclick="App.addToCart('${prod.id}'); App.closeModal('quickview-modal');">
-            Add to Cart (Rs. ${prod.price.toLocaleString()})
+          <button id="qv-add-cart-btn" class="btn-primary-glow" style="width:100%; justify-content:center;" onclick="App.executeAddToCartFromQuickView(); App.closeModal('quickview-modal');">
+            Add to Cart ${this.quickViewSelectedStorage ? `• ${this.quickViewSelectedStorage} ` : ''}(Rs. ${this.quickViewSelectedPrice.toLocaleString()})
           </button>
         </div>
       </div>
@@ -1297,31 +1453,45 @@ const App = {
   },
 
   // 5. Cart Management
-  addToCart(prodId) {
+  addToCart(prodId, selectedStorage = null, selectedColor = null, selectedPrice = null) {
     const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 
-    // Close quickview modal if open
-    this.closeModal("quickview-modal");
+    // If product has options and none are selected yet, launch quickview modal
+    const hasVariants = (Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0) ||
+                        (Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0);
+    if (hasVariants && !selectedStorage && !selectedColor) {
+      this.openQuickView(prodId);
+      return;
+    }
 
-    // Add to cart and immediately open cart drawer popup
-    this.executeAddToCart(prod);
+    this.closeModal("quickview-modal");
+    this.executeAddToCart(prod, selectedStorage, selectedColor, selectedPrice);
   },
 
-  executeAddToCart(prod) {
+  executeAddToCart(prod, storage = null, color = null, customPrice = null) {
     let cart = JSON.parse(localStorage.getItem("UH_CART")) || [];
-    const existing = cart.find(item => item.id === prod.id);
+    const effectivePrice = (customPrice !== null && customPrice > 0) ? customPrice : Number(prod.price);
+    const cartItemId = `${prod.id}${storage ? '-' + storage : ''}${color ? '-' + String(color).replace(/\s+/g, '') : ''}`;
+
+    const existing = cart.find(item => (item.cartItemId && item.cartItemId === cartItemId) || 
+      (item.id === prod.id && item.storage === storage && item.color === color));
 
     if (existing) {
       existing.qty += 1;
     } else {
       cart.push({
+        cartItemId: cartItemId,
         id: prod.id,
         name: prod.name,
-        price: prod.price,
+        price: effectivePrice,
+        storage: storage || null,
+        color: color || null,
+        variant: [storage, color].filter(Boolean).join(" • "),
         image: prod.image,
         condition: prod.condition,
+        batteryHealth: prod.batteryHealth || null,
         qty: 1
       });
     }
@@ -1329,7 +1499,8 @@ const App = {
     localStorage.setItem("UH_CART", JSON.stringify(cart));
     this.updateCartBadge();
     this.renderCartDrawer();
-    showToast(`🛒 Added "${prod.name}" to your cart!`);
+    const variantTag = [storage, color].filter(Boolean).join(" | ");
+    showToast(`🛒 Added "${prod.name}${variantTag ? ` (${variantTag})` : ''}" to your cart!`);
 
     // Automatically slide in / pop up the cart drawer
     this.openCart();
@@ -1370,19 +1541,27 @@ const App = {
     let subtotal = 0;
     scrollContainer.innerHTML = cart.map(item => {
       subtotal += item.price * item.qty;
+      const key = item.cartItemId || item.id;
       return `
         <div class="cart-item-row">
           <img src="${item.image}" class="cart-item-thumb" alt="" onerror="this.src='https://placehold.co/80x80/0f172a/00d2ff?text=UH'">
           <div class="cart-item-info">
             <h4>${item.name}</h4>
+            ${(item.storage || item.color) ? `
+              <div class="cart-item-variant-chip">
+                ${item.storage ? `<span>💾 ${item.storage}</span>` : ''}
+                ${item.color ? `<span>🎨 ${item.color}</span>` : ''}
+              </div>
+            ` : ''}
+            ${item.condition ? `<div style="font-size:11px; color:#94a3b8; margin:2px 0;">${item.condition}</div>` : ''}
             <div class="item-price">Rs. ${(item.price * item.qty).toLocaleString()}</div>
             <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
               <div class="cart-stepper">
-                <button onclick="App.updateCartQty('${item.id}', -1)">-</button>
+                <button onclick="App.updateCartQty('${key}', -1)">-</button>
                 <span>${item.qty}</span>
-                <button onclick="App.updateCartQty('${item.id}', 1)">+</button>
+                <button onclick="App.updateCartQty('${key}', 1)">+</button>
               </div>
-              <button class="remove-cart-btn" onclick="App.removeCartItem('${item.id}')">Remove</button>
+              <button class="remove-cart-btn" onclick="App.removeCartItem('${key}')">Remove</button>
             </div>
           </div>
         </div>
@@ -1393,13 +1572,13 @@ const App = {
     if (checkoutBtn) checkoutBtn.disabled = false;
   },
 
-  updateCartQty(id, delta) {
+  updateCartQty(key, delta) {
     let cart = JSON.parse(localStorage.getItem("UH_CART")) || [];
-    const item = cart.find(i => i.id === id);
+    const item = cart.find(i => (i.cartItemId && i.cartItemId === key) || i.id === key);
     if (item) {
       item.qty += delta;
       if (item.qty <= 0) {
-        cart = cart.filter(i => i.id !== id);
+        cart = cart.filter(i => (i.cartItemId ? i.cartItemId !== key : i.id !== key));
       }
       localStorage.setItem("UH_CART", JSON.stringify(cart));
       this.updateCartBadge();
@@ -1407,9 +1586,9 @@ const App = {
     }
   },
 
-  removeCartItem(id) {
+  removeCartItem(key) {
     let cart = JSON.parse(localStorage.getItem("UH_CART")) || [];
-    cart = cart.filter(i => i.id !== id);
+    cart = cart.filter(i => (i.cartItemId ? i.cartItemId !== key : i.id !== key));
     localStorage.setItem("UH_CART", JSON.stringify(cart));
     this.updateCartBadge();
     this.renderCartDrawer();
@@ -1473,7 +1652,13 @@ const App = {
     if (summaryElem) {
       summaryElem.innerHTML = `
         <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:12px; margin-bottom:16px;">
-          ${cart.map(i => `<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>${i.name} × ${i.qty}</span><span style="color:var(--neon-cyan);">Rs. ${(i.price * i.qty).toLocaleString()}</span></div>`).join("")}
+          ${cart.map(i => {
+            const variant = [i.storage, i.color].filter(Boolean).join(" • ");
+            return `<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+              <span>${i.name} ${variant ? `<span style="color:var(--neon-cyan); font-size:11.5px; font-weight:600;">(${variant})</span> ` : ''}× ${i.qty}</span>
+              <span style="color:var(--neon-cyan); font-weight:700;">Rs. ${(i.price * i.qty).toLocaleString()}</span>
+            </div>`;
+          }).join("")}
           <div style="border-top:1px solid rgba(255,255,255,0.1); margin-top:8px; padding-top:8px; display:flex; justify-content:space-between; font-weight:800; font-size:15px; color:#fff;">
             <span>Total Payable:</span>
             <span style="color:var(--neon-cyan);">Rs. ${subtotal.toLocaleString()}</span>

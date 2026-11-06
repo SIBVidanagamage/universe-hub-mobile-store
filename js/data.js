@@ -303,17 +303,51 @@ const INITIAL_PRODUCTS = [
 
   // --- IPHONES: CERTIFIED USED ---
   {
-    id: "prod-used-ip14pm",
-    name: "Apple iPhone 14 Pro Max 256GB (Certified Pre-Owned)",
+    id: "prod-used-ip13",
+    name: "Apple iPhone 13 (Certified Pre-Owned)",
+    brand: "Apple",
     mainCategory: "iphones",
     category: "used-iphones",
     subCategory: "used",
-    condition: "Used - Grade A+",
-    conditionBadge: "96% Battery",
-    batteryHealth: 96,
-    price: 245000,
-    originalPrice: 280000,
-    discount: "Grade A+",
+    condition: "Grade A (95%-98% Clean)",
+    conditionBadge: "88% - 93% Battery",
+    batteryHealth: "88% - 93%",
+    price: 139000,
+    originalPrice: 155000,
+    discount: "Grade A Clean",
+    rating: 4.9,
+    reviewsCount: 52,
+    stock: 5,
+    isFeatured: true,
+    warranty: "6 Months Physical Store Warranty + 1 Month Checking",
+    image: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=800&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80"
+    ],
+    video: "",
+    storageOptions: [
+      { capacity: "128GB", price: 139000, originalPrice: 155000 },
+      { capacity: "256GB", price: 154000, originalPrice: 170000 },
+      { capacity: "512GB", price: 172000, originalPrice: 189000 }
+    ],
+    colorOptions: ["Midnight / Black", "Starlight / Silver", "Blue", "Pink", "Green", "Product RED"],
+    tags: ["Grade A (95%-98%)", "88%-93% Battery", "3uTools 100% Score", "Original OLED"],
+    description: "Certified Grade A iPhone 13 with pristine cosmetic condition (95% - 98% super clean). True Tone, Face ID, and cameras 100% operational. Choose your storage and color."
+  },
+  {
+    id: "prod-used-ip14pm",
+    name: "Apple iPhone 14 Pro Max (Certified Pre-Owned)",
+    brand: "Apple",
+    mainCategory: "iphones",
+    category: "used-iphones",
+    subCategory: "used",
+    condition: "Grade A+ (99% Mint)",
+    conditionBadge: "94% - 97% Battery",
+    batteryHealth: "94% - 97%",
+    price: 230000,
+    originalPrice: 260000,
+    discount: "Grade A+ Mint",
     rating: 4.9,
     reviewsCount: 89,
     stock: 4,
@@ -326,21 +360,29 @@ const INITIAL_PRODUCTS = [
       "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&w=800&q=80"
     ],
     video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["Space Black", "96% Battery", "No Scratches", "FaceID 100%"],
+    storageOptions: [
+      { capacity: "128GB", price: 230000, originalPrice: 260000 },
+      { capacity: "256GB", price: 245000, originalPrice: 280000 },
+      { capacity: "512GB", price: 265000, originalPrice: 298000 },
+      { capacity: "1TB", price: 285000, originalPrice: 320000 }
+    ],
+    colorOptions: ["Space Black", "Deep Purple", "Starlight / Silver", "Gold"],
+    tags: ["Grade A+ (99% Mint)", "Space Black", "Deep Purple", "ProMotion 120Hz"],
     description: "Meticulously inspected by Universe Hub technicians. 100% original OLED screen, True Tone & Face ID active. Zero scratches."
   },
   {
     id: "prod-used-ip13p",
-    name: "Apple iPhone 13 Pro 128GB - Sierra Blue (Used)",
+    name: "Apple iPhone 13 Pro (Certified Pre-Owned)",
+    brand: "Apple",
     mainCategory: "iphones",
     category: "used-iphones",
     subCategory: "used",
-    condition: "Used - Grade A+",
-    conditionBadge: "91% Battery",
-    batteryHealth: 91,
+    condition: "Grade A (95%-98% Clean)",
+    conditionBadge: "89% - 93% Battery",
+    batteryHealth: "89% - 93%",
     price: 185000,
     originalPrice: 210000,
-    discount: "Grade A+",
+    discount: "Grade A Clean",
     rating: 4.8,
     reviewsCount: 74,
     stock: 6,
@@ -352,7 +394,13 @@ const INITIAL_PRODUCTS = [
       "https://images.unsplash.com/photo-1663499482523-1c0c1bae4ce1?auto=format&fit=crop&w=800&q=80"
     ],
     video: "",
-    tags: ["Sierra Blue", "91% Battery", "ProMotion 120Hz", "Dual SIM"],
+    storageOptions: [
+      { capacity: "128GB", price: 185000, originalPrice: 210000 },
+      { capacity: "256GB", price: 200000, originalPrice: 225000 },
+      { capacity: "512GB", price: 218000, originalPrice: 245000 }
+    ],
+    colorOptions: ["Sierra Blue", "Midnight / Black", "Starlight / Silver", "Gold", "Alpine Green"],
+    tags: ["Grade A Clean", "Sierra Blue", "ProMotion 120Hz", "Dual SIM"],
     description: "Popular Sierra Blue finish. Factory unlocked, flawless cameras and speakers. Free 9H tempered glass pre-installed!"
   },
   {

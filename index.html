@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link rel="stylesheet" href="css/style.css?v=13">
   <link rel="stylesheet" href="css/invoice.css?v=1">
   <link rel="stylesheet" href="css/payment.css?v=1">
   <style>
@@ -697,11 +697,12 @@
               </select>
             </div>
             <div>
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Condition:</label>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Condition / Grade: <span style="font-size:10.5px; color:var(--neon-cyan);">(Customer Friendly)</span></label>
               <select id="adm-prod-condition" style="width:100%;">
-                <option value="Brand New">Brand New (Sealed)</option>
-                <option value="Used - Grade A+">Used - Grade A+ (Mint)</option>
-                <option value="Used - Grade A">Used - Grade A</option>
+                <option value="Brand New (100% Sealed Box)">Brand New (100% Sealed Box)</option>
+                <option value="Grade A+ (99% Mint)">Grade A+ (99% Like New / Mint)</option>
+                <option value="Grade A (95%-98% Clean)" selected>Grade A (95% - 98% Super Clean)</option>
+                <option value="Grade B (90% Good)">Grade B (90% Good Condition)</option>
               </select>
             </div>
             <div>
@@ -713,8 +714,8 @@
               <input type="number" id="adm-prod-origprice" placeholder="270000" style="width:100%;">
             </div>
             <div>
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health % (Used phones):</label>
-              <input type="number" id="adm-prod-battery" placeholder="95 (Leave blank if brand new)" style="width:100%;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health (Used iPhones):</label>
+              <input type="text" id="adm-prod-battery" placeholder="e.g. 88% - 93% or 95% (Leave blank if New)" style="width:100%;">
             </div>
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Stock Quantity:</label>
@@ -723,6 +724,39 @@
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Warranty Period:</label>
               <input type="text" id="adm-prod-warranty" placeholder="6 Months Store Warranty" style="width:100%;">
+            </div>
+
+            <!-- Storage Capacities & Dynamic Fixed Pricing Matrix -->
+            <div style="grid-column: 1 / -1;" class="storage-matrix-section">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+                <label style="font-size:12.5px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
+                  <span>💾 Storage Capacities &amp; Dynamic Pricing (iPhones / Tech)</span>
+                  <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Select capacities in stock &amp; set fixed price per tier)</span>
+                </label>
+                <div style="display:flex; gap:6px;">
+                  <button type="button" class="btn-toggle-storage-all" onclick="AdminController.quickEnableCommonTiers('adm')">Enable 128GB / 256GB / 512GB</button>
+                  <button type="button" class="btn-toggle-storage-all" style="color:#94a3b8; border-color:rgba(255,255,255,0.15);" onclick="AdminController.resetStorageTiers('adm')">Clear</button>
+                </div>
+              </div>
+              <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:10px;">
+                💡 When enabled, customers can pick their storage capacity on the live storefront. The price updates automatically to your fixed price for that tier!
+              </p>
+              <div class="storage-tiers-grid" id="adm-storage-tiers-grid"></div>
+            </div>
+
+            <!-- Available Stock Colors -->
+            <div style="grid-column: 1 / -1;" class="colors-selection-section">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+                <label style="font-size:12.5px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
+                  <span>🎨 Available Stock Colors</span>
+                  <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Click pills to select colors available in store stock)</span>
+                </label>
+              </div>
+              <div class="color-presets-wrapper" id="adm-color-presets-wrap"></div>
+              <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+                <input type="text" id="adm-custom-color-input" placeholder="+ Add custom color name (e.g. Sierra Blue, Alpine Green, Desert Titanium)" style="flex:1; max-width:400px; font-size:12px; padding:6px 10px;">
+                <button type="button" class="btn-glass" style="font-size:12px; padding:6px 14px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.4);" onclick="AdminController.addCustomColor('adm')">+ Add Color</button>
+              </div>
             </div>
             <!-- Direct Drag-and-Drop Image Uploader -->
             <div style="grid-column: 1 / -1;" class="media-upload-section">
@@ -2131,11 +2165,12 @@
               </select>
             </div>
             <div>
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Condition:</label>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Condition / Grade: <span style="font-size:10.5px; color:var(--neon-cyan);">(Customer Friendly)</span></label>
               <select id="edit-prod-condition" style="width:100%;">
-                <option value="Brand New">Brand New (Sealed)</option>
-                <option value="Used - Grade A+">Used - Grade A+ (Mint)</option>
-                <option value="Used - Grade A">Used - Grade A</option>
+                <option value="Brand New (100% Sealed Box)">Brand New (100% Sealed Box)</option>
+                <option value="Grade A+ (99% Mint)">Grade A+ (99% Like New / Mint)</option>
+                <option value="Grade A (95%-98% Clean)">Grade A (95% - 98% Super Clean)</option>
+                <option value="Grade B (90% Good)">Grade B (90% Good Condition)</option>
               </select>
             </div>
             <div>
@@ -2147,8 +2182,8 @@
               <input type="number" id="edit-prod-origprice" style="width:100%;">
             </div>
             <div>
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health %:</label>
-              <input type="number" id="edit-prod-battery" placeholder="Leave empty for new" style="width:100%;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health (Used iPhones):</label>
+              <input type="text" id="edit-prod-battery" placeholder="e.g. 88% - 93% or 95% (Leave empty for new)" style="width:100%;">
             </div>
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Stock Units:</label>
@@ -2157,6 +2192,39 @@
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Warranty Period:</label>
               <input type="text" id="edit-prod-warranty" style="width:100%;">
+            </div>
+
+            <!-- Storage Capacities & Dynamic Fixed Pricing Matrix (Edit Modal) -->
+            <div style="grid-column: 1 / -1;" class="storage-matrix-section">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+                <label style="font-size:12.5px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
+                  <span>💾 Storage Capacities &amp; Dynamic Pricing (iPhones / Tech)</span>
+                  <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Select capacities in stock &amp; set fixed price per tier)</span>
+                </label>
+                <div style="display:flex; gap:6px;">
+                  <button type="button" class="btn-toggle-storage-all" onclick="AdminController.quickEnableCommonTiers('edit')">Enable 128GB / 256GB / 512GB</button>
+                  <button type="button" class="btn-toggle-storage-all" style="color:#94a3b8; border-color:rgba(255,255,255,0.15);" onclick="AdminController.resetStorageTiers('edit')">Clear</button>
+                </div>
+              </div>
+              <p style="font-size:11.5px; color:var(--text-muted); margin-bottom:10px;">
+                💡 Dynamic storage matrix for this device. Check available capacities and adjust individual prices.
+              </p>
+              <div class="storage-tiers-grid" id="edit-storage-tiers-grid"></div>
+            </div>
+
+            <!-- Available Stock Colors (Edit Modal) -->
+            <div style="grid-column: 1 / -1;" class="colors-selection-section">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+                <label style="font-size:12.5px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
+                  <span>🎨 Available Stock Colors</span>
+                  <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">(Click pills to select colors available in store stock)</span>
+                </label>
+              </div>
+              <div class="color-presets-wrapper" id="edit-color-presets-wrap"></div>
+              <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+                <input type="text" id="edit-custom-color-input" placeholder="+ Add custom color name (e.g. Sierra Blue, Alpine Green, Desert Titanium)" style="flex:1; max-width:400px; font-size:12px; padding:6px 10px;">
+                <button type="button" class="btn-glass" style="font-size:12px; padding:6px 14px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.4);" onclick="AdminController.addCustomColor('edit')">+ Add Color</button>
+              </div>
             </div>
           </div>
 
@@ -2792,14 +2860,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=14"></script>
-  <script src="js/supabase-client.js?v=3"></script>
-  <script src="js/notification-service.js?v=1"></script>
-  <script src="js/invoice.js?v=2"></script>
+  <script src="js/data.js?v=15"></script>
+  <script src="js/supabase-client.js?v=4"></script>
+  <script src="js/notification-service.js?v=2"></script>
+  <script src="js/invoice.js?v=3"></script>
   <script src="js/uploader.js?v=12"></script>
   <script src="js/bulk-uploader.js?v=5"></script>
   <script src="js/payment-gateway.js?v=1"></script>
-  <script src="js/admin.js?v=19"></script>
-  <script src="js/app.js?v=20"></script>
+  <script src="js/admin.js?v=20"></script>
+  <script src="js/app.js?v=21"></script>
 </body>
 </html>

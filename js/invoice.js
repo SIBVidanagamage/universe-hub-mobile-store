@@ -141,7 +141,7 @@ const InvoiceService = {
                   <td style="text-align:center; color:#64748b;">${idx + 1}</td>
                   <td>
                     <div class="invoice-item-title">${itemTitle}</div>
-                    ${item.variant ? `<div class="invoice-item-sub">Variant: ${item.variant}</div>` : ''}
+                    ${(item.variant || item.storage || item.color) ? `<div class="invoice-item-sub">Variant: ${item.variant || [item.storage, item.color].filter(Boolean).join(" • ")}</div>` : ''}
                   </td>
                   <td>
                     <span class="invoice-pill-cond">${cond}</span>
@@ -244,7 +244,10 @@ const InvoiceService = {
 
     const waBtn = document.getElementById("btn-wa-invoice-action");
     if (waBtn) {
-      const itemsList = (order.items || []).map(i => `• ${i.name || i.title} x${i.qty}`).join('%0A');
+      const itemsList = (order.items || []).map(i => {
+        const v = i.variant || [i.storage, i.color].filter(Boolean).join(" • ");
+        return `• ${i.name || i.title}${v ? ` (${v})` : ''} x${i.qty}`;
+      }).join('%0A');
       const waText = `*Invoice Inquiry - Universe Hub*%0A*Order ID:* ${order.id}%0A*Customer:* ${encodeURIComponent(order.customerName)}%0A*Total:* Rs. ${(order.total || 0).toLocaleString()}%0A*Items:*%0A${itemsList}`;
       waBtn.href = `https://wa.me/94740219239?text=${waText}`;
     }
@@ -328,7 +331,10 @@ const InvoiceService = {
 
     const waBtn = document.getElementById("btn-success-whatsapp");
     if (waBtn) {
-      const itemsList = (order.items || []).map(i => `• ${i.name || i.title} x${i.qty} (Rs. ${(i.price * i.qty).toLocaleString()})`).join('%0A');
+      const itemsList = (order.items || []).map(i => {
+        const v = i.variant || [i.storage, i.color].filter(Boolean).join(" • ");
+        return `• ${i.name || i.title}${v ? ` (${v})` : ''} x${i.qty} (Rs. ${(i.price * i.qty).toLocaleString()})`;
+      }).join('%0A');
       const waText = `*New Order - Universe Hub*%0A*Order ID:* ${order.id}%0A*Customer:* ${encodeURIComponent(order.customerName)}%0A*Phone:* ${encodeURIComponent(order.phone)}%0A*Delivery:* ${encodeURIComponent(order.deliveryMethod || order.method)}%0A*Total:* Rs. ${(order.total || 0).toLocaleString()}%0A%0A*Items:*%0A${itemsList}`;
       waBtn.href = `https://wa.me/94740219239?text=${waText}`;
     }
