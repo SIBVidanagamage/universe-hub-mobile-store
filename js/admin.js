@@ -67,64 +67,78 @@ const AdminController = {
   },
 
   switchTab(tabName) {
+    if (!tabName) return;
     this.activeTab = tabName;
     document.querySelectorAll(".admin-tab-btn").forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.tab === tabName);
+      const match = (btn.dataset && btn.dataset.tab === tabName) || (btn.getAttribute("data-tab") === tabName);
+      btn.classList.toggle("active", !!match);
     });
 
     document.querySelectorAll(".admin-tab-content").forEach(content => {
       content.style.display = content.id === `admin-tab-${tabName}` ? "block" : "none";
     });
 
-    this.renderCurrentTab();
+    try {
+      this.renderCurrentTab();
+    } catch (err) {
+      console.error("Error rendering tab " + tabName + ":", err);
+    }
   },
 
   renderStats() {
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-    const orders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
-    const repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
-    const reviews = JSON.parse(localStorage.getItem("UH_REVIEWS")) || [];
+    try {
+      const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      const orders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
+      const repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
+      const reviews = JSON.parse(localStorage.getItem("UH_REVIEWS")) || [];
 
-    const totalRevenue = orders.reduce((sum, ord) => sum + (ord.total || 0), 0);
-    const activeRepairs = repairs.filter(r => r.status !== "Completed").length;
+      const totalRevenue = orders.reduce((sum, ord) => sum + (ord.total || 0), 0);
+      const activeRepairs = repairs.filter(r => r.status !== "Completed").length;
 
-    const revElem = document.getElementById("admin-stat-revenue");
-    if (revElem) revElem.textContent = `Rs. ${totalRevenue.toLocaleString()}`;
+      const revElem = document.getElementById("admin-stat-revenue");
+      if (revElem) revElem.textContent = `Rs. ${totalRevenue.toLocaleString()}`;
 
-    const ordElem = document.getElementById("admin-stat-orders");
-    if (ordElem) ordElem.textContent = orders.length;
+      const ordElem = document.getElementById("admin-stat-orders");
+      if (ordElem) ordElem.textContent = orders.length;
 
-    const repElem = document.getElementById("admin-stat-repairs");
-    if (repElem) repElem.textContent = activeRepairs;
+      const repElem = document.getElementById("admin-stat-repairs");
+      if (repElem) repElem.textContent = activeRepairs;
 
-    const revsElem = document.getElementById("admin-stat-reviews");
-    if (revsElem) revsElem.textContent = reviews.length;
+      const revsElem = document.getElementById("admin-stat-reviews");
+      if (revsElem) revsElem.textContent = reviews.length;
 
-    const prodElem = document.getElementById("admin-stat-products");
-    if (prodElem) prodElem.textContent = products.length;
+      const prodElem = document.getElementById("admin-stat-products");
+      if (prodElem) prodElem.textContent = products.length;
+    } catch (e) {
+      console.warn("renderStats notice:", e);
+    }
   },
 
   renderCurrentTab() {
     this.renderStats();
-    if (this.activeTab === "products") {
-      this.renderInventoryFilterBar();
-      this.renderProductsTable();
-    } else if (this.activeTab === "brands") {
-      this.renderBrandsManager();
-    } else if (this.activeTab === "categories") {
-      this.renderCategoriesManager();
-    } else if (this.activeTab === "repairs") {
-      this.renderRepairsTable();
-    } else if (this.activeTab === "reviews") {
-      this.renderReviewsTable();
-    } else if (this.activeTab === "orders") {
-      this.renderOrdersTable();
-    } else if (this.activeTab === "store") {
-      this.renderStoreSettings();
-    } else if (this.activeTab === "payments") {
-      if (typeof PaymentGateway !== 'undefined' && typeof PaymentGateway.renderAdminGatewayManager === 'function') {
-        PaymentGateway.renderAdminGatewayManager();
+    try {
+      if (this.activeTab === "products") {
+        this.renderInventoryFilterBar();
+        this.renderProductsTable();
+      } else if (this.activeTab === "brands") {
+        this.renderBrandsManager();
+      } else if (this.activeTab === "categories") {
+        this.renderCategoriesManager();
+      } else if (this.activeTab === "repairs") {
+        this.renderRepairsTable();
+      } else if (this.activeTab === "reviews") {
+        this.renderReviewsTable();
+      } else if (this.activeTab === "orders") {
+        this.renderOrdersTable();
+      } else if (this.activeTab === "store") {
+        this.renderStoreSettings();
+      } else if (this.activeTab === "payments") {
+        if (typeof PaymentGateway !== 'undefined' && typeof PaymentGateway.renderAdminGatewayManager === 'function') {
+          PaymentGateway.renderAdminGatewayManager();
+        }
       }
+    } catch (tabErr) {
+      console.error(`Error rendering active tab "${this.activeTab}":`, tabErr);
     }
   },
 
@@ -2415,8 +2429,6 @@ const AdminController = {
         password: password,
         role: "admin"
       });
-    }
-    localStorage.setItem("UH_USERS", JSON.stringify(users));
     }
     localStorage.setItem("UH_USERS", JSON.stringify(users));
 

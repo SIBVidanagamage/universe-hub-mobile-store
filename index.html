@@ -639,14 +639,14 @@
 
       <!-- Navigation Tabs in Admin -->
       <div class="admin-tabs-list">
-        <button class="admin-tab-btn active" data-tab="products">📱 Products &amp; Inventory</button>
-        <button class="admin-tab-btn" data-tab="brands">🏷️ Brands &amp; Accessories</button>
-        <button class="admin-tab-btn" data-tab="categories">📂 Categories &amp; Navbar</button>
-        <button class="admin-tab-btn" data-tab="repairs">🔧 Repair Orders Queue</button>
-        <button class="admin-tab-btn" data-tab="reviews">⭐ Customer Reviews Moderation</button>
-        <button class="admin-tab-btn" data-tab="orders">🛍️ Storefront Orders</button>
-        <button class="admin-tab-btn" data-tab="store">🏪 Store &amp; Hero Banner</button>
-        <button class="admin-tab-btn" data-tab="payments">💳 Online Gateways</button>
+        <button class="admin-tab-btn active" data-tab="products" onclick="AdminController.switchTab('products')">📱 Products &amp; Inventory</button>
+        <button class="admin-tab-btn" data-tab="brands" onclick="AdminController.switchTab('brands')">🏷️ Brands &amp; Accessories</button>
+        <button class="admin-tab-btn" data-tab="categories" onclick="AdminController.switchTab('categories')">📂 Categories &amp; Navbar</button>
+        <button class="admin-tab-btn" data-tab="repairs" onclick="AdminController.switchTab('repairs')">🔧 Repair Orders Queue</button>
+        <button class="admin-tab-btn" data-tab="reviews" onclick="AdminController.switchTab('reviews')">⭐ Customer Reviews Moderation</button>
+        <button class="admin-tab-btn" data-tab="orders" onclick="AdminController.switchTab('orders')">🛍️ Storefront Orders</button>
+        <button class="admin-tab-btn" data-tab="store" onclick="AdminController.switchTab('store')">🏪 Store &amp; Hero Banner</button>
+        <button class="admin-tab-btn" data-tab="payments" onclick="AdminController.switchTab('payments')">💳 Online Gateways</button>
       </div>
 
       <!-- TAB 1: PRODUCTS INVENTORY -->
@@ -2799,7 +2799,7 @@
   <script src="js/uploader.js?v=12"></script>
   <script src="js/bulk-uploader.js?v=5"></script>
   <script src="js/payment-gateway.js?v=1"></script>
-  <script src="js/admin.js?v=17"></script>
+  <script src="js/admin.js?v=18"></script>
   <script src="js/app.js?v=19"></script>
 </body>
 </html>
