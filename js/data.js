@@ -942,86 +942,46 @@ function initDatabase() {
 
   // 2. Brands initialization (Official Accessory & Device Brands)
   const existingBrands = localStorage.getItem("UH_BRANDS");
+  const deletedBrandIds = JSON.parse(localStorage.getItem("UH_DELETED_BRAND_IDS") || "[]");
   if (!existingBrands) {
-    localStorage.setItem("UH_BRANDS", JSON.stringify(INITIAL_BRANDS));
+    const cleanBrands = INITIAL_BRANDS.filter(b => !deletedBrandIds.includes(String(b.id)));
+    localStorage.setItem("UH_BRANDS", JSON.stringify(cleanBrands));
   } else {
     try {
-      const storedBrands = JSON.parse(existingBrands) || [];
-      let brandsUpdated = false;
-      INITIAL_BRANDS.forEach(ib => {
-        if (!storedBrands.some(b => b.id.toLowerCase() === ib.id.toLowerCase())) {
-          storedBrands.push(ib);
-          brandsUpdated = true;
+      let storedBrands = JSON.parse(existingBrands) || [];
+      if (deletedBrandIds.length > 0) {
+        const filtered = storedBrands.filter(b => !deletedBrandIds.includes(String(b.id)));
+        if (filtered.length !== storedBrands.length) {
+          localStorage.setItem("UH_BRANDS", JSON.stringify(filtered));
         }
-      });
-      if (brandsUpdated) {
-        localStorage.setItem("UH_BRANDS", JSON.stringify(storedBrands));
       }
-    } catch (e) {
-      localStorage.setItem("UH_BRANDS", JSON.stringify(INITIAL_BRANDS));
-    }
+    } catch (e) {}
   }
 
-  // 3. Products schema upgrade & initial load
+  // 3. Products schema upgrade & initial load (never resurrect deleted products)
   const existingProducts = localStorage.getItem("UH_PRODUCTS");
+  const deletedProductIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+
   if (!existingProducts) {
-    const enriched = INITIAL_PRODUCTS.map(p => {
-      if (!p.brand) p.brand = detectProductBrand(p);
-      return p;
-    });
+    const enriched = INITIAL_PRODUCTS
+      .filter(p => !deletedProductIds.includes(String(p.id)))
+      .map(p => {
+        if (!p.brand) p.brand = detectProductBrand(p);
+        return p;
+      });
     localStorage.setItem("UH_PRODUCTS", JSON.stringify(enriched));
   } else {
     try {
-      const prods = JSON.parse(existingProducts);
-      let needsUpdate = false;
-
-      prods.forEach(p => {
-        const match = INITIAL_PRODUCTS.find(ip => ip.id === p.id);
-        if (match) {
-          if (!p.mainCategory) { p.mainCategory = match.mainCategory; needsUpdate = true; }
-          if (p.category === "iphones" || p.category === "cases") {
-            p.category = match.category;
-            needsUpdate = true;
-          }
-          if (match.brand && (!p.brand || p.brand === "Universal" || p.brand === "Generic")) {
-            p.brand = match.brand;
-            needsUpdate = true;
-          }
+      let prods = JSON.parse(existingProducts) || [];
+      // Strictly purge any deleted product IDs from local cache
+      if (deletedProductIds.length > 0) {
+        const filtered = prods.filter(p => !deletedProductIds.includes(String(p.id)));
+        if (filtered.length !== prods.length) {
+          prods = filtered;
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
         }
-
-        // Auto-assign brand if missing
-        if (!p.brand) {
-          p.brand = detectProductBrand(p);
-          needsUpdate = true;
-        }
-
-        if (!p.images || !Array.isArray(p.images) || p.images.length === 0) {
-          if (match && match.images) {
-            p.images = match.images;
-            p.video = match.video || "";
-          } else {
-            p.images = [p.image || ""];
-            p.video = p.video || "";
-          }
-          needsUpdate = true;
-        }
-      });
-
-      // Also ensure newly defined products (like Ugreen, Baseus, WiWU, Asper) exist
-      INITIAL_PRODUCTS.forEach(ip => {
-        if (!prods.some(p => p.id === ip.id)) {
-          if (!ip.brand) ip.brand = detectProductBrand(ip);
-          prods.push(ip);
-          needsUpdate = true;
-        }
-      });
-
-      if (needsUpdate) {
-        localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
       }
-    } catch (e) {
-      localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS));
-    }
+    } catch (e) {}
   }
 
   if (!localStorage.getItem("UH_REVIEWS")) {

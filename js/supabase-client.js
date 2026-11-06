@@ -133,35 +133,58 @@
             .select("*")
             .order("created_at", { ascending: false });
 
-          if (!error && Array.isArray(data) && data.length > 0) {
-            const mapped = data.map(item => ({
-              id: item.id,
-              name: item.title,
-              title: item.title,
-              slug: item.slug || item.id,
-              category: item.category,
-              brand: item.brand,
-              price: Number(item.price),
-              originalPrice: item.original_price ? Number(item.original_price) : null,
-              badge: item.badge,
-              isFeatured: item.is_featured,
-              stock: item.stock,
-              rating: Number(item.rating || 5.0),
-              reviews: item.review_count || 0,
-              image: item.image,
-              images: item.images || [item.image],
-              video: item.specs?.video || item.video || null,
-              description: item.description || "",
-              specs: item.specs || {}
-            }));
-            localStorage.setItem("UH_PRODUCTS", JSON.stringify(mapped));
+          if (!error && Array.isArray(data)) {
+            let deletedIds = [];
+            try {
+              deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+            } catch (e) { deletedIds = []; }
+
+            const mapped = data
+              .filter(item => !deletedIds.includes(String(item.id)))
+              .map(item => ({
+                id: item.id,
+                name: item.title,
+                title: item.title,
+                slug: item.slug || item.id,
+                category: item.category,
+                brand: item.brand,
+                price: Number(item.price),
+                originalPrice: item.original_price ? Number(item.original_price) : null,
+                badge: item.badge,
+                isFeatured: item.is_featured,
+                stock: item.stock,
+                rating: Number(item.rating || 5.0),
+                reviews: item.review_count || 0,
+                image: item.image,
+                images: item.images || [item.image],
+                video: item.specs?.video || item.video || null,
+                description: item.description || "",
+                specs: item.specs || {}
+              }));
+
+            try {
+              localStorage.setItem("UH_PRODUCTS", JSON.stringify(mapped));
+            } catch (quotaErr) {
+              console.warn("Quota warning caching fetched products:", quotaErr);
+            }
             return mapped;
           }
         } catch (e) {
           console.warn("[Supabase] Fetch products failed, using local cache", e);
         }
       }
-      return JSON.parse(localStorage.getItem("UH_PRODUCTS")) || (typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : []);
+
+      let localProducts = [];
+      try {
+        localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || (typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : []);
+        let deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+        if (deletedIds.length > 0) {
+          localProducts = localProducts.filter(p => !deletedIds.includes(String(p.id)));
+        }
+      } catch (e) {
+        localProducts = [];
+      }
+      return localProducts;
     },
 
     async syncProductsToLocal() {
@@ -238,19 +261,85 @@
     },
 
     async deleteProduct(productId) {
-      // 1. Remove from local storage
-      let localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-      localProducts = localProducts.filter(p => p.id !== productId);
-      localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts));
+      if (!productId) return;
+      const strId = String(productId);
 
-      // 2. Remove from Supabase
+      // 1. Permanently track in deleted IDs so it never re-appears
+      let deletedIds = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+      } catch (e) { deletedIds = []; }
+      if (!deletedIds.includes(strId)) {
+        deletedIds.push(strId);
+        try {
+          localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds));
+        } catch (e) {}
+      }
+
+      // 2. Remove from local storage
+      let localProducts = [];
+      try {
+        localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      } catch (e) { localProducts = []; }
+      localProducts = localProducts.filter(p => String(p.id) !== strId);
+      try {
+        localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts));
+      } catch (e) {}
+
+      // 3. Remove from Supabase Cloud Database
       if (this.isConnected && this.client) {
         try {
-          const { error } = await this.client.from("products").delete().eq("id", productId);
+          const { error } = await this.client.from("products").delete().eq("id", strId);
           if (error) console.error("[Supabase] Delete product error:", error);
-          else console.log("⚡ [Supabase] Product deleted from cloud:", productId);
+          else console.log("⚡ [Supabase] Product deleted from cloud:", strId);
         } catch (e) {
           console.error("[Supabase] Delete product network error:", e);
+        }
+      }
+    },
+
+    async deleteBrand(brandId) {
+      if (!brandId) return;
+      const strId = String(brandId);
+
+      let deletedBrandIds = [];
+      try {
+        deletedBrandIds = JSON.parse(localStorage.getItem("UH_DELETED_BRAND_IDS") || "[]");
+      } catch (e) { deletedBrandIds = []; }
+      if (!deletedBrandIds.includes(strId)) {
+        deletedBrandIds.push(strId);
+        try { localStorage.setItem("UH_DELETED_BRAND_IDS", JSON.stringify(deletedBrandIds)); } catch (e) {}
+      }
+
+      if (this.isConnected && this.client) {
+        try {
+          await this.client.from("brands").delete().eq("id", strId);
+          console.log("⚡ [Supabase] Brand deleted from cloud:", strId);
+        } catch (e) {
+          console.warn("[Supabase] Delete brand error:", e);
+        }
+      }
+    },
+
+    async deleteCategory(catId) {
+      if (!catId) return;
+      const strId = String(catId);
+
+      let deletedCategoryIds = [];
+      try {
+        deletedCategoryIds = JSON.parse(localStorage.getItem("UH_DELETED_CATEGORY_IDS") || "[]");
+      } catch (e) { deletedCategoryIds = []; }
+      if (!deletedCategoryIds.includes(strId)) {
+        deletedCategoryIds.push(strId);
+        try { localStorage.setItem("UH_DELETED_CATEGORY_IDS", JSON.stringify(deletedCategoryIds)); } catch (e) {}
+      }
+
+      if (this.isConnected && this.client) {
+        try {
+          await this.client.from("categories").delete().eq("id", strId);
+          console.log("⚡ [Supabase] Category deleted from cloud:", strId);
+        } catch (e) {
+          console.warn("[Supabase] Delete category error:", e);
         }
       }
     },

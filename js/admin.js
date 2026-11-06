@@ -610,12 +610,27 @@ const AdminController = {
     showToast(`Brand "${b.name}" ${b.inFilter ? 'is shown in Catalog Filter' : 'is hidden from Catalog Filter'}`);
   },
 
-  deleteBrand(brandId) {
-    if (!confirm(`Are you sure you want to delete brand "${brandId}"?`)) return;
+  async deleteBrand(brandId) {
+    if (!brandId) return;
+    if (!confirm(`Are you sure you want to permanently delete brand "${brandId}"?`)) return;
+
+    const strId = String(brandId);
+    let deletedBrandIds = [];
+    try {
+      deletedBrandIds = JSON.parse(localStorage.getItem("UH_DELETED_BRAND_IDS") || "[]");
+    } catch (e) { deletedBrandIds = []; }
+    if (!deletedBrandIds.includes(strId)) {
+      deletedBrandIds.push(strId);
+      try { localStorage.setItem("UH_DELETED_BRAND_IDS", JSON.stringify(deletedBrandIds)); } catch (e) {}
+    }
 
     let brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
-    brands = brands.filter(b => b.id !== brandId);
+    brands = brands.filter(b => String(b.id) !== strId && String(b.name).toLowerCase() !== strId.toLowerCase());
     localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
+
+    if (window.SupabaseSync && typeof window.SupabaseSync.deleteBrand === "function") {
+      try { await window.SupabaseSync.deleteBrand(strId); } catch (e) {}
+    }
 
     this.populateBrandDropdowns();
     this.renderBrandsManager();
@@ -769,12 +784,27 @@ const AdminController = {
     showToast(`Category "${cat.name}" is now ${cat.inFilter ? 'shown in Catalog Filter' : 'hidden from Catalog Filter'}!`);
   },
 
-  deleteCategory(catId) {
-    if (!confirm(`Are you sure you want to delete category "${catId}"?`)) return;
+  async deleteCategory(catId) {
+    if (!catId) return;
+    if (!confirm(`Are you sure you want to permanently delete category "${catId}"?`)) return;
+
+    const strId = String(catId);
+    let deletedCategoryIds = [];
+    try {
+      deletedCategoryIds = JSON.parse(localStorage.getItem("UH_DELETED_CATEGORY_IDS") || "[]");
+    } catch (e) { deletedCategoryIds = []; }
+    if (!deletedCategoryIds.includes(strId)) {
+      deletedCategoryIds.push(strId);
+      try { localStorage.setItem("UH_DELETED_CATEGORY_IDS", JSON.stringify(deletedCategoryIds)); } catch (e) {}
+    }
 
     let categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
-    categories = categories.filter(c => c.id !== catId);
+    categories = categories.filter(c => String(c.id) !== strId);
     localStorage.setItem("UH_CATEGORIES", JSON.stringify(categories));
+
+    if (window.SupabaseSync && typeof window.SupabaseSync.deleteCategory === "function") {
+      try { await window.SupabaseSync.deleteCategory(strId); } catch (e) {}
+    }
 
     this.populateCategoryDropdowns();
     this.renderCategoriesManager();
@@ -1116,21 +1146,47 @@ const AdminController = {
     }
   },
 
-  deleteProduct(prodId) {
-    if (confirm("Are you sure you want to delete this product from Universe Hub inventory?")) {
-      let products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-      products = products.filter(p => p.id !== prodId);
-      localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+  async deleteProduct(prodId) {
+    if (!prodId) return;
+    if (confirm("Are you sure you want to permanently delete this product from Universe Hub inventory?")) {
+      const strId = String(prodId);
 
-      // Sync to Supabase Cloud Database
-      if (window.SupabaseSync && typeof window.SupabaseSync.deleteProduct === "function") {
-        window.SupabaseSync.deleteProduct(prodId);
+      // Track in deleted IDs so it never re-appears on refresh
+      let deletedIds = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+      } catch (e) { deletedIds = []; }
+      if (!deletedIds.includes(strId)) {
+        deletedIds.push(strId);
+        try { localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds)); } catch (e) {}
       }
+
+      // 1. Remove from local storage
+      let products = [];
+      try {
+        products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      } catch (e) { products = []; }
+      products = products.filter(p => String(p.id) !== strId);
+      try {
+        localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+      } catch (e) {}
+
+      // 2. Permanently delete from Supabase Cloud Database
+      if (window.SupabaseSync && typeof window.SupabaseSync.deleteProduct === "function") {
+        try {
+          await window.SupabaseSync.deleteProduct(strId);
+        } catch (e) {
+          console.warn("Supabase delete notice:", e);
+        }
+      }
+
       this.renderProductsTable();
+      this.renderInventoryFilterBar();
       this.renderStats();
-      showToast("Product deleted from store.");
+      showToast("🗑️ Product permanently deleted from store.");
       if (window.App && typeof App.renderCatalog === "function") {
         App.renderCatalog();
+        App.renderCategories();
       }
     }
   },
