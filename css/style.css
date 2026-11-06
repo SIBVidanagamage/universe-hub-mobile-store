@@ -4412,5 +4412,35 @@ img, video, iframe {
   margin: 3px 0;
 }
 
+/* Supabase Cloud Status Indicator */
+.supabase-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.supabase-status-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.2);
+}
+
+.supabase-status-pill .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
 
 
