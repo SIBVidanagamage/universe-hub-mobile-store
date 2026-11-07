@@ -60,6 +60,12 @@ const App = {
         this.applyStoreSettings();
       });
     }
+    if (window.SupabaseSync && typeof window.SupabaseSync.fetchRegisteredUsers === "function") {
+      window.SupabaseSync.fetchRegisteredUsers();
+    }
+    if (window.SupabaseSync && typeof window.SupabaseSync.fetchOrders === "function") {
+      window.SupabaseSync.fetchOrders();
+    }
 
     // Check if URL has admin hash
     if (window.location.hash === "#admin") {
@@ -464,6 +470,9 @@ const App = {
 
     users.push(newUser);
     localStorage.setItem("UH_USERS", JSON.stringify(users));
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveRegisteredUsers === "function") {
+      window.SupabaseSync.saveRegisteredUsers(users);
+    }
 
     if (errBanner) errBanner.style.display = "none";
     this.onCustomerAuthSuccess(newUser);

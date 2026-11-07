@@ -1039,7 +1039,7 @@ function initDatabase() {
     localStorage.setItem("UH_REPAIRS", JSON.stringify(DEMO_REPAIR_ORDERS));
   }
   if (!localStorage.getItem("UH_ORDERS")) {
-    localStorage.setItem("UH_ORDERS", JSON.stringify(DEMO_STORE_ORDERS));
+    localStorage.setItem("UH_ORDERS", JSON.stringify([]));
   }
   if (!localStorage.getItem("UH_CART")) {
     localStorage.setItem("UH_CART", JSON.stringify([]));

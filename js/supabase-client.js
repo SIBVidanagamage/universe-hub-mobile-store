@@ -120,6 +120,26 @@
         this.updateStatusBadge(true);
         console.log("⚡ [Supabase] Cloud database verified live and synchronized.");
 
+        // Automatically fetch latest catalog, settings and orders to guarantee real-time cross-device sync (e.g. laptop <-> mobile)
+        this.fetchProducts().then(prods => {
+          if (prods && prods.length > 0 && typeof window !== "undefined" && window.App) {
+            if (typeof window.App.renderCatalog === "function") window.App.renderCatalog();
+            if (typeof window.App.renderCategories === "function") window.App.renderCategories();
+            if (typeof window.App.renderBrandsSection === "function") window.App.renderBrandsSection();
+          }
+        });
+        this.fetchStoreSettings().then(st => {
+          if (st && typeof window !== "undefined" && window.App && typeof window.App.applyStoreSettings === "function") {
+            window.App.applyStoreSettings();
+          }
+        });
+        this.fetchRegisteredUsers();
+        this.fetchOrders().then(() => {
+          if (typeof window !== "undefined" && window.AdminController && typeof window.AdminController.renderOrdersTable === "function") {
+            window.AdminController.renderOrdersTable();
+          }
+        });
+
         // Automatically flush any changes that were queued while offline
         this.flushSyncQueue();
         return true;
@@ -288,11 +308,11 @@
 
     // --- PRODUCTS SYNC ---
     async fetchProducts() {
-      // 1. If online and client is active, try fetching latest cloud catalog
-      if (this.isConnected && this.client) {
+      // 1. If online and client is active, query latest cloud catalog directly
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
         try {
           const controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
-          const timer = controller ? setTimeout(() => controller.abort(), 5000) : null;
+          const timer = controller ? setTimeout(() => controller.abort(), 6000) : null;
 
           const query = this.client
             .from("products")
@@ -304,6 +324,9 @@
           if (timer) clearTimeout(timer);
 
           if (!error && Array.isArray(data) && data.length > 0) {
+            this.isConnected = true;
+            this.updateStatusBadge(true);
+
             let deletedIds = [];
             try {
               deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
@@ -526,6 +549,69 @@
     },
 
     // --- ORDERS SYNC ---
+    async fetchOrders() {
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
+        try {
+          const controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+          const timer = controller ? setTimeout(() => controller.abort(), 6000) : null;
+
+          const query = this.client
+            .from("orders")
+            .select("*")
+            .order("created_at", { ascending: false });
+          if (controller) query.abortSignal(controller.signal);
+
+          const { data, error } = await query;
+          if (timer) clearTimeout(timer);
+
+          if (!error && Array.isArray(data)) {
+            let deletedOrderIds = [];
+            try {
+              deletedOrderIds = JSON.parse(localStorage.getItem("UH_DELETED_ORDER_IDS") || "[]");
+            } catch (e) { deletedOrderIds = []; }
+
+            const cloudOrders = data
+              .filter(ord => !deletedOrderIds.includes(String(ord.id)))
+              .map(ord => ({
+                id: ord.id,
+                orderNumber: ord.order_number || ord.id,
+                customerName: ord.customer_name,
+                phone: ord.customer_phone,
+                whatsapp: ord.customer_phone,
+                email: ord.customer_email || "",
+                address: ord.address || "Flagship Pickup",
+                city: ord.city || "Maharagama",
+                date: ord.created_at ? new Date(ord.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Recently",
+                items: ord.items || [],
+                total: Number(ord.total || 0),
+                subtotal: Number(ord.subtotal || ord.total || 0),
+                deliveryMethod: ord.address && ord.address.toLowerCase().includes("store") ? "Physical Store Pickup" : "Courier Delivery",
+                paymentMethod: ord.payment_method || "COD",
+                method: (ord.address && ord.address.toLowerCase().includes("store") ? "PHYSICAL STORE PICKUP" : "COURIER DELIVERY") + " (" + (ord.payment_method || "COD").toUpperCase() + ")",
+                status: ord.order_status || "Processing"
+              }));
+
+            let localOrders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
+            // Remove demo placeholder orders from local cache
+            localOrders = localOrders.filter(o => o.id !== 'ORD-7711' && o.id !== 'ORD-7712' && o.id !== 'ORD-4401' && o.id !== 'ORD-4402');
+
+            const merged = [...cloudOrders];
+            for (const lOrd of localOrders) {
+              if (!merged.some(c => c.id === lOrd.id) && !deletedOrderIds.includes(String(lOrd.id))) {
+                merged.push(lOrd);
+                this.createOrder(lOrd);
+              }
+            }
+            localStorage.setItem("UH_ORDERS", JSON.stringify(merged));
+            return merged;
+          }
+        } catch (e) {
+          console.warn("[Supabase] fetchOrders notice:", e);
+        }
+      }
+      return JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
+    },
+
     async createOrder(order) {
       let localOrders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
       localOrders.unshift(order);
@@ -645,7 +731,7 @@
 
     // --- STORE SETTINGS SYNC ---
     async fetchStoreSettings() {
-      if (this.isConnected && this.client) {
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
         try {
           const { data, error } = await this.client
             .from("store_settings")
@@ -667,7 +753,7 @@
     async saveStoreSettings(settings) {
       localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
-      if (this.isConnected && this.client) {
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
         try {
           await this.client.from("store_settings").upsert({
             key: "general",
@@ -675,6 +761,46 @@
             updated_at: new Date().toISOString()
           });
           console.log("⚡ [Supabase] Store settings synced to cloud!");
+        } catch (e) {}
+      }
+    },
+
+    // --- REGISTERED CUSTOMERS SYNC ---
+    async fetchRegisteredUsers() {
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
+        try {
+          const { data, error } = await this.client
+            .from("store_settings")
+            .select("value")
+            .eq("key", "registered_customers")
+            .maybeSingle();
+
+          if (!error && data && Array.isArray(data.value)) {
+            let localUsers = JSON.parse(localStorage.getItem("UH_USERS")) || [];
+            const merged = [...data.value];
+            for (const lu of localUsers) {
+              if (!merged.some(cu => cu.email && cu.email.toLowerCase() === (lu.email || '').toLowerCase())) {
+                merged.push(lu);
+              }
+            }
+            localStorage.setItem("UH_USERS", JSON.stringify(merged));
+            return merged;
+          }
+        } catch (e) {}
+      }
+      return JSON.parse(localStorage.getItem("UH_USERS")) || [];
+    },
+
+    async saveRegisteredUsers(users) {
+      localStorage.setItem("UH_USERS", JSON.stringify(users));
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
+        try {
+          await this.client.from("store_settings").upsert({
+            key: "registered_customers",
+            value: users,
+            updated_at: new Date().toISOString()
+          });
+          console.log("⚡ [Supabase] Registered customers synced to cloud!");
         } catch (e) {}
       }
     },

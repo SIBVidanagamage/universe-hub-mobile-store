@@ -1787,10 +1787,22 @@ const AdminController = {
 
   // 4. Store Orders Table
   renderOrdersTable() {
-    let orders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
-    if (orders.length === 0 && typeof DEMO_STORE_ORDERS !== 'undefined') {
-      orders = DEMO_STORE_ORDERS;
+    if (window.SupabaseSync && typeof window.SupabaseSync.fetchOrders === 'function') {
+      window.SupabaseSync.fetchOrders().then(() => {
+        this._renderOrdersRows();
+      });
     }
+    this._renderOrdersRows();
+  },
+
+  _renderOrdersRows() {
+    let orders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
+    let deletedOrderIds = [];
+    try {
+      deletedOrderIds = JSON.parse(localStorage.getItem("UH_DELETED_ORDER_IDS") || "[]");
+    } catch (e) { deletedOrderIds = []; }
+    orders = orders.filter(o => !deletedOrderIds.includes(String(o.id)));
+
     const tbody = document.getElementById("admin-orders-tbody");
     if (!tbody) return;
 
