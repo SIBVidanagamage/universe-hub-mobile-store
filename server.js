@@ -130,6 +130,45 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // 1.1 In-Store Order & Repair Notification Bridge
+  if (req.method === 'POST' && (reqPath === '/api/notify-order' || reqPath === '/api/notify-repair')) {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const isRepair = reqPath.includes('repair');
+        console.log(`\n🔔 ========================================================`);
+        console.log(`⚡ [NEW ${isRepair ? 'REPAIR BOOKING' : 'STORE ORDER'} RECEIVED] ⚡`);
+        console.log(`Time: ${new Date().toLocaleString()}`);
+        console.log(`Customer: ${payload['Customer Name'] || 'Customer'}`);
+        console.log(`Phone: ${payload['Contact Number'] || payload['WhatsApp / Phone'] || 'N/A'}`);
+        if (!isRepair) {
+          console.log(`Order ID: ${payload['Order ID']}`);
+          console.log(`Total: ${payload['Total Amount']}`);
+          console.log(`Items:\n${payload['Ordered Items']}`);
+        } else {
+          console.log(`Ticket: ${payload['Repair Ticket']}`);
+          console.log(`Device: ${payload['Device']}`);
+          console.log(`Issue: ${payload['Fault / Issue']}`);
+        }
+        console.log(`========================================================\n`);
+
+        // Append to audit log
+        const logFile = path.join(UPLOAD_DIR, 'notifications_audit.log');
+        const logEntry = `[${new Date().toISOString()}] ${isRepair ? 'REPAIR' : 'ORDER'}: ${JSON.stringify(payload)}\n`;
+        fs.appendFile(logFile, logEntry, () => {});
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Logged successfully' }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
   // 2. Static File Serving with Range Support for Video Streaming
   let filePath = (reqPath === '/' || reqPath === '') ? '/index.html' : reqPath;
   const targetFile = path.normalize(path.join(__dirname, filePath));

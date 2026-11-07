@@ -1,10 +1,11 @@
 /**
  * Universe Hub - Real-time Order & Notification Engine
- * Automatically dispatches:
- * 1. Instant Email notification to Official Store Email (configured in Admin Center)
- *    with safety CC to shashikaisuranga143@gmail.com
- * 2. Instant WhatsApp auto-redirect with pre-filled order breakdown to Hotline WhatsApp
- * 3. Instant Repair booking email alert
+ * Automatically dispatches across multi-redundant channels:
+ * 1. ShipMyForm - Instant zero-delay form-to-email delivery to Official Store Email
+ * 2. FormSubmit (with 4s timeout fallback)
+ * 3. Netlify Native Edge Forms
+ * 4. Local Dev Server /api/notify-order audit logging
+ * 5. Instant WhatsApp auto-redirect with pre-filled order breakdown
  */
 
 (function (global) {
@@ -59,7 +60,7 @@
     getStoreName,
 
     /**
-     * Send auto email notification to store owner
+     * Send auto email notification to store owner across all redundant pipelines
      */
     async sendOrderEmail(order) {
       if (!order) return;
@@ -103,12 +104,44 @@
         "Total Amount": totalFormatted
       };
 
-      // If store email is different from backup email, CC backup email so both inboxes receive it
       if (storeEmail.toLowerCase() !== backupEmail.toLowerCase()) {
         payload._cc = backupEmail;
       }
 
-      // 1. Dispatch via Netlify Native Forms (100% Guaranteed on Netlify edge)
+      // 1. Pipeline A: ShipMyForm Instant Delivery (Primary)
+      try {
+        const shipParams = new URLSearchParams();
+        shipParams.append("_subject", `🚨 NEW ORDER #${orderId} - ${customerName} (${totalFormatted})`);
+        shipParams.append("Store", storeName);
+        shipParams.append("Order_ID", orderId);
+        shipParams.append("Date_Time", new Date().toLocaleString("en-US", { timeZone: "Asia/Colombo" }));
+        shipParams.append("Customer_Name", customerName);
+        shipParams.append("Contact_Phone", phone);
+        shipParams.append("Customer_Email", email);
+        shipParams.append("Delivery_Method", deliveryMethod);
+        shipParams.append("Shipping_Address", `${address}, ${city}`);
+        shipParams.append("Payment_Mode", paymentMethod);
+        shipParams.append("Ordered_Items", itemsSummary);
+        shipParams.append("Total_Amount", totalFormatted);
+        if (backupEmail && storeEmail.toLowerCase() !== backupEmail.toLowerCase()) {
+          shipParams.append("CC_Backup_Email", backupEmail);
+        }
+
+        const shipRes = await fetch(`https://shipmyform.com/to/${encodeURIComponent(storeEmail)}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json"
+          },
+          body: shipParams.toString()
+        });
+        const shipData = await shipRes.json().catch(() => ({}));
+        console.log("⚡ [NotificationService] ShipMyForm result:", shipData);
+      } catch (err) {
+        console.warn("[NotificationService] ShipMyForm dispatch error:", err);
+      }
+
+      // 2. Pipeline B: Netlify Native Forms Edge
       try {
         const netlifyParams = new URLSearchParams({
           "form-name": "order-notifications",
@@ -134,30 +167,43 @@
         console.warn("[NotificationService] Netlify form dispatch error:", e);
       }
 
-      // 2. Dispatch via FormSubmit / External Mail to active store email (+ CC)
+      // 3. Pipeline C: FormSubmit with 4-second timeout (Fallback)
       try {
-        console.log(`[NotificationService] Dispatching order email to ${storeEmail} (CC: ${payload._cc || 'None'})...`);
-        const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(storeEmail)}`, {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timeoutId = controller ? setTimeout(() => controller.abort(), 4000) : null;
+        
+        const fetchOpts = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
           },
           body: JSON.stringify(payload)
-        });
+        };
+        if (controller) fetchOpts.signal = controller.signal;
 
-        if (response.ok) {
-          console.log(`⚡ [NotificationService] Order email successfully sent to ${storeEmail}`);
-        } else {
-          console.warn("[NotificationService] Email dispatch returned status:", response.status);
+        const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(storeEmail)}`, fetchOpts);
+        if (timeoutId) clearTimeout(timeoutId);
+
+        if (response && response.ok) {
+          console.log(`⚡ [NotificationService] FormSubmit sent to ${storeEmail}`);
         }
       } catch (err) {
-        console.error("[NotificationService] Failed to send order email:", err);
+        console.warn("[NotificationService] FormSubmit unavailable or timed out:", err.message);
       }
+
+      // 4. Pipeline D: Local Dev Server Notification Bridge
+      try {
+        await fetch("/api/notify-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {}
     },
 
     /**
-     * Send auto email for Repair Lab bookings
+     * Send auto email for Repair Lab bookings across all redundant pipelines
      */
     async sendRepairEmail(repair) {
       if (!repair) return;
@@ -191,7 +237,36 @@
         payload._cc = backupEmail;
       }
 
-      // 1. Dispatch via Netlify Native Forms
+      // 1. Pipeline A: ShipMyForm Instant Delivery
+      try {
+        const shipParams = new URLSearchParams();
+        shipParams.append("_subject", `🛠️ NEW REPAIR BOOKING #${trackingCode} - ${device}`);
+        shipParams.append("Store", storeName);
+        shipParams.append("Repair_Ticket", trackingCode);
+        shipParams.append("Customer_Name", name);
+        shipParams.append("WhatsApp_Phone", phone);
+        shipParams.append("Device", device);
+        shipParams.append("Fault_Issue", fault);
+        shipParams.append("Preferred_Time", date);
+        shipParams.append("Repair_Desk", "Maharagama Flagship Store (188/8c High Level Rd)");
+        if (backupEmail && storeEmail.toLowerCase() !== backupEmail.toLowerCase()) {
+          shipParams.append("CC_Backup_Email", backupEmail);
+        }
+
+        await fetch(`https://shipmyform.com/to/${encodeURIComponent(storeEmail)}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json"
+          },
+          body: shipParams.toString()
+        });
+        console.log("⚡ [NotificationService] Repair booking alert sent via ShipMyForm");
+      } catch (err) {
+        console.warn("[NotificationService] ShipMyForm repair error:", err);
+      }
+
+      // 2. Pipeline B: Netlify Native Forms
       try {
         const netlifyParams = new URLSearchParams({
           "form-name": "repair-notifications",
@@ -213,21 +288,33 @@
         console.warn("[NotificationService] Netlify repair form error:", e);
       }
 
-      // 2. Dispatch via FormSubmit
+      // 3. Pipeline C: FormSubmit with 4s timeout (Fallback)
       try {
-        console.log(`[NotificationService] Dispatching repair booking alert to ${storeEmail}...`);
-        await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(storeEmail)}`, {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timeoutId = controller ? setTimeout(() => controller.abort(), 4000) : null;
+        
+        const fetchOpts = {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
           },
           body: JSON.stringify(payload)
+        };
+        if (controller) fetchOpts.signal = controller.signal;
+
+        await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(storeEmail)}`, fetchOpts);
+        if (timeoutId) clearTimeout(timeoutId);
+      } catch (e) {}
+
+      // 4. Pipeline D: Local Dev Server Notification Bridge
+      try {
+        await fetch("/api/notify-repair", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
-        console.log(`⚡ [NotificationService] Repair booking alert sent to ${storeEmail}`);
-      } catch (e) {
-        console.error("[NotificationService] Failed to send repair email:", e);
-      }
+      } catch (e) {}
     },
 
     /**
