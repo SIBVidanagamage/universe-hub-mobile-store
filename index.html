@@ -297,52 +297,76 @@
         </div>
 
         <div class="repair-split-grid">
-          <!-- Interactive Cost Estimator -->
+          <!-- Interactive Repair Inquiry & Quotation Card -->
           <div class="repair-card-interactive">
-            <div class="step-indicator">STEP 1 • LIVE COST ESTIMATOR</div>
-            <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:18px;">Select Your Device & Repair</h3>
+            <div class="step-indicator" style="color:var(--neon-cyan);">STEP 1 • DIRECT INQUIRY &amp; QUOTE</div>
+            <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">Inquire Repair or Reserve Desk</h3>
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+              Part prices change dynamically by model and availability. Select your device below to get an exact live price quote on WhatsApp or book a free in-store diagnostic.
+            </p>
 
             <div class="repair-form-group">
               <label for="estimator-device">Phone Model:</label>
               <select id="estimator-device" style="width:100%;">
-                <option value="iPhone 16 Pro Max">Apple iPhone 16 Pro Max</option>
-                <option value="iPhone 16 Pro">Apple iPhone 16 Pro</option>
-                <option value="iPhone 15 Pro Max">Apple iPhone 15 Pro Max</option>
-                <option value="iPhone 15">Apple iPhone 15</option>
-                <option value="iPhone 14 Pro Max" selected>Apple iPhone 14 Pro Max</option>
-                <option value="iPhone 13 Pro">Apple iPhone 13 Pro</option>
-                <option value="iPhone 12">Apple iPhone 12</option>
-                <option value="iPhone 11">Apple iPhone 11</option>
-                <option value="Samsung Galaxy S24 Ultra">Samsung Galaxy S24 Ultra</option>
+                <option value="Apple iPhone 16 Pro Max">Apple iPhone 16 Pro Max</option>
+                <option value="Apple iPhone 16 Pro">Apple iPhone 16 Pro</option>
+                <option value="Apple iPhone 16 Plus / 16">Apple iPhone 16 Plus / 16</option>
+                <option value="Apple iPhone 15 Pro Max">Apple iPhone 15 Pro Max</option>
+                <option value="Apple iPhone 15 Pro">Apple iPhone 15 Pro</option>
+                <option value="Apple iPhone 15 Plus / 15">Apple iPhone 15 Plus / 15</option>
+                <option value="Apple iPhone 14 Pro Max" selected>Apple iPhone 14 Pro Max</option>
+                <option value="Apple iPhone 14 Pro">Apple iPhone 14 Pro</option>
+                <option value="Apple iPhone 14 Plus / 14">Apple iPhone 14 Plus / 14</option>
+                <option value="Apple iPhone 13 Pro Max">Apple iPhone 13 Pro Max</option>
+                <option value="Apple iPhone 13 Pro">Apple iPhone 13 Pro</option>
+                <option value="Apple iPhone 13 / 13 Mini">Apple iPhone 13 / 13 Mini</option>
+                <option value="Apple iPhone 12 Series">Apple iPhone 12 Series</option>
+                <option value="Apple iPhone 11 Series">Apple iPhone 11 Series</option>
+                <option value="Samsung Galaxy S24 / S23 Series">Samsung Galaxy Flagship Series</option>
+                <option value="Other Mobile Device">Other Brand / Model</option>
               </select>
             </div>
 
             <div class="repair-form-group">
-              <label for="estimator-service">Service Required:</label>
+              <label for="estimator-service">Service / Fault Required:</label>
               <select id="estimator-service" style="width:100%;">
-                <option value="screen">Display / OLED Screen Replacement</option>
-                <option value="battery">Original Battery Replacement (100% Health)</option>
-                <option value="charging">Charging Port & Type-C Repair</option>
-                <option value="backglass">Laser Back Glass Replacement</option>
-                <option value="water">Water Damage Diagnostic & Cleaning</option>
-                <option value="camera">Camera Sensor & Lens Repair</option>
+                <option value="Display / OLED Screen Replacement">Display / OLED Screen Replacement</option>
+                <option value="Original Battery Replacement">Original Battery Replacement (100% Health)</option>
+                <option value="Charging Port & Type-C Repair">Charging Port &amp; Connector Repair</option>
+                <option value="Laser Back Glass Replacement">Laser Back Glass Replacement</option>
+                <option value="Camera Lens & Sensor Repair">Camera Lens &amp; Sensor Replacement</option>
+                <option value="Water Damage Ultrasonic Diagnostic">Water Damage Ultrasonic Diagnostic &amp; Cleaning</option>
+                <option value="Face ID / Logic Board Chip Repair">Face ID &amp; Motherboard Chip-Level Repair</option>
+                <option value="General Inspection / Not Powering On">General Inspection / Phone Not Turning On</option>
               </select>
             </div>
 
-            <div class="estimate-output-box">
-              <div>
-                <h4>Estimated Cost Range:</h4>
-                <div id="estimator-price-display" class="price-tag">Rs. 18,500 - 22,000</div>
-              </div>
-              <div style="text-align:right;">
-                <div id="estimator-time-display" class="time-tag">⏱️ Est. Time: 30 - 45 Mins</div>
-                <div id="estimator-warranty-display" style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">🛡️ Includes 6-Month Warranty</div>
+            <!-- Lab Quality Perks (Transparent & Customer-friendly) -->
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; margin-bottom:16px;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; color:#cbd5e1;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:#22c55e;">✓</span> <span><b>Free Diagnostic</b> at Store</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:#22c55e;">✓</span> <span><b>30-45 Mins</b> Turnaround</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:#22c55e;">✓</span> <span><b>Up to 6-Mo</b> Warranty</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:#22c55e;">✓</span> <span><b>Genuine Parts</b> Inspected</span>
+                </div>
               </div>
             </div>
 
-            <button class="btn-primary-glow" style="width:100%; justify-content:center;" onclick="App.openRepairBookingModal()">
-              Reserve Repair Slot at Physical Store
-            </button>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <button class="btn-primary-glow" style="width:100%; justify-content:center; background:#25d366; box-shadow:0 0 16px rgba(37,211,102,0.35); font-weight:700;" onclick="App.openWhatsAppRepairQuote()">
+                💬 Get Live Quote on WhatsApp (074-0219239)
+              </button>
+              <button class="btn-glass" style="width:100%; justify-content:center; font-size:13px;" onclick="App.openRepairBookingModal()">
+                📅 Reserve In-Store Inspection Slot
+              </button>
+            </div>
           </div>
 
           <!-- Real-Time Repair Tracker -->
@@ -351,15 +375,15 @@
             <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">Track Your Device in Our Lab</h3>
             <p style="font-size:13px; color:var(--text-secondary);">Enter the tracking number from your physical receipt or booking confirmation.</p>
 
-            <form id="repair-track-form" class="track-input-row">
+            <form id="repair-track-form" class="track-input-row" onsubmit="event.preventDefault(); App.handleTrackRepair();">
               <input type="text" id="track-repair-input" placeholder="e.g. UH-8821 or UH-8902" value="UH-8821" required>
-              <button type="submit" class="btn-glass" style="background:var(--neon-purple); border-color:var(--neon-purple); color:#fff;">
+              <button type="submit" class="btn-glass" style="background:var(--neon-purple); border-color:var(--neon-purple); color:#fff; font-weight:700;">
                 Track Status
               </button>
             </form>
 
             <div style="font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">
-              💡 <b>Demo Codes to test:</b> <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8821'; App.handleTrackRepair();" style="color:var(--neon-cyan); text-decoration:underline;">UH-8821 (In Repair)</a> | <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8902'; App.handleTrackRepair();" style="color:var(--neon-cyan); text-decoration:underline;">UH-8902 (Ready for Pickup)</a>
+              💡 <b>Sample Codes to Test:</b> <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8821'; App.handleTrackRepair();" style="color:var(--neon-cyan); text-decoration:underline;">UH-8821 (⚙️ In Progress)</a> | <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8902'; App.handleTrackRepair();" style="color:#34d399; text-decoration:underline;">UH-8902 (✅ Ready for Pickup)</a>
             </div>
 
             <!-- Dynamic Track Result Card -->
@@ -2968,6 +2992,6 @@
   <script src="js/bulk-uploader.js?v=5"></script>
   <script src="js/payment-gateway.js?v=1"></script>
   <script src="js/admin.js?v=22"></script>
-  <script src="js/app.js?v=22"></script>
+  <script src="js/app.js?v=23"></script>
 </body>
 </html>

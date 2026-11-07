@@ -1802,39 +1802,46 @@ const App = {
     }
   },
 
-  // 8. Repair Interactive Estimator
+  // 8. Repair Inquiry & Quotation System
   setupRepairEstimator() {
-    const serviceSelect = document.getElementById("estimator-service");
-    const deviceSelect = document.getElementById("estimator-device");
-    if (!serviceSelect || !deviceSelect) return;
+    // Automatically trigger initial track preview for default demo code
+    setTimeout(() => {
+      const trackInput = document.getElementById("track-repair-input");
+      if (trackInput && trackInput.value) {
+        this.handleTrackRepair();
+      }
+    }, 400);
+  },
 
-    const updateEstimate = () => {
-      const serviceId = serviceSelect.value;
-      const deviceId = deviceSelect.value;
-      const servicesList = (typeof REPAIR_SERVICES !== 'undefined' ? REPAIR_SERVICES : (window.REPAIR_SERVICES || []));
-      const service = servicesList.find(s => s.id === serviceId) || servicesList[0] || { basePrice: 5000, duration: "1 Hour", warranty: "6 Months" };
+  openWhatsAppRepairQuote() {
+    const devEl = document.getElementById("estimator-device");
+    const srvEl = document.getElementById("estimator-service");
+    const device = devEl ? devEl.value : "Apple iPhone";
+    const service = srvEl ? (srvEl.options[srvEl.selectedIndex]?.text || srvEl.value) : "Mobile Repair";
 
-      let multiplier = 1.0;
-      if (deviceId.includes("16") || deviceId.includes("15")) multiplier = 1.6;
-      else if (deviceId.includes("14") || deviceId.includes("13")) multiplier = 1.3;
-      else if (deviceId.includes("12") || deviceId.includes("11")) multiplier = 1.0;
+    const msg = `Hello Universe Hub Repair Desk (Maharagama)! 👋\n\nI would like to get a price quotation and part availability for my device:\n• Device Model: ${device}\n• Service / Fault: ${service}\n\nCould you please let me know the current repair cost and how long it will take? Thank you!`;
+    const settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    const rawWa = (settings.whatsapp || settings.phone || "0740219239").replace(/[^0-9]/g, "");
+    let waPhone = rawWa;
+    if (waPhone.startsWith("0")) waPhone = "94" + waPhone.substring(1);
+    else if (!waPhone.startsWith("94")) waPhone = "94" + waPhone;
 
-      const estimatedCost = Math.round(service.basePrice * multiplier);
-      const priceElem = document.getElementById("estimator-price-display");
-      const timeElem = document.getElementById("estimator-time-display");
-      const warrantyElem = document.getElementById("estimator-warranty-display");
-
-      if (priceElem) priceElem.textContent = `Rs. ${estimatedCost.toLocaleString()} - ${(estimatedCost + 3500).toLocaleString()}`;
-      if (timeElem) timeElem.textContent = `⏱️ Est. Time: ${service.duration}`;
-      if (warrantyElem) warrantyElem.textContent = `🛡️ Includes: ${service.warranty}`;
-    };
-
-    serviceSelect.addEventListener("change", updateEstimate);
-    deviceSelect.addEventListener("change", updateEstimate);
-    updateEstimate();
+    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   },
 
   openRepairBookingModal() {
+    const devEl = document.getElementById("estimator-device");
+    const srvEl = document.getElementById("estimator-service");
+    const bookDev = document.getElementById("book-cust-device");
+    const bookIss = document.getElementById("book-cust-issue");
+
+    if (devEl && bookDev) {
+      bookDev.value = devEl.value;
+    }
+    if (srvEl && bookIss) {
+      bookIss.value = srvEl.options[srvEl.selectedIndex]?.text || srvEl.value;
+    }
+
     this.openModal("repair-booking-modal");
   },
 
@@ -1860,10 +1867,10 @@ const App = {
       issue,
       status: "Received",
       stepIndex: 1,
-      estimatedCompletion: date || "Today within 1 hour",
+      estimatedCompletion: date || "Today at Maharagama Counter",
       desk: "In-Store Express Bay",
-      cost: 8500,
-      notes: "Booked online for Physical Store visit."
+      cost: 0,
+      notes: "Booked online for Physical Store inspection."
     };
 
     let repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
@@ -1882,62 +1889,176 @@ const App = {
 
     this.closeModal("repair-booking-modal");
     
+    // Auto populate tracking input with new code
+    const trackInp = document.getElementById("track-repair-input");
+    if (trackInp) {
+      trackInp.value = trackingCode;
+      this.handleTrackRepair();
+    }
+
     const sendWa = confirm(`⚡ Repair Slot Reserved!\n\nTracking Code: ${trackingCode}\nDevice: ${device}\n\nWould you like to send this repair reservation directly to Universe Hub WhatsApp Desk (074-0219239)?`);
     if (sendWa) {
       const waMsg = `Hello Universe Hub Repair Desk! I have reserved an in-store repair slot for my ${device}.\n\n• Job Tracking ID: ${trackingCode}\n• Customer: ${name}\n• Contact / WhatsApp: ${phone}\n• Fault: ${issue}\n• Preferred Visit Time: ${date || 'Today'}\n\nPlease confirm desk availability.`;
-      window.open(`https://wa.me/94740219239?text=${encodeURIComponent(waMsg)}`, '_blank');
+      const settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+      const rawWa = (settings.whatsapp || settings.phone || "0740219239").replace(/[^0-9]/g, "");
+      let waPhone = rawWa;
+      if (waPhone.startsWith("0")) waPhone = "94" + waPhone.substring(1);
+      else if (!waPhone.startsWith("94")) waPhone = "94" + waPhone;
+      window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`, '_blank');
     }
     showToast(`Repair job ${trackingCode} reserved!`);
   },
 
   // 9. Real-time Repair Status Tracking
-  handleTrackRepair() {
+  async handleTrackRepair() {
     const input = document.getElementById("track-repair-input");
     const code = input ? input.value.trim().toUpperCase() : "";
     const card = document.getElementById("track-result-container");
     if (!code || !card) return;
 
-    const repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
-    const record = repairs.find(r => r.trackingCode.toUpperCase() === code);
+    let repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || (typeof DEMO_REPAIR_ORDERS !== 'undefined' ? DEMO_REPAIR_ORDERS : []);
+    let record = repairs.find(r => (r.trackingCode || '').toUpperCase() === code || (r.id || '').toUpperCase() === code);
+
+    // If not found in localStorage, attempt Supabase Cloud Query
+    if (!record && window.SupabaseSync && window.SupabaseSync.client && window.SupabaseSync.isConnected) {
+      try {
+        const { data } = await window.SupabaseSync.client
+          .from("repair_orders")
+          .select("*")
+          .or(`ticket_number.ilike.${code},id.ilike.${code}`)
+          .limit(1);
+        if (data && data.length > 0) {
+          const row = data[0];
+          record = {
+            trackingCode: row.ticket_number || row.id,
+            customerName: row.customer_name,
+            phone: row.phone,
+            device: row.device_model || `${row.device_brand || ''} ${row.device_model || ''}`.trim() || "Mobile Device",
+            issue: row.issue_description || row.issue_type || "Diagnostic",
+            status: row.status || "Received",
+            stepIndex: row.status === "Completed" ? 5 : (row.status === "Ready for Pickup" ? 4 : (row.status === "In Progress" || row.status === "In Process" ? 3 : (row.status === "Diagnostic" ? 2 : 1))),
+            estimatedCompletion: "In-Store Lab",
+            desk: "Maharagama Counter Desk",
+            cost: Number(row.estimated_cost || 0),
+            notes: row.notes || "Synced from Universe Hub Cloud Lab."
+          };
+        }
+      } catch (e) {}
+    }
 
     if (!record) {
       card.innerHTML = `
-        <div style="padding:16px; text-align:center; color:#f87171;">
-          ❌ No repair record found with tracking code <b>${code}</b>. Please check your physical receipt or try sample demo code: <b>UH-8821</b> or <b>UH-8902</b>.
+        <div style="padding:18px; text-align:center; color:#f87171; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:10px;">
+          <div style="font-size:22px; margin-bottom:6px;">❌</div>
+          <div style="font-weight:700; margin-bottom:4px;">No repair record found for: <b>${code}</b></div>
+          <p style="font-size:12px; color:var(--text-secondary); margin:0;">
+            Please check the Tracking Code on your store receipt, or click sample codes above to preview: <b>UH-8821</b> or <b>UH-8902</b>.
+          </p>
         </div>
       `;
       card.classList.add("active");
       return;
     }
 
+    // Determine current step index (1 to 5)
+    let currentStep = record.stepIndex || 1;
+    const stNorm = (record.status || '').toLowerCase();
+    if (stNorm.includes('ready')) currentStep = 4;
+    else if (stNorm.includes('progress') || stNorm.includes('repair')) currentStep = 3;
+    else if (stNorm.includes('diag')) currentStep = 2;
+    else if (stNorm.includes('complete')) currentStep = 5;
+    else if (stNorm.includes('receive')) currentStep = 1;
+
     const steps = [
-      { num: 1, label: "Received" },
-      { num: 2, label: "Diagnostic" },
-      { num: 3, label: "In Repair" },
-      { num: 4, label: "Quality Check" },
-      { num: 5, label: "Ready" }
+      { num: 1, label: "Received", desc: "Checked in at Maharagama" },
+      { num: 2, label: "Diagnostic", desc: "Inspection & Testing" },
+      { num: 3, label: "In Process", desc: "Undergoing Repair" },
+      { num: 4, label: "Ready for Pickup", desc: "Completed & Ready!" },
+      { num: 5, label: "Completed", desc: "Delivered to Customer" }
     ];
 
-    const currentStep = record.stepIndex || 2;
+    // Status Badge Details & Banner
+    let badgeBg = "rgba(0,210,255,0.15)";
+    let badgeColor = "var(--neon-cyan)";
+    let badgeBorder = "rgba(0,210,255,0.3)";
+    let statusText = record.status || "Received";
+    let statusBannerHtml = "";
+
+    if (currentStep === 4) {
+      badgeBg = "rgba(16,185,129,0.2)";
+      badgeColor = "#34d399";
+      badgeBorder = "rgba(16,185,129,0.4)";
+      statusText = "✅ Ready for Pickup";
+      statusBannerHtml = `
+        <div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:12px 14px; margin-top:14px; color:#34d399; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎉</span>
+          <span><b>Your phone is ready for pickup!</b> You can collect it right now from our Maharagama Flagship Store front counter (188/8c High Level Rd).</span>
+        </div>
+      `;
+    } else if (currentStep === 3) {
+      badgeBg = "rgba(56,189,248,0.2)";
+      badgeColor = "#38bdf8";
+      badgeBorder = "rgba(56,189,248,0.4)";
+      statusText = "⚙️ In Process (Repairing)";
+      statusBannerHtml = `
+        <div style="background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:12px 14px; margin-top:14px; color:#38bdf8; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">⚙️</span>
+          <span><b>Repair in progress:</b> Certified technician is currently servicing your device using genuine parts. Est. Completion: ${record.estimatedCompletion || 'Today'}.</span>
+        </div>
+      `;
+    } else if (currentStep === 2) {
+      badgeBg = "rgba(245,158,11,0.2)";
+      badgeColor = "#fbbf24";
+      badgeBorder = "rgba(245,158,11,0.4)";
+      statusText = "🔍 Diagnostic / Inspection";
+      statusBannerHtml = `
+        <div style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:12px 14px; margin-top:14px; color:#fbbf24; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🔍</span>
+          <span><b>Diagnostic in progress:</b> Tech bench is testing display, power rails, and logic board components.</span>
+        </div>
+      `;
+    } else if (currentStep === 5) {
+      badgeBg = "rgba(34,197,94,0.2)";
+      badgeColor = "#4ade80";
+      badgeBorder = "rgba(34,197,94,0.4)";
+      statusText = "🎉 Completed & Collected";
+      statusBannerHtml = `
+        <div style="background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:8px; padding:12px 14px; margin-top:14px; color:#4ade80; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🏆</span>
+          <span><b>Device Collected:</b> Repair completed and device handed over to customer. Warranty is active.</span>
+        </div>
+      `;
+    } else {
+      badgeBg = "rgba(147,51,234,0.2)";
+      badgeColor = "#c084fc";
+      badgeBorder = "rgba(147,51,234,0.4)";
+      statusText = "📥 Received at Store Desk";
+      statusBannerHtml = `
+        <div style="background:rgba(147,51,234,0.12); border:1px solid rgba(147,51,234,0.3); border-radius:8px; padding:12px 14px; margin-top:14px; color:#c084fc; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📥</span>
+          <span><b>Device received:</b> Safely stored in our Maharagama repair queue. Technician inspection starting shortly.</span>
+        </div>
+      `;
+    }
 
     card.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
         <div>
-          <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Tracking Code</span>
-          <h4 style="font-size:18px; color:var(--neon-cyan); font-weight:800;">${record.trackingCode}</h4>
+          <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Job Tracking ID</span>
+          <h4 style="font-size:20px; color:var(--neon-cyan); font-weight:800; font-family:monospace; margin:2px 0 0;">${record.trackingCode}</h4>
         </div>
         <div style="text-align:right;">
-          <span class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); border:1px solid rgba(0,210,255,0.3); font-size:12px;">
-            ${record.status}
+          <span class="badge-pill" style="background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder}; font-size:12px; font-weight:700; padding:4px 10px;">
+            ${statusText}
           </span>
         </div>
       </div>
 
-      <div style="font-size:13.5px; line-height:1.6; margin-bottom:14px;">
-        <div><b>Device:</b> ${record.device}</div>
-        <div><b>Reported Issue:</b> ${record.issue}</div>
-        <div><b>Lab Location:</b> ${record.desk || 'Main Tech Bay'}</div>
-        <div><b>Est. Completion:</b> <span style="color:var(--success); font-weight:700;">${record.estimatedCompletion}</span></div>
+      <div style="font-size:13.5px; line-height:1.6; margin-bottom:14px; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px;">
+        <div><b>Device:</b> <span style="color:#fff;">${record.device}</span></div>
+        <div><b>Reported Fault:</b> <span style="color:#94a3b8;">${record.issue}</span></div>
+        <div><b>Lab Bench:</b> <span style="color:#94a3b8;">${record.desk || 'Maharagama Flagship Tech Bay'}</span></div>
+        <div><b>Ready Time:</b> <span style="color:${badgeColor}; font-weight:700;">${record.estimatedCompletion || 'In Service'}</span></div>
       </div>
 
       <div class="status-timeline">
@@ -1954,20 +2075,22 @@ const App = {
         }).join("")}
       </div>
 
+      ${statusBannerHtml}
+
       ${record.notes ? `
-        <div style="background:rgba(0,210,255,0.06); border-radius:6px; padding:10px; font-size:12px; color:#cbd5e1; margin-top:12px;">
+        <div style="background:rgba(0,210,255,0.06); border-radius:8px; padding:10px 14px; font-size:12px; color:#cbd5e1; margin-top:12px; border:1px solid rgba(0,210,255,0.15);">
           <b style="color:var(--neon-cyan);">Technician Note:</b> ${record.notes}
         </div>
       ` : ''}
 
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
-        <a href="https://wa.me/94740219239?text=${encodeURIComponent(`Hello Universe Hub Repair Desk! I am checking on my device repair (${record.device}) with Job Tracking ID #${record.trackingCode}. Current status shown online is "${record.status}".`)}"
+        <a href="https://wa.me/94740219239?text=${encodeURIComponent(`Hello Universe Hub Repair Desk! I am checking on my device repair (${record.device}) with Job Tracking ID #${record.trackingCode}. Current status shown online is "${statusText}".`)}"
            target="_blank" class="btn-primary-glow" style="background:#25d366; box-shadow:0 0 16px rgba(37,211,102,0.3); font-size:12px; padding:8px 14px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
           <span>💬</span>
-          <span>WhatsApp Repair Desk (074-0219239)</span>
+          <span>WhatsApp Tech Desk (074-0219239)</span>
         </a>
-        <button class="btn-glass" onclick="showToast('🔔 Real-time WhatsApp & SMS updates are active for ${record.phone || 'your phone number'}!')" style="font-size:12px; padding:8px 14px;">
-          🔔 Subscribed to WhatsApp &amp; SMS
+        <button class="btn-glass" onclick="showToast('🔔 Real-time status notifications active for ${record.phone || 'your device'}!')" style="font-size:12px; padding:8px 14px;">
+          🔔 Store Updates Subscribed
         </button>
       </div>
     `;
