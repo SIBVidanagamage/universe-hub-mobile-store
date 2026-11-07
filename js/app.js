@@ -1816,10 +1816,10 @@ const App = {
   openWhatsAppRepairQuote() {
     const devEl = document.getElementById("estimator-device");
     const srvEl = document.getElementById("estimator-service");
-    const device = devEl ? devEl.value : "Apple iPhone";
-    const service = srvEl ? (srvEl.options[srvEl.selectedIndex]?.text || srvEl.value) : "Mobile Repair";
+    const device = devEl ? devEl.value.trim() : "Mobile Phone";
+    const service = srvEl ? srvEl.value.trim() : "General Diagnostic & Repair";
 
-    const msg = `Hello Universe Hub Repair Desk (Maharagama)! 👋\n\nI would like to get a price quotation and part availability for my device:\n• Device Model: ${device}\n• Service / Fault: ${service}\n\nCould you please let me know the current repair cost and how long it will take? Thank you!`;
+    const msg = `Hello Universe Hub Repair Desk (Maharagama)! 👋\n\nI would like to get a price quotation and part availability for my device:\n• Device Model: ${device || 'Mobile Phone'}\n• Service / Fault: ${service || 'General Diagnostic'}\n\nCould you please let me know the current repair cost and how long it will take? Thank you!`;
     const settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
     const rawWa = (settings.whatsapp || settings.phone || "0740219239").replace(/[^0-9]/g, "");
     let waPhone = rawWa;
@@ -1835,11 +1835,11 @@ const App = {
     const bookDev = document.getElementById("book-cust-device");
     const bookIss = document.getElementById("book-cust-issue");
 
-    if (devEl && bookDev) {
-      bookDev.value = devEl.value;
+    if (devEl && bookDev && devEl.value.trim()) {
+      bookDev.value = devEl.value.trim();
     }
-    if (srvEl && bookIss) {
-      bookIss.value = srvEl.options[srvEl.selectedIndex]?.text || srvEl.value;
+    if (srvEl && bookIss && srvEl.value.trim()) {
+      bookIss.value = srvEl.value.trim();
     }
 
     this.openModal("repair-booking-modal");

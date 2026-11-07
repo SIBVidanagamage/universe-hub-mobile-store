@@ -306,39 +306,37 @@
             </p>
 
             <div class="repair-form-group">
-              <label for="estimator-device">Phone Model:</label>
-              <select id="estimator-device" style="width:100%;">
-                <option value="Apple iPhone 16 Pro Max">Apple iPhone 16 Pro Max</option>
-                <option value="Apple iPhone 16 Pro">Apple iPhone 16 Pro</option>
-                <option value="Apple iPhone 16 Plus / 16">Apple iPhone 16 Plus / 16</option>
-                <option value="Apple iPhone 15 Pro Max">Apple iPhone 15 Pro Max</option>
-                <option value="Apple iPhone 15 Pro">Apple iPhone 15 Pro</option>
-                <option value="Apple iPhone 15 Plus / 15">Apple iPhone 15 Plus / 15</option>
-                <option value="Apple iPhone 14 Pro Max" selected>Apple iPhone 14 Pro Max</option>
-                <option value="Apple iPhone 14 Pro">Apple iPhone 14 Pro</option>
-                <option value="Apple iPhone 14 Plus / 14">Apple iPhone 14 Plus / 14</option>
-                <option value="Apple iPhone 13 Pro Max">Apple iPhone 13 Pro Max</option>
-                <option value="Apple iPhone 13 Pro">Apple iPhone 13 Pro</option>
-                <option value="Apple iPhone 13 / 13 Mini">Apple iPhone 13 / 13 Mini</option>
-                <option value="Apple iPhone 12 Series">Apple iPhone 12 Series</option>
-                <option value="Apple iPhone 11 Series">Apple iPhone 11 Series</option>
-                <option value="Samsung Galaxy S24 / S23 Series">Samsung Galaxy Flagship Series</option>
-                <option value="Other Mobile Device">Other Brand / Model</option>
-              </select>
+              <label for="estimator-device" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">Phone Model / Brand (Type any model):</label>
+              <input type="text" id="estimator-device" placeholder="e.g. iPhone 14 Pro Max, Samsung S23, Pixel, Xiaomi..." value="Apple iPhone 14 Pro Max" style="width:100%; padding:10px 14px; font-size:13.5px;" list="popular-models-list">
+              <datalist id="popular-models-list">
+                <option value="Apple iPhone 16 Pro Max">
+                <option value="Apple iPhone 15 Pro Max">
+                <option value="Apple iPhone 14 Pro Max">
+                <option value="Apple iPhone 13 Pro Max">
+                <option value="Apple iPhone 12 Pro Max">
+                <option value="Apple iPhone 11">
+                <option value="Samsung Galaxy S24 Ultra">
+                <option value="Samsung Galaxy S23 Ultra">
+                <option value="Google Pixel 8 Pro">
+                <option value="Xiaomi / Redmi Note Series">
+                <option value="Vivo / Oppo / OnePlus">
+              </datalist>
             </div>
 
             <div class="repair-form-group">
-              <label for="estimator-service">Service / Fault Required:</label>
-              <select id="estimator-service" style="width:100%;">
-                <option value="Display / OLED Screen Replacement">Display / OLED Screen Replacement</option>
-                <option value="Original Battery Replacement">Original Battery Replacement (100% Health)</option>
-                <option value="Charging Port & Type-C Repair">Charging Port &amp; Connector Repair</option>
-                <option value="Laser Back Glass Replacement">Laser Back Glass Replacement</option>
-                <option value="Camera Lens & Sensor Repair">Camera Lens &amp; Sensor Replacement</option>
-                <option value="Water Damage Ultrasonic Diagnostic">Water Damage Ultrasonic Diagnostic &amp; Cleaning</option>
-                <option value="Face ID / Logic Board Chip Repair">Face ID &amp; Motherboard Chip-Level Repair</option>
-                <option value="General Inspection / Not Powering On">General Inspection / Phone Not Turning On</option>
-              </select>
+              <label for="estimator-service" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">Service / Fault Required (Type your issue):</label>
+              <input type="text" id="estimator-service" placeholder="e.g. Broken display, Battery drain, Charging issue, Water damaged..." value="Display / OLED Screen Replacement" style="width:100%; padding:10px 14px; font-size:13.5px;" list="common-faults-list">
+              <datalist id="common-faults-list">
+                <option value="Display / OLED Screen Replacement">
+                <option value="Battery Replacement">
+                <option value="Charging Port & Type-C Repair">
+                <option value="Laser Back Glass Replacement">
+                <option value="Camera Lens & Sensor Repair">
+                <option value="Water Damage Ultrasonic Cleaning">
+                <option value="Logic Board / Not Powering On">
+                <option value="Face ID / Touch ID Repair">
+                <option value="Speaker / Mic Issue">
+              </datalist>
             </div>
 
             <!-- Lab Quality Perks (Transparent & Customer-friendly) -->
@@ -351,7 +349,7 @@
                   <span style="color:#22c55e;">✓</span> <span><b>30-45 Mins</b> Turnaround</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#22c55e;">✓</span> <span><b>Up to 6-Mo</b> Warranty</span>
+                  <span style="color:#22c55e;">✓</span> <span><b>All Brands</b> &amp; Models</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:6px;">
                   <span style="color:#22c55e;">✓</span> <span><b>Genuine Parts</b> Inspected</span>
@@ -2992,6 +2990,6 @@
   <script src="js/bulk-uploader.js?v=5"></script>
   <script src="js/payment-gateway.js?v=1"></script>
   <script src="js/admin.js?v=22"></script>
-  <script src="js/app.js?v=23"></script>
+  <script src="js/app.js?v=24"></script>
 </body>
 </html>
