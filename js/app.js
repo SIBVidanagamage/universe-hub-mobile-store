@@ -1038,6 +1038,15 @@ const App = {
       });
     }
 
+    // Ensure iPhones appear first, followed by premium accessories
+    filtered.sort((a, b) => {
+      const aIsPhone = (a.category && a.category.includes("iphone")) || (a.mainCategory === "iphones");
+      const bIsPhone = (b.category && b.category.includes("iphone")) || (b.mainCategory === "iphones");
+      if (aIsPhone && !bIsPhone) return -1;
+      if (!aIsPhone && bIsPhone) return 1;
+      return 0;
+    });
+
     if (filtered.length === 0) {
       container.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
@@ -1095,7 +1104,7 @@ const App = {
 
           <div class="card-details">
             <div class="card-rating-row">
-              ★ <b>${prod.rating.toFixed(1)}</b> <span>(${prod.reviewsCount})</span>
+              ★ <b>${(Number(prod.rating) || 5.0).toFixed(1)}</b> <span>(${prod.reviewsCount !== undefined ? prod.reviewsCount : (prod.reviews || 0)})</span>
             </div>
 
             <h3 class="card-title" title="${prod.name}" onclick="App.openQuickView('${prod.id}')">${prod.name}</h3>
