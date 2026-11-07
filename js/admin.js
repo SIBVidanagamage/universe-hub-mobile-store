@@ -1837,12 +1837,15 @@ const AdminController = {
           <td><span class="badge-pill" style="background:rgba(59,130,246,0.15); color:#60a5fa;">${ord.method || 'Courier'}</span></td>
           <td style="color:var(--text-muted); font-size:12px;">${ord.date || 'Recent'}</td>
           <td>
-            <div style="display:flex; gap:6px;">
+            <div style="display:flex; gap:6px; align-items:center;">
               <button type="button" class="btn-invoice-download" onclick="InvoiceService.showInvoice('${ord.id}')" style="padding:4px 8px; font-size:11px;" title="View &amp; Print Official Tax Invoice">
                 📄 Invoice
               </button>
               <button type="button" class="btn-invoice-print" onclick="InvoiceService.showInvoice('${ord.id}'); setTimeout(() => InvoiceService.downloadPDF('${ord.id}'), 300);" style="padding:4px 8px; font-size:11px;" title="1-Click Download A4 PDF">
                 📥 PDF
+              </button>
+              <button type="button" onclick="AdminController.promptDeleteOrder('${ord.id}')" style="padding:4px 8px; font-size:11px; background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:6px; cursor:pointer; font-weight:700; transition:all 0.2s ease;" title="Delete this order record" onmouseover="this.style.background='rgba(239,68,68,0.3)'" onmouseout="this.style.background='rgba(239,68,68,0.15)'">
+                🗑️ Delete
               </button>
             </div>
           </td>
@@ -1978,6 +1981,9 @@ const AdminController = {
     if (adminEmailInput) adminEmailInput.value = adminCfg.email || "shashikaisuranga143@gmail.com";
     const adminPassInput = document.getElementById("admin-cfg-password");
     if (adminPassInput) adminPassInput.value = adminCfg.password || "Kumudinikumari@0709";
+
+    const deletePinInput = document.getElementById("admin-order-delete-pin");
+    if (deletePinInput) deletePinInput.value = settings.orderDeletePin || "1234";
 
     // Bind Dropzones once
     if (!this.hasBoundStoreEvents) {
@@ -2622,6 +2628,7 @@ const AdminController = {
     const aboutH = document.getElementById("admin-about-heading")?.value.trim() || settings.aboutHeading;
     const aboutS = document.getElementById("admin-about-story")?.value.trim() || settings.aboutStory;
     const aboutM = document.getElementById("admin-about-mission")?.value.trim() || settings.aboutMission;
+    const deletePinVal = document.getElementById("admin-order-delete-pin")?.value.trim() || settings.orderDeletePin || "1234";
 
     // Clean phone number for WhatsApp link
     const cleanDigits = (waVal || phoneVal || "0740219239").replace(/[^0-9]/g, "");
@@ -2643,6 +2650,7 @@ const AdminController = {
     settings.aboutHeading = aboutH;
     settings.aboutStory = aboutS;
     settings.aboutMission = aboutM;
+    settings.orderDeletePin = deletePinVal;
 
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
@@ -2707,6 +2715,107 @@ const AdminController = {
     if (!silent) {
       showToast("🔒 Admin Security Password updated successfully!");
     }
+  },
+
+  // 6. ORDER DELETION SECURITY PIN & HIDE/SEE CONTROLLER
+  pendingDeleteOrderId: null,
+
+  togglePinVisibility(inputId, btnEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === "password") {
+      input.type = "text";
+      if (btnEl) btnEl.textContent = "🙈";
+    } else {
+      input.type = "password";
+      if (btnEl) btnEl.textContent = "👁️";
+    }
+  },
+
+  promptDeleteOrder(orderId) {
+    if (!orderId) return;
+    this.pendingDeleteOrderId = orderId;
+    const label = document.getElementById("delete-order-id-label");
+    if (label) label.textContent = `#${orderId}`;
+
+    const pinInput = document.getElementById("order-delete-verify-pin");
+    if (pinInput) {
+      pinInput.value = "";
+      pinInput.type = "password";
+    }
+    const errBox = document.getElementById("order-delete-error");
+    if (errBox) errBox.style.display = "none";
+
+    if (window.App && typeof App.openModal === "function") {
+      App.openModal("admin-order-delete-modal");
+    } else {
+      const modal = document.getElementById("admin-order-delete-modal");
+      if (modal) modal.classList.add("active");
+    }
+    setTimeout(() => {
+      const pinInp = document.getElementById("order-delete-verify-pin");
+      if (pinInp) pinInp.focus();
+    }, 150);
+  },
+
+  closeOrderDeleteModal() {
+    this.pendingDeleteOrderId = null;
+    if (window.App && typeof App.closeModal === "function") {
+      App.closeModal("admin-order-delete-modal");
+    } else {
+      const modal = document.getElementById("admin-order-delete-modal");
+      if (modal) modal.classList.remove("active");
+    }
+  },
+
+  executeDeleteOrder() {
+    if (!this.pendingDeleteOrderId) return;
+    const orderId = this.pendingDeleteOrderId;
+
+    const enteredPin = document.getElementById("order-delete-verify-pin")?.value.trim() || "";
+    const settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== "undefined" ? DEFAULT_STORE_SETTINGS : {});
+    const expectedPin = (settings.orderDeletePin || "1234").trim();
+
+    let adminCfg = {};
+    try {
+      const savedAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
+      if (savedAdmin) adminCfg = JSON.parse(savedAdmin);
+    } catch (e) {}
+    const adminPass = (adminCfg.password || "Kumudinikumari@0709").trim();
+
+    if (enteredPin !== expectedPin && enteredPin !== adminPass) {
+      const errBox = document.getElementById("order-delete-error");
+      if (errBox) {
+        errBox.style.display = "block";
+        errBox.textContent = "⚠️ Incorrect Security PIN! Please enter the correct PIN configured in Store & Hero Banner settings.";
+      }
+      const pinInp = document.getElementById("order-delete-verify-pin");
+      if (pinInp) {
+        pinInp.select();
+        pinInp.focus();
+      }
+      return;
+    }
+
+    // Valid PIN - Delete from LocalStorage
+    let orders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
+    orders = orders.filter(o => String(o.id) !== String(orderId) && String(o.orderNumber) !== String(orderId));
+    localStorage.setItem("UH_ORDERS", JSON.stringify(orders));
+
+    if (typeof DEMO_STORE_ORDERS !== "undefined") {
+      const idx = DEMO_STORE_ORDERS.findIndex(o => String(o.id) === String(orderId));
+      if (idx !== -1) DEMO_STORE_ORDERS.splice(idx, 1);
+    }
+
+    // Sync delete to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.deleteOrder === "function") {
+      window.SupabaseSync.deleteOrder(orderId);
+    }
+
+    this.closeOrderDeleteModal();
+    showToast(`🗑️ Order #${orderId} deleted successfully!`);
+    this.renderOrdersTable();
+    this.renderStats();
   }
 };
 

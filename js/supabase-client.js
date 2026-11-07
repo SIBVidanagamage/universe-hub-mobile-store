@@ -265,6 +265,10 @@
           } else if (item.action === "create_order") {
             const { error } = await this.client.from("orders").insert([item.payload]);
             if (error) remaining.push(item);
+          } else if (item.action === "delete_order") {
+            const ordId = String(item.payload?.id || item.payload);
+            const { error } = await this.client.from("orders").delete().eq("id", ordId);
+            if (error) remaining.push(item);
           } else if (item.action === "create_repair") {
             const { error } = await this.client.from("repair_orders").insert([item.payload]);
             if (error) remaining.push(item);
@@ -560,6 +564,26 @@
         this.enqueueSync("create_order", payload);
       }
       return order;
+    },
+
+    async deleteOrder(orderId) {
+      if (!orderId) return;
+      const strId = String(orderId);
+      let localOrders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
+      localOrders = localOrders.filter(o => String(o.id) !== strId && String(o.orderNumber) !== strId);
+      localStorage.setItem("UH_ORDERS", JSON.stringify(localOrders));
+
+      if (this.isConnected && this.client) {
+        try {
+          const { error } = await this.client.from("orders").delete().eq("id", strId);
+          if (error) this.enqueueSync("delete_order", { id: strId });
+          else console.log("⚡ [Supabase] Order deleted from cloud:", strId);
+        } catch (e) {
+          this.enqueueSync("delete_order", { id: strId });
+        }
+      } else {
+        this.enqueueSync("delete_order", { id: strId });
+      }
     },
 
     // --- REPAIRS SYNC ---
