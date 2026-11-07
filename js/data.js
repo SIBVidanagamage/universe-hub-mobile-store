@@ -1101,7 +1101,7 @@ function initDatabase() {
         parsed.whatsappLink = DEFAULT_STORE_SETTINGS.whatsappLink;
         updated = true;
       }
-      if (!parsed.email) {
+      if (!parsed.email || parsed.email.includes("contact@universehub")) {
         parsed.email = DEFAULT_STORE_SETTINGS.email;
         updated = true;
       }
@@ -1160,7 +1160,7 @@ const DEFAULT_STORE_SETTINGS = {
   phone: "074-0219239",
   whatsapp: "074-0219239",
   whatsappLink: "https://wa.me/94740219239?text=Hello%20Universe%20Hub,%20I%20have%20an%20inquiry%20regarding%20iPhone%20/%20accessories",
-  email: "contact@universehub.store",
+  email: "universehubstore00@gmail.com",
   address: "188/8c, High Level Road, Maharagama",
   locationShort: "Maharagama Flagship Store",
   openingHours: "Open Daily: 9:30 AM – 8:30 PM",

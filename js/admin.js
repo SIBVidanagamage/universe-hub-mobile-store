@@ -1947,7 +1947,7 @@ const AdminController = {
     if (waInput) waInput.value = settings.whatsapp || "074-0219239";
 
     const emailInput = document.getElementById("admin-store-email");
-    if (emailInput) emailInput.value = settings.email || "contact@universehub.lk";
+    if (emailInput) emailInput.value = settings.email || "universehubstore00@gmail.com";
 
     const hoursInput = document.getElementById("admin-store-hours");
     if (hoursInput) hoursInput.value = settings.openingHours || "Open Daily: 9:30 AM – 8:30 PM";
@@ -2615,7 +2615,7 @@ const AdminController = {
     const nameVal = document.getElementById("admin-store-name")?.value.trim() || settings.storeName;
     const phoneVal = document.getElementById("admin-store-phone")?.value.trim() || settings.phone;
     const waVal = document.getElementById("admin-store-whatsapp")?.value.trim() || settings.whatsapp;
-    const emailVal = document.getElementById("admin-store-email")?.value.trim() || settings.email || "contact@universehub.store";
+    const emailVal = document.getElementById("admin-store-email")?.value.trim() || settings.email || "universehubstore00@gmail.com";
     const hoursVal = document.getElementById("admin-store-hours")?.value.trim() || settings.openingHours;
     const addrVal = document.getElementById("admin-store-address")?.value.trim() || settings.address;
     const mapsVal = document.getElementById("admin-store-maps")?.value.trim() || settings.googleMapsUrl || "https://maps.app.goo.gl/r1BY5dMznxRunVC58";
