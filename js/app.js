@@ -1916,10 +1916,23 @@ const App = {
     const card = document.getElementById("track-result-container");
     if (!code || !card) return;
 
-    let repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || (typeof DEMO_REPAIR_ORDERS !== 'undefined' ? DEMO_REPAIR_ORDERS : []);
-    let record = repairs.find(r => (r.trackingCode || '').toUpperCase() === code || (r.id || '').toUpperCase() === code);
+    let repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
+    let record = repairs.find(r => 
+      (r.trackingCode || '').toUpperCase() === code || 
+      (r.ticketNumber || '').toUpperCase() === code || 
+      (r.id || '').toUpperCase() === code
+    );
 
-    // If not found in localStorage, attempt Supabase Cloud Query
+    // Fallback to DEMO_REPAIR_ORDERS if not found in custom repairs
+    if (!record && typeof DEMO_REPAIR_ORDERS !== 'undefined' && Array.isArray(DEMO_REPAIR_ORDERS)) {
+      record = DEMO_REPAIR_ORDERS.find(r => 
+        (r.trackingCode || '').toUpperCase() === code || 
+        (r.ticketNumber || '').toUpperCase() === code || 
+        (r.id || '').toUpperCase() === code
+      );
+    }
+
+    // If not found in localStorage or demo, attempt Supabase Cloud Query
     if (!record && window.SupabaseSync && window.SupabaseSync.client && window.SupabaseSync.isConnected) {
       try {
         const { data } = await window.SupabaseSync.client
