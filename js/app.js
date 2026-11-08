@@ -67,6 +67,14 @@ const App = {
       window.SupabaseSync.fetchOrders();
     }
 
+    // If this device has deleted products tracked, purge them from cloud so mobile devices match
+    try {
+      const localDel = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+      if (localDel && localDel.length > 0 && window.SupabaseSync && typeof window.SupabaseSync.syncLocalCatalogToCloud === "function") {
+        window.SupabaseSync.syncLocalCatalogToCloud();
+      }
+    } catch (e) {}
+
     // Check if URL has admin hash
     if (window.location.hash === "#admin") {
       if (this.currentUser && this.currentUser.role === "admin") {

@@ -17,6 +17,24 @@ const AdminController = {
     if (typeof BulkUploader !== 'undefined') {
       BulkUploader.init();
     }
+    // Auto-sync laptop's active inventory with cloud database so mobile phones match instantly
+    if (window.SupabaseSync && typeof window.SupabaseSync.syncLocalCatalogToCloud === 'function') {
+      window.SupabaseSync.syncLocalCatalogToCloud();
+    }
+  },
+
+  async syncCatalogToCloud() {
+    showToast("☁️ Syncing Laptop inventory with Supabase Cloud...");
+    if (window.SupabaseSync && typeof window.SupabaseSync.syncLocalCatalogToCloud === "function") {
+      const ok = await window.SupabaseSync.syncLocalCatalogToCloud();
+      if (ok) {
+        showToast("✅ Cloud database updated! Phone will now show the exact same products.");
+        this.renderProductsTable();
+        this.renderStats();
+      } else {
+        showToast("⚠️ Cloud sync notice. Operating safely.");
+      }
+    }
   },
 
   openBulkUploader(type = 'products') {

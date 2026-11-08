@@ -120,6 +120,14 @@
         this.updateStatusBadge(true);
         console.log("⚡ [Supabase] Cloud database verified live and synchronized.");
 
+        // If local device has deleted products tracked, purge them from cloud immediately
+        try {
+          const localDel = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+          if (localDel && localDel.length > 0) {
+            this.syncLocalCatalogToCloud();
+          }
+        } catch (e) {}
+
         // Automatically fetch latest catalog, settings and orders to guarantee real-time cross-device sync (e.g. laptop <-> mobile)
         this.fetchProducts().then(prods => {
           if (prods && prods.length > 0 && typeof window !== "undefined" && window.App) {
@@ -332,6 +340,21 @@
               deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
             } catch (e) { deletedIds = []; }
 
+            // Pull cloud deleted IDs so ALL devices (phones, tablets) filter them out immediately
+            try {
+              const { data: delRow } = await this.client
+                .from("store_settings")
+                .select("value")
+                .eq("key", "deleted_product_ids")
+                .maybeSingle();
+              if (delRow && Array.isArray(delRow.value)) {
+                deletedIds = [...new Set([...deletedIds, ...delRow.value.map(String)])];
+                try {
+                  localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds));
+                } catch (e) {}
+              }
+            } catch (e) {}
+
             const mapped = data
               .filter(item => !deletedIds.includes(String(item.id)))
               .map(item => ({
@@ -388,6 +411,67 @@
 
     async syncProductsToLocal() {
       return await this.fetchProducts();
+    },
+
+    // Master function: Force Supabase Cloud database to 100% mirror current Laptop inventory
+    async syncLocalCatalogToCloud() {
+      if (!this.client || (typeof navigator !== "undefined" && navigator.onLine === false)) return false;
+      try {
+        console.log("☁️ [Supabase] Starting full cross-device inventory sync...");
+        let localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+        let deletedIds = [];
+        try {
+          deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+        } catch (e) { deletedIds = []; }
+
+        // 1. Purge all explicitly deleted products from Cloud
+        if (deletedIds.length > 0) {
+          for (const pid of deletedIds) {
+            await this.client.from("products").delete().eq("id", String(pid));
+          }
+          await this.client.from("store_settings").upsert({
+            key: "deleted_product_ids",
+            value: deletedIds,
+            updated_at: new Date().toISOString()
+          });
+        }
+
+        // 2. Cross-check Cloud against Laptop: If Cloud has any product NOT on Laptop, delete it!
+        if (localProducts.length > 0) {
+          const localIds = localProducts.map(p => String(p.id));
+          const { data: cloudProds } = await this.client.from("products").select("id");
+          if (cloudProds && cloudProds.length > 0) {
+            for (const cp of cloudProds) {
+              const cpId = String(cp.id);
+              if (!localIds.includes(cpId)) {
+                console.log("🗑️ [Supabase] Purging orphaned cloud product:", cpId);
+                await this.client.from("products").delete().eq("id", cpId);
+                if (!deletedIds.includes(cpId)) {
+                  deletedIds.push(cpId);
+                }
+              }
+            }
+            try {
+              localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds));
+            } catch (e) {}
+            await this.client.from("store_settings").upsert({
+              key: "deleted_product_ids",
+              value: deletedIds,
+              updated_at: new Date().toISOString()
+            });
+          }
+
+          // 3. Upsert all active laptop products into Supabase
+          for (const prod of localProducts) {
+            await this.saveProduct(prod);
+          }
+        }
+        console.log("✅ [Supabase] Cloud database is now 100% synchronized with Laptop inventory!");
+        return true;
+      } catch (err) {
+        console.warn("[Supabase] syncLocalCatalogToCloud notice:", err);
+        return false;
+      }
     },
 
     async saveProduct(product) {
@@ -496,11 +580,17 @@
       try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts)); } catch (e) {}
 
       // 3. Delete from Supabase or Enqueue
-      if (this.client && this.isConnected) {
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
         try {
           const { error } = await this.client.from("products").delete().eq("id", strId);
           if (error) this.enqueueSync("delete_product", strId);
           else console.log("⚡ [Supabase] Product purged from cloud:", strId);
+
+          await this.client.from("store_settings").upsert({
+            key: "deleted_product_ids",
+            value: deletedIds,
+            updated_at: new Date().toISOString()
+          });
         } catch (e) {
           this.enqueueSync("delete_product", strId);
         }

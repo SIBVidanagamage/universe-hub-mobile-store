@@ -687,6 +687,9 @@
               <p style="font-size:12.5px; color:var(--text-secondary); margin:3px 0 0 0;">Add single items manually or use bulk CSV import to add hundreds instantly.</p>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn-primary-glow" style="padding:8px 14px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; background:#0ea5e9; box-shadow:0 0 16px rgba(14,165,233,0.35);" onclick="window.AdminController && AdminController.syncCatalogToCloud()" title="Forces Supabase Cloud database to delete all products you deleted on this laptop, so your mobile phone updates instantly">
+                ☁️ Sync Inventory to Cloud (Phone Sync)
+              </button>
               <button type="button" id="btn-admin-bulk-upload-prod" class="btn-primary-glow" style="padding:8px 14px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;" onclick="window.BulkUploader ? BulkUploader.openModal('products') : (window.AdminController && AdminController.openBulkUploader('products'))">
                 ⚡ Bulk Upload Products (CSV)
               </button>
@@ -2982,14 +2985,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=18"></script>
-  <script src="js/supabase-client.js?v=8"></script>
+  <script src="js/data.js?v=19"></script>
+  <script src="js/supabase-client.js?v=9"></script>
   <script src="js/notification-service.js?v=4"></script>
   <script src="js/invoice.js?v=3"></script>
   <script src="js/uploader.js?v=12"></script>
   <script src="js/bulk-uploader.js?v=5"></script>
   <script src="js/payment-gateway.js?v=1"></script>
-  <script src="js/admin.js?v=23"></script>
-  <script src="js/app.js?v=27"></script>
+  <script src="js/admin.js?v=24"></script>
+  <script src="js/app.js?v=28"></script>
 </body>
 </html>
