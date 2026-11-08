@@ -190,600 +190,37 @@ const INITIAL_BRANDS = [
 ];
 
 const INITIAL_PRODUCTS = [
-  // --- IPHONES: BRAND NEW ---
   {
-    id: "prod-ip18pm",
-    name: "Apple iPhone 18 Pro Max 512GB - Crimson & Frost Titanium",
-    brand: "Apple",
+    id: "prod-1794121290955",
+    name: "iphone 13 pro max",
+    title: "iphone 13 pro max",
+    slug: "prod-1794121290955",
+    category: "used-iphones",
     mainCategory: "iphones",
-    category: "brand-new-iphones",
-    subCategory: "brand-new",
-    condition: "Brand New",
-    conditionBadge: "Brand New 2026",
-    batteryHealth: 100,
-    price: 520000,
-    originalPrice: 560000,
-    discount: "7% OFF",
-    rating: 5.0,
-    reviewsCount: 19,
+    subCategory: "used",
+    brand: "Apple",
+    price: 145000,
+    originalPrice: 150000,
+    badge: "85% Battery",
+    isFeatured: true,
     stock: 5,
-    isFeatured: true,
-    warranty: "1 Year Official Apple Care + 1 Year Store Care",
-    image: "assets/iphone18_showcase.jpg",
-    images: [
-      "assets/iphone18_showcase.jpg",
-      "assets/hero_showcase.jpg"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["Apple A19 Bionic", "512GB", "Visor Quad-Camera", "Next-Gen Titanium"],
-    description: "Next-generation Apple iPhone 18 Pro Max featuring the aerospace-grade titanium chassis with all-new horizontal camera visor system, 200MP Fusion sensor, ultra-long battery life, and high-speed GaN compatibility."
-  },
-  {
-    id: "prod-ip16pm",
-    name: "Apple iPhone 16 Pro Max 256GB - Desert Titanium",
-    mainCategory: "iphones",
-    category: "brand-new-iphones",
-    subCategory: "brand-new",
-    condition: "Brand New",
-    conditionBadge: "Brand New",
-    batteryHealth: 100,
-    price: 435000,
-    originalPrice: 465000,
-    discount: "6% OFF",
-    rating: 5.0,
-    reviewsCount: 42,
-    stock: 12,
-    isFeatured: true,
-    warranty: "1 Year Apple Care + 1 Year Hardware",
-    image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80",
-      "assets/hero_showcase.jpg",
-      "assets/cases_banner.jpg"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["Apple A18 Pro", "256GB", "Titanium", "5x Telephoto"],
-    description: "Brand new sealed Apple iPhone 16 Pro Max with Camera Control button, 48MP Fusion camera system, and ultra-durable Titanium design. Official TRCSL Approved."
-  },
-  {
-    id: "prod-ip16p",
-    name: "Apple iPhone 16 Pro 128GB - Natural Titanium",
-    mainCategory: "iphones",
-    category: "brand-new-iphones",
-    subCategory: "brand-new",
-    condition: "Brand New",
-    conditionBadge: "Brand New",
-    batteryHealth: 100,
-    price: 369000,
-    originalPrice: 395000,
-    discount: "7% OFF",
-    rating: 4.9,
-    reviewsCount: 38,
-    stock: 8,
-    isFeatured: true,
-    warranty: "1 Year Apple Care Official",
-    image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=800&q=80",
-      "assets/hero_showcase.jpg"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["A18 Pro", "128GB", "ProMotion 120Hz", "USB-C 3.0"],
-    description: "Sealed box iPhone 16 Pro in sleek Natural Titanium finish with pro-grade video recording and 48MP Ultra Wide sensor."
-  },
-  {
-    id: "prod-ip15p",
-    name: "Apple iPhone 15 Pro 128GB - Blue Titanium",
-    mainCategory: "iphones",
-    category: "brand-new-iphones",
-    subCategory: "brand-new",
-    condition: "Brand New",
-    conditionBadge: "Brand New",
-    batteryHealth: 100,
-    price: 310000,
-    originalPrice: 345000,
-    discount: "10% OFF",
-    rating: 4.8,
-    reviewsCount: 65,
-    stock: 5,
-    isFeatured: true,
-    warranty: "1 Year Store Warranty",
-    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80",
-      "assets/hero_showcase.jpg"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["A17 Pro", "Titanium Frame", "Action Button"],
-    description: "Flagship performance powered by A17 Pro 3nm chip. Brand new genuine unit with full accessory kit."
-  },
-
-  // --- IPHONES: CERTIFIED USED ---
-  {
-    id: "prod-used-ip13",
-    name: "Apple iPhone 13 (Certified Pre-Owned)",
-    brand: "Apple",
-    mainCategory: "iphones",
-    category: "used-iphones",
-    subCategory: "used",
-    condition: "Grade A (95%-98% Clean)",
-    conditionBadge: "88% - 93% Battery",
-    batteryHealth: "88% - 93%",
-    price: 139000,
-    originalPrice: 155000,
-    discount: "Grade A Clean",
-    rating: 4.9,
-    reviewsCount: 52,
-    stock: 5,
-    isFeatured: true,
-    warranty: "6 Months Physical Store Warranty + 1 Month Checking",
-    image: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    storageOptions: [
-      { capacity: "128GB", price: 139000, originalPrice: 155000 },
-      { capacity: "256GB", price: 154000, originalPrice: 170000 },
-      { capacity: "512GB", price: 172000, originalPrice: 189000 }
-    ],
-    colorOptions: ["Midnight / Black", "Starlight / Silver", "Blue", "Pink", "Green", "Product RED"],
-    tags: ["Grade A (95%-98%)", "88%-93% Battery", "3uTools 100% Score", "Original OLED"],
-    description: "Certified Grade A iPhone 13 with pristine cosmetic condition (95% - 98% super clean). True Tone, Face ID, and cameras 100% operational. Choose your storage and color."
-  },
-  {
-    id: "prod-used-ip14pm",
-    name: "Apple iPhone 14 Pro Max (Certified Pre-Owned)",
-    brand: "Apple",
-    mainCategory: "iphones",
-    category: "used-iphones",
-    subCategory: "used",
-    condition: "Grade A+ (99% Mint)",
-    conditionBadge: "94% - 97% Battery",
-    batteryHealth: "94% - 97%",
-    price: 230000,
-    originalPrice: 260000,
-    discount: "Grade A+ Mint",
-    rating: 4.9,
-    reviewsCount: 89,
-    stock: 4,
-    isFeatured: true,
-    warranty: "6 Months Physical Store Warranty + 1 Month Checking",
-    image: "https://images.unsplash.com/photo-1663499482523-1c0c1bae4ce1?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1663499482523-1c0c1bae4ce1?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    storageOptions: [
-      { capacity: "128GB", price: 230000, originalPrice: 260000 },
-      { capacity: "256GB", price: 245000, originalPrice: 280000 },
-      { capacity: "512GB", price: 265000, originalPrice: 298000 },
-      { capacity: "1TB", price: 285000, originalPrice: 320000 }
-    ],
-    colorOptions: ["Space Black", "Deep Purple", "Starlight / Silver", "Gold"],
-    tags: ["Grade A+ (99% Mint)", "Space Black", "Deep Purple", "ProMotion 120Hz"],
-    description: "Meticulously inspected by Universe Hub technicians. 100% original OLED screen, True Tone & Face ID active. Zero scratches."
-  },
-  {
-    id: "prod-used-ip13p",
-    name: "Apple iPhone 13 Pro (Certified Pre-Owned)",
-    brand: "Apple",
-    mainCategory: "iphones",
-    category: "used-iphones",
-    subCategory: "used",
-    condition: "Grade A (95%-98% Clean)",
-    conditionBadge: "89% - 93% Battery",
-    batteryHealth: "89% - 93%",
-    price: 185000,
-    originalPrice: 210000,
-    discount: "Grade A Clean",
-    rating: 4.8,
-    reviewsCount: 74,
-    stock: 6,
-    isFeatured: true,
-    warranty: "6 Months Physical Store Warranty",
-    image: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1663499482523-1c0c1bae4ce1?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    storageOptions: [
-      { capacity: "128GB", price: 185000, originalPrice: 210000 },
-      { capacity: "256GB", price: 200000, originalPrice: 225000 },
-      { capacity: "512GB", price: 218000, originalPrice: 245000 }
-    ],
-    colorOptions: ["Sierra Blue", "Midnight / Black", "Starlight / Silver", "Gold", "Alpine Green"],
-    tags: ["Grade A Clean", "Sierra Blue", "ProMotion 120Hz", "Dual SIM"],
-    description: "Popular Sierra Blue finish. Factory unlocked, flawless cameras and speakers. Free 9H tempered glass pre-installed!"
-  },
-  {
-    id: "prod-used-ip12",
-    name: "Apple iPhone 12 128GB - Purple Edition (Used)",
-    mainCategory: "iphones",
-    category: "used-iphones",
-    subCategory: "used",
-    condition: "Used - Grade A",
-    conditionBadge: "88% Battery",
-    batteryHealth: 88,
-    price: 119000,
-    originalPrice: 135000,
-    discount: "Budget Pick",
-    rating: 4.7,
-    reviewsCount: 92,
-    stock: 9,
-    isFeatured: false,
-    warranty: "3 Months Store Warranty",
-    image: "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["Purple", "88% Battery", "MagSafe Ready", "Super Retina"],
-    description: "Great condition certified pre-owned iPhone 12. Ideal daily driver with 5G connectivity and vibrant OLED display."
-  },
-  {
-    id: "prod-used-ip11",
-    name: "Apple iPhone 11 128GB - Black (Clean Used)",
-    mainCategory: "iphones",
-    category: "used-iphones",
-    subCategory: "used",
-    condition: "Used - Grade A",
-    conditionBadge: "87% Battery",
-    batteryHealth: 87,
-    price: 89000,
-    originalPrice: 105000,
-    discount: "Special Deal",
-    rating: 4.7,
-    reviewsCount: 110,
-    stock: 11,
-    isFeatured: false,
-    warranty: "3 Months Store Warranty",
-    image: "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["128GB", "Dual Camera", "Night Mode", "Unlocked"],
-    description: "Tested and guaranteed fully functional. All original parts, ideal for school, work or backup phone."
-  },
-
-  // --- ACCESSORIES: BACK COVERS & CASES ---
-  {
-    id: "prod-case-magsafe",
-    name: "Spigen Ultra Hybrid MagSafe Crystal Clear Case (iPhone 16 / 15 Series)",
-    mainCategory: "accessories",
-    category: "back-covers",
-    subCategory: "cases",
-    condition: "Brand New",
-    conditionBadge: "Original Spigen",
-    batteryHealth: null,
-    price: 6490,
-    originalPrice: 7990,
-    discount: "18% OFF",
-    rating: 4.9,
-    reviewsCount: 156,
-    stock: 45,
-    isFeatured: true,
-    warranty: "Lifetime Yellowing Guarantee",
-    image: "assets/cases_banner.jpg",
-    images: [
-      "assets/cases_banner.jpg",
-      "assets/hero_showcase.jpg",
-      "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["Anti-Yellowing", "MagSafe Ring", "Air Cushion Drop Protection"],
-    description: "Military-grade drop certified clear case with integrated strong neodymium magnets for flawless MagSafe accessories."
-  },
-  {
-    id: "prod-case-carbon",
-    name: "Aramid Carbon Fiber Sleek Protective Case (iPhone 16 Pro Max / 15 Pro)",
-    mainCategory: "accessories",
-    category: "back-covers",
-    subCategory: "cases",
-    condition: "Brand New",
-    conditionBadge: "Ultra Slim",
-    batteryHealth: null,
-    price: 7990,
-    originalPrice: 9500,
-    discount: "15% OFF",
-    rating: 4.8,
-    reviewsCount: 84,
-    stock: 25,
-    isFeatured: false,
-    warranty: "6 Months Warranty",
-    image: "assets/cases_banner.jpg",
-    images: [
-      "assets/cases_banner.jpg",
-      "https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["Real 1500D Carbon", "0.6mm Slim", "Matte Grip"],
-    description: "Aerospace-grade authentic carbon fiber case. Incredibly lightweight with a smooth textured matte grip."
-  },
-
-  // --- ACCESSORIES: FAST CHARGERS & GAN ---
-  {
-    id: "prod-charger-65w",
-    name: "Anker Nano II 65W GaN Fast Dual Wall Charger (USB-C + USB-A)",
-    mainCategory: "accessories",
-    category: "chargers",
-    subCategory: "chargers",
-    condition: "Brand New",
-    conditionBadge: "65W GaN",
-    batteryHealth: null,
-    price: 11990,
-    originalPrice: 14500,
-    discount: "17% OFF",
-    rating: 5.0,
-    reviewsCount: 210,
-    stock: 35,
-    isFeatured: true,
-    warranty: "18 Months Anker Official Warranty",
-    image: "assets/chargers_banner.jpg",
-    images: [
-      "assets/chargers_banner.jpg",
-      "assets/hero_showcase.jpg",
-      "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["GaN III Tech", "Fast Charge 50% in 20min", "MacBook & iPhone Compatible"],
-    description: "Ultra-compact GaN fast charger. Powers iPhone, iPad and MacBook simultaneously with dynamic temperature control."
-  },
-  {
-    id: "prod-pb-20k",
-    name: "Baseus Blade 20,000mAh 65W Slim Fast Power Bank with LED Display",
-    mainCategory: "accessories",
-    category: "chargers",
-    subCategory: "chargers",
-    condition: "Brand New",
-    conditionBadge: "20,000mAh",
-    batteryHealth: null,
-    price: 18900,
-    originalPrice: 22500,
-    discount: "16% OFF",
-    rating: 4.9,
-    reviewsCount: 78,
-    stock: 18,
-    isFeatured: true,
-    warranty: "1 Year Store Warranty",
-    image: "assets/chargers_banner.jpg",
-    images: [
-      "assets/chargers_banner.jpg",
-      "https://images.unsplash.com/photo-1609592424317-2993fb6bc120?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["65W Bi-directional", "Digital Wattage Display", "Airline Approved"],
-    description: "Slim profile power bank capable of charging laptops, iPhones and Android flagships on the go."
-  },
-
-  // --- ACCESSORIES: CHARGING CABLES ---
-  {
-    id: "prod-cable-braided",
-    name: "Braided 240W Type-C to Type-C Ultra-Durable Fast Cable (2m)",
-    mainCategory: "accessories",
-    category: "cables",
-    subCategory: "cables",
-    condition: "Brand New",
-    conditionBadge: "240W Power",
-    batteryHealth: null,
-    price: 2990,
-    originalPrice: 3800,
-    discount: "21% OFF",
-    rating: 4.8,
-    reviewsCount: 95,
-    stock: 60,
-    isFeatured: true,
-    warranty: "1 Year Replacement Warranty",
-    image: "assets/chargers_banner.jpg",
-    images: [
-      "assets/chargers_banner.jpg",
-      "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["240W PD 3.1", "Nylon Armor", "Aluminum Plugs"],
-    description: "Bend-tested up to 30,000 cycles. Supports high-speed data transfer and 240W ultra-fast charging."
-  },
-
-  // --- ACCESSORIES: TEMPERED GLASS & SCREEN PROTECTORS ---
-  {
-    id: "prod-glass-9h",
-    name: "9H Sapphire Tempered Glass Screen Protector with Auto-Dust Tray",
-    mainCategory: "accessories",
-    category: "tempered-glass",
-    subCategory: "tempered",
-    condition: "Brand New",
-    conditionBadge: "Free In-Store Fit",
-    batteryHealth: null,
-    price: 2490,
-    originalPrice: 3200,
-    discount: "22% OFF",
-    rating: 4.8,
-    reviewsCount: 310,
-    stock: 120,
-    isFeatured: false,
-    warranty: "Free Installation at Physical Store",
-    image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["Auto Alignment", "Oleophobic Coating", "Edge-to-Edge"],
-    description: "Zero bubbles guarantee. Bring to our Universe Hub physical store for complimentary free precision machine fitting."
-  },
-
-  // --- ACCESSORIES: CAMERA LENS PROTECTORS ---
-  {
-    id: "prod-cam-lens",
-    name: "ESR Armorite Titanium Camera Lens Protector (iPhone 16 / 15 Pro Max)",
-    mainCategory: "accessories",
-    category: "camera-protectors",
-    subCategory: "camera-lens",
-    condition: "Brand New",
-    conditionBadge: "Titanium Ring",
-    batteryHealth: null,
-    price: 3490,
-    originalPrice: 4500,
-    discount: "22% OFF",
-    rating: 4.9,
-    reviewsCount: 68,
-    stock: 40,
-    isFeatured: true,
-    warranty: "Scratch-Proof Guarantee",
-    image: "assets/cases_banner.jpg",
-    images: [
-      "assets/cases_banner.jpg",
-      "assets/hero_showcase.jpg"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["Individual Lens Rings", "Anti-Reflective Night Shot", "9H Hardness"],
-    description: "Aviation-grade alloy edge with 9H tempered sapphire glass. Zero flash glare, ultra scratch-proof camera shield."
-  },
-
-  // --- ACCESSORIES: AUDIO & AIRPODS ---
-  {
-    id: "prod-airpods-pro",
-    name: "Apple AirPods Pro (2nd Generation) with Type-C MagSafe Case",
-    mainCategory: "accessories",
-    category: "audio",
-    subCategory: "audio",
-    condition: "Brand New",
-    conditionBadge: "Apple Original",
-    batteryHealth: null,
-    price: 78500,
-    originalPrice: 89000,
-    discount: "Best Audio",
-    rating: 4.9,
-    reviewsCount: 142,
-    stock: 14,
-    isFeatured: true,
-    warranty: "1 Year Apple International Warranty",
-    image: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80",
-      "assets/hero_showcase.jpg"
-    ],
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    tags: ["2x Active Noise Cancellation", "Spatial Audio", "Transparency Mode"],
-    description: "Next-level active noise cancellation, adaptive audio and USB-C MagSafe charging case with precision finding."
-  },
-
-  // --- BRAND SPECIFIC ACCESSORIES (UGREEN, BASEUS, WIWU, ASPER) ---
-  {
-    id: "prod-ugreen-100w",
-    name: "Ugreen Nexode 100W 4-Port GaN Fast Desktop Charger",
-    mainCategory: "accessories",
-    category: "chargers",
-    subCategory: "chargers",
-    brand: "Ugreen",
-    condition: "Brand New",
-    conditionBadge: "100W GaN",
-    batteryHealth: null,
-    price: 16900,
-    originalPrice: 19500,
-    discount: "13% OFF",
-    rating: 5.0,
-    reviewsCount: 88,
-    stock: 22,
-    isFeatured: true,
-    warranty: "1 Year Ugreen Replacement Warranty",
-    image: "assets/chargers_banner.jpg",
-    images: [
-      "assets/chargers_banner.jpg",
-      "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["3x USB-C + 1x USB-A", "GaNFast Tech", "Powers Laptop + Phone"],
-    description: "Official Ugreen Nexode 100W desktop power station. High-efficiency GaN III charging for MacBook, iPhone and iPad simultaneously."
-  },
-  {
-    id: "prod-baseus-cable",
-    name: "Baseus Tungsten Gold 100W Type-C Fast Charging Cable (1.5m)",
-    mainCategory: "accessories",
-    category: "cables",
-    subCategory: "cables",
-    brand: "Baseus",
-    condition: "Brand New",
-    conditionBadge: "100W PD",
-    batteryHealth: null,
-    price: 3200,
-    originalPrice: 4200,
-    discount: "24% OFF",
-    rating: 4.8,
-    reviewsCount: 64,
-    stock: 50,
-    isFeatured: false,
-    warranty: "6 Months Baseus Warranty",
-    image: "assets/chargers_banner.jpg",
-    images: [
-      "assets/chargers_banner.jpg",
-      "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["E-Marker Chip", "Zinc Alloy Plugs", "High-Density Braiding"],
-    description: "Ultra-resilient Baseus cable engineered with high-luster tungsten alloy plugs and 480Mbps fast data transmission."
-  },
-  {
-    id: "prod-wiwu-wallet",
-    name: "WiWU MagSkin Premium Vegan Leather MagSafe Wallet & Kickstand",
-    mainCategory: "accessories",
-    category: "back-covers",
-    subCategory: "cases",
-    brand: "WiWU",
-    condition: "Brand New",
-    conditionBadge: "MagSafe Stand",
-    batteryHealth: null,
-    price: 4800,
-    originalPrice: 6200,
-    discount: "22% OFF",
-    rating: 4.9,
-    reviewsCount: 52,
-    stock: 30,
-    isFeatured: true,
-    warranty: "6 Months WiWU Warranty",
-    image: "assets/cases_banner.jpg",
-    images: [
-      "assets/cases_banner.jpg",
-      "assets/hero_showcase.jpg"
-    ],
-    video: "",
-    tags: ["Holds 3 Cards", "Multi-Angle Kickstand", "N52 Magnets"],
-    description: "Snap-on WiWU MagSafe leather card wallet that folds into an ergonomic portrait or landscape phone stand."
-  },
-  {
-    id: "prod-asper-case",
-    name: "Asper AeroShock Frosted Matte MagSafe Case with Metallic Buttons",
-    mainCategory: "accessories",
-    category: "back-covers",
-    subCategory: "cases",
-    brand: "Asper",
-    condition: "Brand New",
-    conditionBadge: "Matte Grip",
-    batteryHealth: null,
-    price: 5900,
-    originalPrice: 7500,
-    discount: "21% OFF",
-    rating: 4.8,
-    reviewsCount: 45,
-    stock: 35,
-    isFeatured: true,
-    warranty: "1 Year Anti-Yellowing Warranty",
-    image: "assets/cases_banner.jpg",
-    images: [
-      "assets/cases_banner.jpg",
-      "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&w=800&q=80"
-    ],
-    video: "",
-    tags: ["Fingerprint Resistant", "Anodized CNC Buttons", "Shock Absorbing"],
-    description: "Premium frosted back translucent case with CNC machined tactile buttons and reinforced drop-absorbing corners."
+    rating: 5,
+    reviewsCount: 1,
+    image: "assets/hero_showcase.jpg",
+    images: ["assets/hero_showcase.jpg"],
+    description: "full set with box",
+    specs: {
+      video: "",
+      warranty: "1month",
+      condition: "Grade B (90% Good)",
+      colorOptions: ["Midnight / Black", "Starlight / Silver", "Blue / Sierra Blue"],
+      batteryHealth: "85%",
+      storageOptions: [
+        { price: 145000, capacity: "128GB", originalPrice: 150000 },
+        { price: 155000, capacity: "256GB", originalPrice: 160000 },
+        { price: 165000, capacity: "512GB", originalPrice: 169969 }
+      ]
+    }
   }
 ];
 
@@ -1006,9 +443,26 @@ function initDatabase() {
     } catch (e) {}
   }
 
-  // 3. Products schema upgrade & initial load (never resurrect deleted products)
+  // 3. Products schema upgrade & initial load (permanently purge all demo products)
+  const SAMPLE_PRODUCT_IDS = [
+    'prod-ip18pm', 'prod-ip16pm', 'prod-ip16p', 'prod-ip15p', 'prod-used-ip13',
+    'prod-used-ip14pm', 'prod-used-ip13p', 'prod-used-ip12', 'prod-used-ip11',
+    'prod-case-magsafe', 'prod-case-carbon', 'prod-charger-65w', 'prod-pb-20k',
+    'prod-cable-braided', 'prod-glass-9h', 'prod-cam-lens', 'prod-airpods-pro',
+    'prod-ugreen-100w', 'prod-baseus-cable', 'prod-wiwu-wallet', 'prod-asper-case'
+  ];
+
   const existingProducts = localStorage.getItem("UH_PRODUCTS");
-  const deletedProductIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+  let deletedProductIds = [];
+  try {
+    deletedProductIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
+  } catch (e) { deletedProductIds = []; }
+  
+  // Guarantee that all deleted sample products are tracked and purged on all devices
+  deletedProductIds = [...new Set([...deletedProductIds, ...SAMPLE_PRODUCT_IDS])];
+  try {
+    localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedProductIds));
+  } catch (e) {}
 
   if (!existingProducts) {
     const enriched = INITIAL_PRODUCTS
@@ -1021,13 +475,11 @@ function initDatabase() {
   } else {
     try {
       let prods = JSON.parse(existingProducts) || [];
-      // Strictly purge any deleted product IDs from local cache
-      if (deletedProductIds.length > 0) {
-        const filtered = prods.filter(p => !deletedProductIds.includes(String(p.id)));
-        if (filtered.length !== prods.length) {
-          prods = filtered;
-          localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
-        }
+      // Strictly purge any deleted or sample product IDs from local cache
+      const filtered = prods.filter(p => !deletedProductIds.includes(String(p.id)));
+      if (filtered.length !== prods.length) {
+        prods = filtered;
+        localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
       }
     } catch (e) {}
   }
