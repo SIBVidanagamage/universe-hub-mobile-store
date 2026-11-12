@@ -1456,7 +1456,7 @@ const App = {
     modalBody.innerHTML = `
       <div class="quickview-grid-layout">
         <!-- Left: Interactive Gallery -->
-        <div class="product-gallery-card">
+        <div class="product-gallery-card" style="min-width:0; width:100%; box-sizing:border-box;">
           <div class="gallery-viewport" id="gallery-viewport-stage">
             <!-- Main media item rendered here -->
           </div>
@@ -1475,7 +1475,7 @@ const App = {
         </div>
 
         <!-- Right: Specs and Details -->
-        <div>
+        <div style="min-width:0; width:100%; box-sizing:border-box;">
           <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
             ${prod.condition ? `<span class="badge-pill ${isUsed ? 'badge-used' : 'badge-new'}">${condTitle}</span>` : ''}
             ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 Battery: ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''} Original</span>` : ''}
