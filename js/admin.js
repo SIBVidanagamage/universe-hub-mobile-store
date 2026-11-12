@@ -2985,6 +2985,102 @@ const AdminController = {
     showToast(`🗑️ Order #${orderId} deleted successfully!`);
     this.renderOrdersTable();
     this.renderStats();
+  },
+
+  // 7. RICH FORMATTING TOOLBAR & ENTER KEY CONTROLLER FOR DESCRIPTION
+  formatTextarea(textareaId, action) {
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+
+    textarea.focus();
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const text = textarea.value;
+    const selected = text.substring(start, end);
+
+    let replacement = "";
+    let newCursorPos = start;
+
+    switch (action) {
+      case "bold":
+        if (selected) {
+          replacement = `**${selected}**`;
+          newCursorPos = start + replacement.length;
+        } else {
+          replacement = "**Bold Text**";
+          newCursorPos = start + 2;
+        }
+        break;
+
+      case "italic":
+        if (selected) {
+          replacement = `*${selected}*`;
+          newCursorPos = start + replacement.length;
+        } else {
+          replacement = "*Italic Text*";
+          newCursorPos = start + 1;
+        }
+        break;
+
+      case "heading":
+        const preH = (start > 0 && text[start - 1] !== "\n") ? "\n\n" : "";
+        replacement = `${preH}Key Features:\n`;
+        newCursorPos = start + replacement.length;
+        break;
+
+      case "bullet":
+        if (selected) {
+          replacement = selected.split("\n").map(l => l.startsWith("• ") ? l : `• ${l}`).join("\n");
+          newCursorPos = start + replacement.length;
+        } else {
+          const preB = (start > 0 && text[start - 1] !== "\n") ? "\n" : "";
+          replacement = `${preB}• `;
+          newCursorPos = start + replacement.length;
+        }
+        break;
+
+      case "spec":
+        const preS = (start > 0 && text[start - 1] !== "\n") ? "\n" : "";
+        replacement = `${preS}• Feature Name: Specification Value\n`;
+        newCursorPos = start + replacement.length;
+        break;
+
+      case "break":
+        replacement = "\n";
+        newCursorPos = start + 1;
+        break;
+    }
+
+    textarea.value = text.substring(0, start) + replacement + text.substring(end);
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  },
+
+  handleTextareaKeydown(e, textarea) {
+    if (e.key === "Enter") {
+      e.stopPropagation(); // prevent form submission or modal handling
+      
+      const start = textarea.selectionStart;
+      const text = textarea.value;
+      const lineStart = text.lastIndexOf("\n", start - 1) + 1;
+      const currentLine = text.substring(lineStart, start);
+
+      // Auto-continue bullet points if current line is a bullet
+      if (currentLine.startsWith("• ")) {
+        e.preventDefault();
+        // If bullet line is empty (just "• "), pressing enter clears the bullet
+        if (currentLine.trim() === "•") {
+          textarea.value = text.substring(0, lineStart) + text.substring(start);
+          textarea.setSelectionRange(lineStart, lineStart);
+        } else {
+          // Continue with new bullet line
+          const insertText = "\n• ";
+          textarea.value = text.substring(0, start) + insertText + text.substring(start);
+          textarea.setSelectionRange(start + insertText.length, start + insertText.length);
+        }
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
   }
 };
 

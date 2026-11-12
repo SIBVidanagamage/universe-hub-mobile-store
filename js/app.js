@@ -1333,6 +1333,17 @@ const App = {
       return div.innerHTML;
     };
 
+    const formatInline = (str) => {
+      let s = escapeHtml(str);
+      // bold: **text** or <b>text</b>
+      s = s.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#ffffff; font-weight:800; text-shadow:0 0 8px rgba(255,255,255,0.25);">$1</strong>');
+      s = s.replace(/&lt;b&gt;(.+?)&lt;\/b&gt;/gi, '<strong style="color:#ffffff; font-weight:800; text-shadow:0 0 8px rgba(255,255,255,0.25);">$1</strong>');
+      // italic: *text* or <i>text</i>
+      s = s.replace(/\*([^\*]+)\*/g, '<em style="color:#e2e8f0; font-style:italic;">$1</em>');
+      s = s.replace(/&lt;i&gt;(.+?)&lt;\/i&gt;/gi, '<em style="color:#e2e8f0; font-style:italic;">$1</em>');
+      return s;
+    };
+
     const lines = clean.split("\n");
     return lines.map(line => {
       const trimmed = line.trim();
@@ -1342,7 +1353,7 @@ const App = {
       if (/^(Key Features|Specifications|Specs|Highlights|Package Includes|In the Box):?$/i.test(trimmed)) {
         return `<div style="font-weight:800; color:#fff; font-size:13.5px; margin-top:12px; margin-bottom:6px; display:flex; align-items:center; gap:6px; letter-spacing:0.3px;">
           <span style="color:var(--neon-cyan);">⚡</span>
-          <span>${escapeHtml(trimmed)}</span>
+          <span>${formatInline(trimmed)}</span>
         </div>`;
       }
 
@@ -1355,12 +1366,12 @@ const App = {
           const val = text.substring(colonIdx + 1);
           return `<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; line-height:1.55; padding-left:4px;">
             <span style="color:var(--neon-cyan); font-size:11px; margin-top:3px;">✦</span>
-            <span><strong style="color:#f8fafc; font-weight:700;">${escapeHtml(label)}:</strong><span style="color:#cbd5e1;">${escapeHtml(val)}</span></span>
+            <span><strong style="color:#f8fafc; font-weight:700;">${formatInline(label)}:</strong><span style="color:#cbd5e1;">${formatInline(val)}</span></span>
           </div>`;
         }
         return `<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; line-height:1.55; padding-left:4px;">
           <span style="color:var(--neon-cyan); font-size:11px; margin-top:3px;">✦</span>
-          <span style="color:#cbd5e1;">${escapeHtml(text)}</span>
+          <span style="color:#cbd5e1;">${formatInline(text)}</span>
         </div>`;
       }
 
@@ -1371,12 +1382,12 @@ const App = {
         const val = trimmed.substring(colonIdx + 1);
         return `<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; line-height:1.55; padding-left:4px;">
           <span style="color:var(--neon-cyan); font-size:11px; margin-top:3px;">✦</span>
-          <span><strong style="color:#f8fafc; font-weight:700;">${escapeHtml(label)}:</strong><span style="color:#cbd5e1;">${escapeHtml(val)}</span></span>
+          <span><strong style="color:#f8fafc; font-weight:700;">${formatInline(label)}:</strong><span style="color:#cbd5e1;">${formatInline(val)}</span></span>
         </div>`;
       }
 
       // Normal paragraph
-      return `<p style="margin:0 0 8px 0; color:var(--text-secondary); line-height:1.65;">${escapeHtml(trimmed)}</p>`;
+      return `<p style="margin:0 0 8px 0; color:var(--text-secondary); line-height:1.65;">${formatInline(trimmed)}</p>`;
     }).join("");
   },
 
