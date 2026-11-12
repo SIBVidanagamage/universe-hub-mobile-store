@@ -451,69 +451,99 @@ const AdminController = {
     }
 
     tbody.innerHTML = filtered.map(prod => {
-      const imgsCount = (prod.images && Array.isArray(prod.images)) ? prod.images.length : (prod.image ? 1 : 0);
-      const hasVideo = !!(prod.video && prod.video.trim());
-      const catObj = categories.find(c => c.id === prod.category);
-      const isIphone = prod.mainCategory === "iphones" || (prod.category && prod.category.includes("iphone"));
+      try {
+        const id = String(prod.id);
+        const name = prod.name || prod.title || "Product";
+        const brand = prod.brand || "Apple";
+        const category = prod.category || "brand-new-iphones";
+        const price = Number(prod.price) || 0;
+        const stock = prod.stock !== undefined ? prod.stock : 10;
+        const condition = prod.condition || prod.specs?.condition || "";
+        const batteryHealth = prod.batteryHealth || prod.specs?.batteryHealth || null;
+        const stockStatus = prod.stockStatus || prod.specs?.stockStatus || "available";
 
-      let categoryBadge = "";
-      if (isIphone) {
-        const sub = prod.category === "brand-new-iphones" ? "Brand New" : (prod.category === "used-iphones" ? "Certified Used" : (prod.condition ? (prod.condition.includes("Used") ? "Used" : "Brand New") : ""));
-        categoryBadge = `<span class="badge-pill badge-cat-iphone">📱 iPhone${sub ? ` • ${sub}` : ''}</span>`;
-      } else {
-        const catName = catObj ? catObj.name : (prod.category || "Accessory");
-        categoryBadge = `<span class="badge-pill badge-cat-accessory">⚡ ${catName}</span>`;
-      }
+        const imgsCount = (prod.images && Array.isArray(prod.images)) ? prod.images.length : (prod.image ? 1 : 0);
+        const hasVideo = !!(prod.video && prod.video.trim());
+        const catObj = categories.find(c => c.id === category);
+        const isIphone = prod.mainCategory === "iphones" || category.includes("iphone");
 
-      const brandBadge = `<span class="badge-pill badge-brand" style="margin-left:4px;">🏷️ ${prod.brand || 'Apple'}</span>`;
+        let categoryBadge = "";
+        if (isIphone) {
+          const sub = category === "brand-new-iphones" ? "Brand New" : (category === "used-iphones" ? "Certified Used" : (condition ? (condition.includes("Used") ? "Used" : "Brand New") : ""));
+          categoryBadge = `<span class="badge-pill badge-cat-iphone">📱 iPhone${sub ? ` • ${sub}` : ''}</span>`;
+        } else {
+          const catName = catObj ? catObj.name : category;
+          categoryBadge = `<span class="badge-pill badge-cat-accessory">⚡ ${catName}</span>`;
+        }
 
-      return `
-      <tr>
-        <td>
-          <div style="display:flex; align-items:center; gap: 10px;">
-            <img src="${prod.image || (prod.images && prod.images[0]) || 'assets/hero_showcase.jpg'}" style="width:44px; height:44px; border-radius:6px; object-fit:cover; background:#0c101a;" alt="" onerror="this.src='assets/hero_showcase.jpg'">
-            <div>
-              <div style="font-weight:700; color:#fff;">${prod.name}</div>
-              <div style="display:flex; gap:6px; margin-top:2px;">
-                <span style="font-size:10.5px; color:var(--neon-cyan); background:rgba(0,210,255,0.1); padding:1px 6px; border-radius:4px;">📷 ${imgsCount} Img${imgsCount > 1 ? 's' : ''}</span>
-                ${hasVideo ? `<span style="font-size:10.5px; color:#e056fd; background:rgba(224,86,253,0.12); padding:1px 6px; border-radius:4px;">🎬 Video</span>` : ''}
+        const brandBadge = `<span class="badge-pill badge-brand" style="margin-left:4px;">🏷️ ${brand}</span>`;
+
+        return `
+        <tr>
+          <td>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <img src="${prod.image || (prod.images && prod.images[0]) || 'assets/hero_showcase.jpg'}" style="width:44px; height:44px; border-radius:6px; object-fit:cover; background:#0c101a;" alt="" onerror="this.src='assets/hero_showcase.jpg'">
+              <div>
+                <div style="font-weight:700; color:#fff;">${name}</div>
+                <div style="display:flex; gap:6px; margin-top:2px;">
+                  <span style="font-size:10.5px; color:var(--neon-cyan); background:rgba(0,210,255,0.1); padding:1px 6px; border-radius:4px;">📷 ${imgsCount} Img${imgsCount > 1 ? 's' : ''}</span>
+                  ${hasVideo ? `<span style="font-size:10.5px; color:#e056fd; background:rgba(224,86,253,0.12); padding:1px 6px; border-radius:4px;">🎬 Video</span>` : ''}
+                </div>
               </div>
             </div>
-          </div>
-        </td>
-        <td>
-          ${prod.condition ? `
-            <span class="badge-pill ${prod.condition.toLowerCase().includes('brand new') ? 'badge-new' : 'badge-used'}">
-              ${prod.condition}
-            </span>
-          ` : `<span style="color:var(--text-muted); font-size:11.5px;">— None —</span>`}
-          ${prod.batteryHealth ? `<span class="badge-pill badge-battery" style="margin-left:4px;">${prod.batteryHealth}% Batt</span>` : ''}
-        </td>
-        <td>
-          <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
-            ${categoryBadge}
-            ${brandBadge}
-          </div>
-        </td>
-        <td style="color:var(--neon-cyan); font-weight:700;">Rs. ${prod.price.toLocaleString()}</td>
-        <td>
-          <div style="font-weight:700; font-size:12px; color:${prod.stockStatus === 'on-request' ? '#f59e0b' : (prod.stockStatus === 'inquire' ? 'var(--neon-cyan)' : 'var(--success)')};">
-            ${prod.stockStatus === 'on-request' ? '⚡ On Request' : (prod.stockStatus === 'inquire' ? '💬 WhatsApp' : '🟢 In Store')}
-          </div>
-          <div style="font-size:11px; color:var(--text-muted);">${prod.stock || 0} internal units</div>
-        </td>
-        <td>
-          <div class="table-action-btns">
-            <button class="btn-icon-action btn-edit" title="Edit Full Product & Media" onclick="AdminController.openEditProduct('${prod.id}')">
-              ✏️
-            </button>
-            <button class="btn-icon-action btn-delete" title="Delete Product" onclick="AdminController.deleteProduct('${prod.id}')">
-              🗑️
-            </button>
-          </div>
-        </td>
-      </tr>
-    `}).join("");
+          </td>
+          <td>
+            ${condition ? `
+              <span class="badge-pill ${condition.toLowerCase().includes('brand new') ? 'badge-new' : 'badge-used'}">
+                ${condition}
+              </span>
+            ` : `<span style="color:var(--text-muted); font-size:11.5px;">— None —</span>`}
+            ${batteryHealth ? `<span class="badge-pill badge-battery" style="margin-left:4px;">${batteryHealth}${typeof batteryHealth === 'number' || !String(batteryHealth).includes('%') ? '%' : ''} Batt</span>` : ''}
+          </td>
+          <td>
+            <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+              ${categoryBadge}
+              ${brandBadge}
+            </div>
+          </td>
+          <td style="color:var(--neon-cyan); font-weight:700;">Rs. ${price.toLocaleString()}</td>
+          <td>
+            <div style="font-weight:700; font-size:12px; color:${stockStatus === 'on-request' ? '#f59e0b' : (stockStatus === 'inquire' ? 'var(--neon-cyan)' : 'var(--success)')};">
+              ${stockStatus === 'on-request' ? '⚡ On Request' : (stockStatus === 'inquire' ? '💬 WhatsApp' : '🟢 In Store')}
+            </div>
+            <div style="font-size:11px; color:var(--text-muted);">${stock} internal units</div>
+          </td>
+          <td>
+            <div class="table-action-btns">
+              <button class="btn-icon-action btn-edit" title="Edit Full Product & Media" onclick="AdminController.openEditProduct('${id}')">
+                ✏️
+              </button>
+              <button class="btn-icon-action btn-delete" title="Delete Product" onclick="AdminController.deleteProduct('${id}')">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+      } catch (rowErr) {
+        console.error("Error rendering product row:", rowErr);
+        const fallbackId = String(prod?.id || '');
+        return `
+        <tr>
+          <td><div style="font-weight:700; color:#fff;">${prod?.name || prod?.title || fallbackId}</div></td>
+          <td><span style="color:var(--text-muted);">—</span></td>
+          <td><span class="badge-pill badge-brand">${prod?.brand || 'Apple'}</span></td>
+          <td style="color:var(--neon-cyan); font-weight:700;">Rs. ${(Number(prod?.price) || 0).toLocaleString()}</td>
+          <td>${prod?.stock || 0}</td>
+          <td>
+            <div class="table-action-btns">
+              <button class="btn-icon-action btn-edit" title="Edit Product" onclick="AdminController.openEditProduct('${fallbackId}')">✏️</button>
+              <button class="btn-icon-action btn-delete" title="Delete Product" onclick="AdminController.deleteProduct('${fallbackId}')">🗑️</button>
+            </div>
+          </td>
+        </tr>`;
+      }
+    }).join("");
   },
 
   // Populate dynamic grouped options for Add and Edit product dropdowns
@@ -1255,17 +1285,17 @@ const AdminController = {
       document.getElementById("edit-prod-brand").value = prod.brand || "Apple";
     }
     document.getElementById("edit-prod-category").value = prod.category;
-    document.getElementById("edit-prod-condition").value = prod.condition || "";
-    document.getElementById("edit-prod-price").value = prod.price;
-    document.getElementById("edit-prod-origprice").value = prod.originalPrice || prod.price;
-    document.getElementById("edit-prod-battery").value = prod.batteryHealth || "";
+    document.getElementById("edit-prod-condition").value = prod.condition || prod.specs?.condition || "";
+    document.getElementById("edit-prod-price").value = Number(prod.price) || 0;
+    document.getElementById("edit-prod-origprice").value = prod.originalPrice || prod.price || 0;
+    document.getElementById("edit-prod-battery").value = prod.batteryHealth || prod.specs?.batteryHealth || "";
     if (document.getElementById("edit-prod-stock-status")) {
-      document.getElementById("edit-prod-stock-status").value = prod.stockStatus || "available";
+      document.getElementById("edit-prod-stock-status").value = prod.stockStatus || prod.specs?.stockStatus || "available";
     }
     document.getElementById("edit-prod-stock").value = prod.stock !== undefined ? prod.stock : 10;
-    document.getElementById("edit-prod-warranty").value = prod.warranty || "";
-    document.getElementById("edit-prod-desc").value = prod.description || "";
-    document.getElementById("edit-prod-video").value = prod.video || "";
+    document.getElementById("edit-prod-warranty").value = prod.warranty || prod.specs?.warranty || "";
+    document.getElementById("edit-prod-desc").value = prod.description || prod.desc || "";
+    document.getElementById("edit-prod-video").value = prod.video || prod.specs?.video || "";
 
     // Render storage matrix and stock colors for edit modal
     this.renderStorageTiersInputs('edit', prod.storageOptions || []);
