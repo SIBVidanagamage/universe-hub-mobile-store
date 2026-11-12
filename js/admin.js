@@ -1140,8 +1140,14 @@ const AdminController = {
       // Images list from MediaUploader or manual textarea fallback
       let imagesList = (window.MediaUploader) ? MediaUploader.getImages("adm") : [];
       if (imagesList.length === 0 && rawImages) {
-        imagesList = rawImages.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
+        imagesList = rawImages.split(/\r?\n/).map(u => u.trim()).filter(u => u.length > 0);
       }
+      imagesList = imagesList.filter(u => typeof u === 'string' && u.trim().length > 0 && (!u.startsWith('data:image') || (u.length > 100 && u.includes(';base64,'))));
+      if (imagesList.length > 1) {
+        const genuine = imagesList.filter(u => u !== 'assets/hero_showcase.jpg');
+        if (genuine.length > 0) imagesList = genuine;
+      }
+      imagesList = Array.from(new Set(imagesList));
       if (imagesList.length === 0) {
         imagesList = ["assets/hero_showcase.jpg"];
       }
@@ -1198,23 +1204,10 @@ const AdminController = {
       try {
         localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
       } catch (quotaErr) {
-        console.warn("⚠️ LocalStorage quota exceeded, sanitizing cached images...", quotaErr);
+        console.warn("⚠️ LocalStorage quota exceeded, caching lighter subset...", quotaErr);
         try {
-          // If quota hit, strip heavy base64 strings from local products list so storage doesn't crash
-          const sanitized = products.map(p => {
-            const clean = { ...p };
-            if (clean.image && clean.image.startsWith("data:") && clean.image.length > 80000) {
-              clean.image = "assets/hero_showcase.jpg";
-            }
-            if (Array.isArray(clean.images)) {
-              clean.images = clean.images.map(img => (img && img.startsWith("data:") && img.length > 80000) ? "assets/hero_showcase.jpg" : img);
-            }
-            if (clean.video && (clean.video.startsWith("data:") || clean.video.startsWith("blob:"))) {
-              clean.video = "";
-            }
-            return clean;
-          });
-          localStorage.setItem("UH_PRODUCTS", JSON.stringify(sanitized.slice(0, 30)));
+          // If quota hit, store just the recent 10 products without corrupting their authentic image data
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(products.slice(0, 10)));
         } catch (err2) {
           console.warn("Could not save to localStorage, continuing with Supabase cloud save:", err2);
         }
@@ -1296,7 +1289,15 @@ const AdminController = {
     this.renderColorPillSelectors('edit', prod.colorOptions || []);
 
     // Fill images and video into MediaUploader dropzones & previews
-    const imgArray = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? prod.images : [prod.image || ""];
+    let imgArray = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? [...prod.images] : [prod.image || ""];
+    imgArray = imgArray.filter(u => typeof u === 'string' && u.trim().length > 0 && (!u.startsWith('data:image') || (u.length > 100 && u.includes(';base64,'))));
+    if (imgArray.length > 1) {
+      const genuine = imgArray.filter(u => u !== 'assets/hero_showcase.jpg');
+      if (genuine.length > 0) imgArray = genuine;
+    }
+    imgArray = Array.from(new Set(imgArray));
+    if (imgArray.length === 0) imgArray = ["assets/hero_showcase.jpg"];
+
     if (document.getElementById("edit-prod-images")) {
       document.getElementById("edit-prod-images").value = imgArray.join("\n");
     }
@@ -1343,9 +1344,16 @@ const AdminController = {
     if (imagesList.length === 0) {
       const rawImgs = document.getElementById("edit-prod-images") ? document.getElementById("edit-prod-images").value.trim() : "";
       if (rawImgs) {
-        imagesList = rawImgs.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
+        imagesList = rawImgs.split(/\r?\n/).map(u => u.trim()).filter(u => u.length > 0);
       }
     }
+    // Clean, sanitize, and eliminate corrupt fragments & accidental showcase fallbacks
+    imagesList = imagesList.filter(u => typeof u === 'string' && u.trim().length > 0 && (!u.startsWith('data:image') || (u.length > 100 && u.includes(';base64,'))));
+    if (imagesList.length > 1) {
+      const genuine = imagesList.filter(u => u !== 'assets/hero_showcase.jpg');
+      if (genuine.length > 0) imagesList = genuine;
+    }
+    imagesList = Array.from(new Set(imagesList));
     if (imagesList.length === 0) imagesList = ["assets/hero_showcase.jpg"];
 
     const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];

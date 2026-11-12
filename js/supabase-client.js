@@ -498,15 +498,10 @@
       try {
         localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts));
       } catch (quotaErr) {
-        console.warn("[Supabase] LocalStorage near capacity, saving optimized payload...", quotaErr);
+        console.warn("[Supabase] LocalStorage near capacity, saving recent subset...", quotaErr);
         try {
-          const trimmed = localProducts.slice(0, 30).map(p => ({
-            ...p,
-            image: (p.image && p.image.length > 80000) ? "assets/hero_showcase.jpg" : p.image,
-            images: (Array.isArray(p.images)) ? p.images.map(img => (img && img.length > 80000) ? "assets/hero_showcase.jpg" : img) : ["assets/hero_showcase.jpg"],
-            video: (p.video && (p.video.startsWith("data:") || p.video.startsWith("blob:"))) ? "" : p.video
-          }));
-          localStorage.setItem("UH_PRODUCTS", JSON.stringify(trimmed));
+          // If browser storage is full, keep recent 10 items without corrupting real image data
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts.slice(0, 10)));
         } catch (e2) { }
       }
 

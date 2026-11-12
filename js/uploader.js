@@ -394,15 +394,26 @@ const MediaUploader = {
 
   // Actions
   removeImage(formType, index) {
+    if (!this.state[formType]?.images) return;
     this.state[formType].images.splice(index, 1);
+    // Keep manual textarea synchronized so deleted items never get resurrected
+    const textarea = document.getElementById(formType === 'adm' ? 'adm-prod-image' : 'edit-prod-images');
+    if (textarea) {
+      textarea.value = this.state[formType].images.map(img => img.url).join('\n');
+    }
     this.renderImages(formType);
     if (typeof showToast === 'function') showToast('Photo removed.');
   },
 
   makePrimary(formType, index) {
+    if (!this.state[formType]?.images) return;
     if (index > 0 && index < this.state[formType].images.length) {
       const item = this.state[formType].images.splice(index, 1)[0];
       this.state[formType].images.unshift(item);
+      const textarea = document.getElementById(formType === 'adm' ? 'adm-prod-image' : 'edit-prod-images');
+      if (textarea) {
+        textarea.value = this.state[formType].images.map(img => img.url).join('\n');
+      }
       this.renderImages(formType);
       if (typeof showToast === 'function') showToast(`"${item.name || 'Photo'}" set as primary cover!`);
     }
@@ -428,18 +439,20 @@ const MediaUploader = {
     const raw = textarea.value.trim();
     if (!raw) return;
 
-    const urls = raw.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
+    // Split strictly by newlines - NEVER by comma (base64 data URLs contain commas)
+    const urls = raw.split(/\r?\n/).map(u => u.trim()).filter(u => u.length > 0);
     urls.forEach((url, i) => {
+      if (url.startsWith('data:image') && (!url.includes(';base64,') || url.length < 100)) return;
       this.state[formType].images.push({
         id: 'url-' + Date.now() + '-' + i,
         url: url,
-        name: url.split('/').pop().split('?')[0] || `Image ${this.state[formType].images.length + 1}`,
-        sizeStr: 'Web Link',
+        name: url.startsWith('data:') ? `Photo ${this.state[formType].images.length + 1}` : (url.split('/').pop().split('?')[0] || `Image ${this.state[formType].images.length + 1}`),
+        sizeStr: url.startsWith('data:') ? 'Optimized' : 'Web Link',
         isUploading: false
       });
     });
 
-    textarea.value = '';
+    textarea.value = this.state[formType].images.map(img => img.url).join('\n');
     this.renderImages(formType);
     if (typeof showToast === 'function') showToast(`Added ${urls.length} image URL${urls.length > 1 ? 's' : ''}!`);
   },
@@ -464,18 +477,43 @@ const MediaUploader = {
 
   // Getters for saving
   getImages(formType) {
-    const list = this.state[formType].images.map(img => img.url).filter(u => !!u);
-    // Also check if user typed anything in manual textarea
-    const textarea = document.getElementById(formType === 'adm' ? 'adm-prod-image' : 'edit-prod-images');
-    if (textarea && textarea.value.trim()) {
-      const extra = textarea.value.trim().split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
-      list.push(...extra);
+    // MediaUploader state is the single source of truth when images exist in state
+    let list = (this.state[formType]?.images || []).map(img => img.url).filter(u => !!u && typeof u === 'string');
+
+    // ONLY fallback to manual textarea if state is completely empty
+    if (list.length === 0) {
+      const textarea = document.getElementById(formType === 'adm' ? 'adm-prod-image' : 'edit-prod-images');
+      if (textarea && textarea.value.trim()) {
+        const lines = textarea.value.trim().split(/\r?\n/).map(u => u.trim()).filter(u => u.length > 0);
+        list.push(...lines);
+      }
     }
-    return list.length > 0 ? list : ['assets/hero_showcase.jpg'];
+
+    // Sanitize against broken base64 pieces and invalid chunks
+    const valid = list.filter(u => {
+      if (!u || typeof u !== 'string') return false;
+      const trimmed = u.trim();
+      if (trimmed.startsWith('data:image')) {
+        return trimmed.length > 100 && trimmed.includes(';base64,');
+      }
+      return trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('assets/') || trimmed.startsWith('/uploads/') || trimmed.startsWith('blob:');
+    });
+
+    // If genuine photos exist, eliminate accidental hero_showcase duplicate fallbacks
+    let sanitized = valid;
+    if (sanitized.length > 1) {
+      const genuine = sanitized.filter(u => u !== 'assets/hero_showcase.jpg');
+      if (genuine.length > 0) sanitized = genuine;
+    }
+
+    // Deduplicate
+    sanitized = Array.from(new Set(sanitized));
+
+    return sanitized.length > 0 ? sanitized : ['assets/hero_showcase.jpg'];
   },
 
   getVideo(formType) {
-    if (this.state[formType].video && this.state[formType].video.url) {
+    if (this.state[formType]?.video && this.state[formType].video.url) {
       return this.state[formType].video.url;
     }
     const input = document.getElementById(formType === 'adm' ? 'adm-prod-video' : 'edit-prod-video');
@@ -484,12 +522,29 @@ const MediaUploader = {
 
   // Setters for populating edit modal
   setImages(formType, urls) {
-    this.state[formType].images = (urls || []).map((url, i) => {
+    if (!this.state[formType]) this.state[formType] = { images: [], video: null };
+
+    // Sanitize incoming URLs: filter out broken fragments and accidental duplicates of hero_showcase
+    let cleanUrls = (urls || []).filter(u => typeof u === 'string' && u.trim().length > 0);
+    cleanUrls = cleanUrls.filter(u => {
+      const trimmed = u.trim();
+      if (trimmed.startsWith('data:image')) {
+        return trimmed.length > 100 && trimmed.includes(';base64,');
+      }
+      return true;
+    });
+    if (cleanUrls.length > 1) {
+      const genuine = cleanUrls.filter(u => u !== 'assets/hero_showcase.jpg');
+      if (genuine.length > 0) cleanUrls = genuine;
+    }
+    cleanUrls = Array.from(new Set(cleanUrls));
+
+    this.state[formType].images = cleanUrls.map((url, i) => {
       const item = {
         id: 'exist-' + Date.now() + '-' + i,
         url: url,
-        name: url.split('/').pop().split('?')[0] || `Image ${i + 1}`,
-        sizeStr: url.startsWith('/uploads/') ? 'Stored on Server' : 'Web Asset',
+        name: url.startsWith('data:') ? `Product Photo ${i + 1}` : (url.split('/').pop().split('?')[0] || `Image ${i + 1}`),
+        sizeStr: url.startsWith('/uploads/') ? 'Stored on Server' : (url.startsWith('data:') ? 'Optimized Asset' : 'Web Asset'),
         dims: '',
         isUploading: false
       };
@@ -502,6 +557,12 @@ const MediaUploader = {
       return item;
     });
     this.renderImages(formType);
+
+    // Keep textarea in sync
+    const textarea = document.getElementById(formType === 'adm' ? 'adm-prod-image' : 'edit-prod-images');
+    if (textarea) {
+      textarea.value = cleanUrls.join('\n');
+    }
   },
 
   setVideo(formType, videoUrl) {

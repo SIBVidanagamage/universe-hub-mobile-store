@@ -1398,17 +1398,21 @@ const App = {
 
     this.quickViewCurrentProdId = prodId;
 
-    // Prepare media items list
+    // Prepare media items list (sanitized & deduplicated)
     let mediaList = [];
-    if (prod.images && Array.isArray(prod.images) && prod.images.length > 0) {
-      prod.images.forEach(imgUrl => {
-        if (imgUrl && imgUrl.trim()) {
-          mediaList.push({ type: 'image', url: imgUrl.trim() });
-        }
-      });
-    } else if (prod.image) {
-      mediaList.push({ type: 'image', url: prod.image });
+    let rawImages = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? [...prod.images] : [prod.image];
+    rawImages = rawImages.filter(u => typeof u === 'string' && u.trim().length > 0 && (!u.startsWith('data:image') || (u.length > 100 && u.includes(';base64,'))));
+    if (rawImages.length > 1) {
+      const genuine = rawImages.filter(u => u !== 'assets/hero_showcase.jpg');
+      if (genuine.length > 0) rawImages = genuine;
     }
+    rawImages = Array.from(new Set(rawImages));
+
+    rawImages.forEach(imgUrl => {
+      if (imgUrl && imgUrl.trim()) {
+        mediaList.push({ type: 'image', url: imgUrl.trim() });
+      }
+    });
 
     if (prod.video && prod.video.trim()) {
       mediaList.push({ type: 'video', url: prod.video.trim() });
