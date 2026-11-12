@@ -2311,13 +2311,22 @@ const AdminController = {
         throw new Error(data.error || "Upload response error");
       }
     } catch (err) {
-      console.warn("Direct upload error, falling back to base64 data URL:", err);
-      finalUrl = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => resolve(tempUrl);
-        reader.readAsDataURL(file);
-      });
+      console.warn("Direct upload error, compressing image client-side:", err);
+      if (window.MediaUploader && typeof window.MediaUploader.compressImageToDataUrl === "function") {
+        try {
+          finalUrl = await window.MediaUploader.compressImageToDataUrl(file, 1600, 900, 0.85);
+        } catch (compErr) {
+          console.warn("MediaUploader compression fallback:", compErr);
+        }
+      }
+      if (!finalUrl || finalUrl === tempUrl) {
+        finalUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve(tempUrl);
+          reader.readAsDataURL(file);
+        });
+      }
     }
 
     if (preview) preview.src = finalUrl;
@@ -2373,12 +2382,21 @@ const AdminController = {
         throw new Error(data.error || "Upload error");
       }
     } catch (err) {
-      finalUrl = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => resolve(tempUrl);
-        reader.readAsDataURL(file);
-      });
+      if (window.MediaUploader && typeof window.MediaUploader.compressImageToDataUrl === "function") {
+        try {
+          finalUrl = await window.MediaUploader.compressImageToDataUrl(file, 600, 200, 0.9);
+        } catch (compErr) {
+          console.warn("MediaUploader logo compression fallback:", compErr);
+        }
+      }
+      if (!finalUrl || finalUrl === tempUrl) {
+        finalUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve(tempUrl);
+          reader.readAsDataURL(file);
+        });
+      }
     }
 
     if (preview) preview.src = finalUrl;
@@ -2433,13 +2451,22 @@ const AdminController = {
         throw new Error(data.error || "Upload failed");
       }
     } catch (err) {
-      console.warn("Direct upload error, falling back to base64:", err);
-      finalUrl = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => resolve(tempUrl);
-        reader.readAsDataURL(file);
-      });
+      console.warn("Direct upload error, compressing banner client-side:", err);
+      if (window.MediaUploader && typeof window.MediaUploader.compressImageToDataUrl === "function") {
+        try {
+          finalUrl = await window.MediaUploader.compressImageToDataUrl(file, 1200, 600, 0.85);
+        } catch (compErr) {
+          console.warn("MediaUploader promo banner compression fallback:", compErr);
+        }
+      }
+      if (!finalUrl || finalUrl === tempUrl) {
+        finalUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve(tempUrl);
+          reader.readAsDataURL(file);
+        });
+      }
     }
 
     if (preview) preview.src = finalUrl;
@@ -2666,7 +2693,7 @@ const AdminController = {
   },
 
   resetHeroBannerToDefault() {
-    const defaultBanner = "assets/hero_showcase.jpg?v=3";
+    const defaultBanner = "assets/custom_hero_banner.png?v=1";
     const preview = document.getElementById("admin-hero-banner-preview");
     const input = document.getElementById("admin-banner-url-input");
     const statusText = document.getElementById("admin-banner-status-text");

@@ -56,8 +56,8 @@ const App = {
       });
     }
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchStoreSettings === "function") {
-      window.SupabaseSync.fetchStoreSettings().then(() => {
-        this.applyStoreSettings();
+      window.SupabaseSync.fetchStoreSettings().then((st) => {
+        this.applyStoreSettings(st);
       });
     }
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchRegisteredUsers === "function") {
@@ -85,13 +85,16 @@ const App = {
     }
   },
 
-  applyStoreSettings() {
-    let settings = typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {};
+  applyStoreSettings(overrideSettings = null) {
+    let settings = typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? { ...DEFAULT_STORE_SETTINGS } : {};
     try {
       const saved = localStorage.getItem("UH_STORE_SETTINGS");
       if (saved) settings = { ...settings, ...JSON.parse(saved) };
     } catch (e) {
       // keep fallback
+    }
+    if (overrideSettings && typeof overrideSettings === "object") {
+      settings = { ...settings, ...overrideSettings };
     }
 
     // 1. Hero Showcase Image (Banner)

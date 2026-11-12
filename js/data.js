@@ -627,7 +627,7 @@ const DEFAULT_STORE_SETTINGS = {
   locationShort: "Maharagama Flagship Store",
   openingHours: "Open Daily: 9:30 AM – 8:30 PM",
   googleMapsUrl: "https://maps.app.goo.gl/r1BY5dMznxRunVC58",
-  heroBannerImg: "assets/hero_showcase.jpg?v=3",
+  heroBannerImg: "assets/custom_hero_banner.png?v=1",
   logoImg: "assets/universe_hub_logo.png?v=10",
   // Promo Banner 1 (Cases & Protection)
   promoBanner1Img: "assets/cases_banner.jpg",

@@ -839,7 +839,11 @@
           if (!error && data && data.value) {
             let localSettings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
             localSettings = { ...localSettings, ...data.value };
-            localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(localSettings));
+            try {
+              localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(localSettings));
+            } catch (quotaErr) {
+              console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+            }
             return localSettings;
           }
         } catch (e) {}
@@ -848,7 +852,11 @@
     },
 
     async saveStoreSettings(settings) {
-      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+      try {
+        localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+      } catch (quotaErr) {
+        console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+      }
 
       if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
         try {
