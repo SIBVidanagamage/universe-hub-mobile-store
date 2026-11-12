@@ -45,7 +45,7 @@
         try {
           const sbModule = require("@supabase/supabase-js");
           createClientFn = sbModule.createClient;
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (!createClientFn) {
@@ -126,7 +126,7 @@
           if (localDel && localDel.length > 0) {
             this.syncLocalCatalogToCloud();
           }
-        } catch (e) {}
+        } catch (e) { }
 
         // Automatically fetch latest catalog, settings and orders to guarantee real-time cross-device sync (e.g. laptop <-> mobile)
         this.fetchProducts().then(prods => {
@@ -154,8 +154,8 @@
       } catch (err) {
         this.isConnected = false;
         const isNet = this.isNetworkError(err);
-        this.lastDiagnosticMessage = isNet 
-          ? "Network / AdBlocker interception (Local Storage fallback active)" 
+        this.lastDiagnosticMessage = isNet
+          ? "Network / AdBlocker interception (Local Storage fallback active)"
           : (err.message || "Connection error");
         this.updateStatusBadge(false, isNet ? "Local Fallback" : "Offline");
         return false;
@@ -166,11 +166,11 @@
       if (!err) return false;
       if (typeof navigator !== "undefined" && !navigator.onLine) return true;
       const str = (err.message || String(err)).toLowerCase();
-      return str.includes("network") || 
-             str.includes("failed to fetch") || 
-             str.includes("load failed") || 
-             str.includes("aborterror") || 
-             str.includes("connection");
+      return str.includes("network") ||
+        str.includes("failed to fetch") ||
+        str.includes("load failed") ||
+        str.includes("aborterror") ||
+        str.includes("connection");
     },
 
     updateStatusBadge(connected, statusLabel = "") {
@@ -189,8 +189,8 @@
         statusPill.style.background = "rgba(245, 158, 11, 0.18)";
         statusPill.style.borderColor = "#f59e0b";
         statusPill.style.color = "#f59e0b";
-        statusText.textContent = queueCount > 0 
-          ? `🟡 Local Storage (${queueCount} Queued)` 
+        statusText.textContent = queueCount > 0
+          ? `🟡 Local Storage (${queueCount} Queued)`
           : (statusLabel ? `🟡 ${statusLabel}` : "🟡 Local Storage Active");
       }
     },
@@ -262,7 +262,7 @@
         });
         localStorage.setItem("UH_CLOUD_SYNC_QUEUE", JSON.stringify(q));
         this.updateStatusBadge(this.isConnected);
-      } catch (e) {}
+      } catch (e) { }
     },
 
     async flushSyncQueue() {
@@ -351,9 +351,9 @@
                 deletedIds = [...new Set([...deletedIds, ...delRow.value.map(String)])];
                 try {
                   localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds));
-                } catch (e) {}
+                } catch (e) { }
               }
-            } catch (e) {}
+            } catch (e) { }
 
             const mapped = data
               .filter(item => !deletedIds.includes(String(item.id)))
@@ -392,7 +392,7 @@
 
             try {
               localStorage.setItem("UH_PRODUCTS", JSON.stringify(mapped));
-            } catch (quotaErr) {}
+            } catch (quotaErr) { }
             return mapped;
           }
         } catch (e) {
@@ -458,7 +458,7 @@
             }
             try {
               localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds));
-            } catch (e) {}
+            } catch (e) { }
             await this.client.from("store_settings").upsert({
               key: "deleted_product_ids",
               value: deletedIds,
@@ -507,7 +507,7 @@
             video: (p.video && (p.video.startsWith("data:") || p.video.startsWith("blob:"))) ? "" : p.video
           }));
           localStorage.setItem("UH_PRODUCTS", JSON.stringify(trimmed));
-        } catch (e2) {}
+        } catch (e2) { }
       }
 
       // 2. Prepare Cloud Payload
@@ -527,8 +527,8 @@
         image: product.image,
         images: product.images || [product.image],
         description: product.description || "",
-        specs: { 
-          ...(product.specs || {}), 
+        specs: {
+          ...(product.specs || {}),
           video: typeof product.video === "string" ? product.video : "",
           storageOptions: product.storageOptions || [],
           colorOptions: product.colorOptions || [],
@@ -574,7 +574,7 @@
       } catch (e) { deletedIds = []; }
       if (!deletedIds.includes(strId)) {
         deletedIds.push(strId);
-        try { localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds)); } catch (e) {}
+        try { localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds)); } catch (e) { }
       }
 
       // 2. Remove locally
@@ -583,7 +583,7 @@
         localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
       } catch (e) { localProducts = []; }
       localProducts = localProducts.filter(p => String(p.id) !== strId);
-      try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts)); } catch (e) {}
+      try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts)); } catch (e) { }
 
       // 3. Delete from Supabase or Enqueue
       if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
@@ -615,13 +615,13 @@
       } catch (e) { deletedBrandIds = []; }
       if (!deletedBrandIds.includes(strId)) {
         deletedBrandIds.push(strId);
-        try { localStorage.setItem("UH_DELETED_BRAND_IDS", JSON.stringify(deletedBrandIds)); } catch (e) {}
+        try { localStorage.setItem("UH_DELETED_BRAND_IDS", JSON.stringify(deletedBrandIds)); } catch (e) { }
       }
 
       if (this.isConnected && this.client) {
         try {
           await this.client.from("brands").delete().eq("id", strId);
-        } catch (e) {}
+        } catch (e) { }
       }
     },
 
@@ -635,13 +635,13 @@
       } catch (e) { deletedCategoryIds = []; }
       if (!deletedCategoryIds.includes(strId)) {
         deletedCategoryIds.push(strId);
-        try { localStorage.setItem("UH_DELETED_CATEGORY_IDS", JSON.stringify(deletedCategoryIds)); } catch (e) {}
+        try { localStorage.setItem("UH_DELETED_CATEGORY_IDS", JSON.stringify(deletedCategoryIds)); } catch (e) { }
       }
 
       if (this.isConnected && this.client) {
         try {
           await this.client.from("categories").delete().eq("id", strId);
-        } catch (e) {}
+        } catch (e) { }
       }
     },
 
@@ -821,7 +821,7 @@
       if (this.isConnected && this.client) {
         try {
           await this.client.from("reviews").insert([payload]);
-        } catch (e) {}
+        } catch (e) { }
       }
       return review;
     },
@@ -846,7 +846,7 @@
             }
             return localSettings;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== "undefined" ? DEFAULT_STORE_SETTINGS : {});
     },
@@ -866,7 +866,7 @@
             updated_at: new Date().toISOString()
           });
           console.log("⚡ [Supabase] Store settings synced to cloud!");
-        } catch (e) {}
+        } catch (e) { }
       }
     },
 
@@ -891,7 +891,7 @@
             localStorage.setItem("UH_USERS", JSON.stringify(merged));
             return merged;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return JSON.parse(localStorage.getItem("UH_USERS")) || [];
     },
@@ -906,7 +906,7 @@
             updated_at: new Date().toISOString()
           });
           console.log("⚡ [Supabase] Registered customers synced to cloud!");
-        } catch (e) {}
+        } catch (e) { }
       }
     },
 
@@ -1006,8 +1006,8 @@
 
       const queueCount = this.getQueueCount();
       const statusColor = this.isConnected ? "#10b981" : "#f59e0b";
-      const statusTitle = this.isConnected 
-        ? "🟢 Cloud Connected & Synchronized" 
+      const statusTitle = this.isConnected
+        ? "🟢 Cloud Connected & Synchronized"
         : "🟡 Local Storage Active (Offline Safe Mode)";
 
       container.innerHTML = `

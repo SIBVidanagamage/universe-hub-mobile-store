@@ -449,7 +449,7 @@ const AdminController = {
       const msg = products.length === 0 
         ? 'Your store inventory is currently completely clear (0 products). Use the "+ Add New Product / Phone to Inventory" form above to add your real products!' 
         : 'No products found in this category filter. Try selecting "All Products" or add one above!';
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px 20px; color: var(--text-muted); font-size: 13.5px;"><div style="font-size:28px; margin-bottom:8px;">📦</div>${msg}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 40px 20px; color: var(--text-muted); font-size: 13.5px;"><div style="font-size:28px; margin-bottom:8px;">📦</div>${msg}</td></tr>`;
       return;
     }
 
@@ -461,7 +461,6 @@ const AdminController = {
         const category = prod.category || "brand-new-iphones";
         const price = Number(prod.price) || 0;
         const stock = prod.stock !== undefined ? prod.stock : 10;
-        const condition = prod.condition || prod.specs?.condition || "";
         const batteryHealth = prod.batteryHealth || prod.specs?.batteryHealth || null;
         const stockStatus = prod.stockStatus || prod.specs?.stockStatus || "available";
 
@@ -472,7 +471,7 @@ const AdminController = {
 
         let categoryBadge = "";
         if (isIphone) {
-          const sub = category === "brand-new-iphones" ? "Brand New" : (category === "used-iphones" ? "Certified Used" : (condition ? (condition.includes("Used") ? "Used" : "Brand New") : ""));
+          const sub = category === "brand-new-iphones" ? "Brand New" : (category === "used-iphones" ? "Used" : "");
           categoryBadge = `<span class="badge-pill badge-cat-iphone">📱 iPhone${sub ? ` • ${sub}` : ''}</span>`;
         } else {
           const catName = catObj ? catObj.name : category;
@@ -496,17 +495,10 @@ const AdminController = {
             </div>
           </td>
           <td>
-            ${condition ? `
-              <span class="badge-pill ${condition.toLowerCase().includes('brand new') ? 'badge-new' : 'badge-used'}">
-                ${condition}
-              </span>
-            ` : `<span style="color:var(--text-muted); font-size:11.5px;">— None —</span>`}
-            ${batteryHealth ? `<span class="badge-pill badge-battery" style="margin-left:4px;">${batteryHealth}${typeof batteryHealth === 'number' || !String(batteryHealth).includes('%') ? '%' : ''} Batt</span>` : ''}
-          </td>
-          <td>
             <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
               ${categoryBadge}
               ${brandBadge}
+              ${batteryHealth ? `<span class="badge-pill badge-battery">${batteryHealth}${typeof batteryHealth === 'number' || !String(batteryHealth).includes('%') ? '%' : ''} Batt</span>` : ''}
             </div>
           </td>
           <td style="color:var(--neon-cyan); font-weight:700;">Rs. ${price.toLocaleString()}</td>
@@ -534,7 +526,6 @@ const AdminController = {
         return `
         <tr>
           <td><div style="font-weight:700; color:#fff;">${prod?.name || prod?.title || fallbackId}</div></td>
-          <td><span style="color:var(--text-muted);">—</span></td>
           <td><span class="badge-pill badge-brand">${prod?.brand || 'Apple'}</span></td>
           <td style="color:var(--neon-cyan); font-weight:700;">Rs. ${(Number(prod?.price) || 0).toLocaleString()}</td>
           <td>${prod?.stock || 0}</td>
@@ -1105,9 +1096,7 @@ const AdminController = {
 
       const catEl = document.getElementById("adm-prod-category");
       const category = (catEl && catEl.value) ? catEl.value : "brand-new-iphones";
-
-      const condEl = document.getElementById("adm-prod-condition");
-      const condition = (condEl && condEl.value) ? condEl.value.trim() : "";
+      const condition = "";
 
       const origEl = document.getElementById("adm-prod-origprice");
       const origPrice = origEl && parseInt(origEl.value, 10) ? parseInt(origEl.value, 10) : price;
@@ -1150,7 +1139,7 @@ const AdminController = {
         imagesList = ["assets/hero_showcase.jpg"];
       }
 
-      const isUsed = !!(condition && !condition.toLowerCase().includes("brand new"));
+      const isUsed = category === "used-iphones";
       const storageOptions = this.getStorageOptionsFromForm('adm');
       const colorOptions = this.getColorOptionsFromForm('adm');
 
@@ -1169,12 +1158,8 @@ const AdminController = {
         mainCategory,
         category,
         subCategory: isUsed ? "used" : "brand-new",
-        condition,
-        conditionBadge: condition 
-          ? (isUsed 
-              ? (battery ? `${battery} Battery` : (condition.includes("Grade A+") ? "99% Mint" : condition.includes("Grade A") ? "Grade A" : "Grade B"))
-              : "Brand New Sealed")
-          : null,
+        condition: "",
+        conditionBadge: null,
         batteryHealth: battery,
         price: effectivePrice,
         originalPrice: effectiveOrigPrice,
@@ -1190,7 +1175,7 @@ const AdminController = {
         video: video,
         storageOptions: storageOptions,
         colorOptions: colorOptions,
-        tags: [condition, category, battery ? `${battery} Battery` : "Official Genuine"].filter(Boolean),
+        tags: [category, battery ? `${battery} Battery` : "Official Genuine"].filter(Boolean),
         description: desc
       };
 
@@ -1288,7 +1273,6 @@ const AdminController = {
       document.getElementById("edit-prod-brand").value = prod.brand || "Apple";
     }
     document.getElementById("edit-prod-category").value = prod.category;
-    document.getElementById("edit-prod-condition").value = prod.condition || prod.specs?.condition || "";
     document.getElementById("edit-prod-price").value = Number(prod.price) || 0;
     document.getElementById("edit-prod-origprice").value = prod.originalPrice || prod.price || 0;
     document.getElementById("edit-prod-battery").value = prod.batteryHealth || prod.specs?.batteryHealth || "";
@@ -1328,7 +1312,7 @@ const AdminController = {
       ? document.getElementById("edit-prod-brand").value
       : "Apple";
     const category = document.getElementById("edit-prod-category").value;
-    const condition = (document.getElementById("edit-prod-condition")?.value || "").trim();
+    const condition = "";
     const price = parseInt(document.getElementById("edit-prod-price").value, 10);
     const origPrice = parseInt(document.getElementById("edit-prod-origprice").value, 10) || price;
     const battery = (document.getElementById("edit-prod-battery")?.value || "").trim() || null;
@@ -1361,19 +1345,15 @@ const AdminController = {
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 
-    const isUsed = !!(condition && !condition.toLowerCase().includes("brand new"));
+    const isUsed = category === "used-iphones";
 
     prod.name = name;
     prod.brand = brand;
     prod.mainCategory = mainCategory;
     prod.category = category;
     prod.subCategory = isUsed ? "used" : "brand-new";
-    prod.condition = condition;
-    prod.conditionBadge = condition
-      ? (isUsed 
-          ? (battery ? `${battery} Battery` : (condition.includes("Grade A+") ? "99% Mint" : condition.includes("Grade A") ? "Grade A" : "Grade B"))
-          : "Brand New Sealed")
-      : null;
+    prod.condition = "";
+    prod.conditionBadge = null;
     prod.batteryHealth = battery;
     prod.price = price;
     prod.originalPrice = origPrice;

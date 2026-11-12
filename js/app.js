@@ -1108,11 +1108,6 @@ const App = {
       return `
         <div class="product-card" data-id="${prod.id}">
           <div class="card-top-badges">
-            ${prod.condition ? (
-              isUsed 
-                ? `<span class="badge-pill badge-used">${conditionLabel}</span>` 
-                : `<span class="badge-pill badge-new">${prod.condition.includes("Brand New") ? prod.condition : "Brand New Sealed"}</span>`
-            ) : ''}
             <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
               🏷️ ${prodBrand}
             </span>

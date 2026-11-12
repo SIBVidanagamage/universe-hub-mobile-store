@@ -407,7 +407,7 @@ function initDatabase() {
           localStorage.setItem("UH_BRANDS", JSON.stringify(filtered));
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // 3. Products schema upgrade & initial load (permanently purge all demo products)
@@ -425,12 +425,12 @@ function initDatabase() {
   try {
     deletedProductIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
   } catch (e) { deletedProductIds = []; }
-  
+
   // Guarantee that all deleted sample products are tracked and purged on all devices
   deletedProductIds = [...new Set([...deletedProductIds, ...SAMPLE_PRODUCT_IDS])];
   try {
     localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedProductIds));
-  } catch (e) {}
+  } catch (e) { }
 
   if (!existingProducts) {
     const enriched = INITIAL_PRODUCTS
@@ -449,7 +449,7 @@ function initDatabase() {
         prods = filtered;
         localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (!localStorage.getItem("UH_REVIEWS")) {
@@ -482,7 +482,7 @@ function initDatabase() {
       parsed.name = "Store Administrator (Shashika)";
       localStorage.setItem("UH_ADMIN_CONFIG", JSON.stringify(parsed));
     }
-  } catch (e) {}
+  } catch (e) { }
 
   try {
     let users = JSON.parse(localStorage.getItem("UH_USERS")) || [];
@@ -504,7 +504,7 @@ function initDatabase() {
       shashika.role = "admin";
       localStorage.setItem("UH_USERS", JSON.stringify(users));
     }
-  } catch (e) {}
+  } catch (e) { }
 
   // 4. Store Details, Branding, Hero Banner & About Us Settings
   const existingStoreSettings = localStorage.getItem("UH_STORE_SETTINGS");
