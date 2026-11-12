@@ -238,7 +238,7 @@ const BulkUploader = {
       const name = row.name || row.title || row.productname || row.producttitle || row.item || '';
       const brand = row.brand || row.maker || row.brandname || 'Apple';
       const category = row.category || row.cat || row.categoryid || 'brand-new-iphones';
-      const condition = row.condition || (name.toLowerCase().includes('used') ? 'Used - Grade A+' : 'Brand New');
+      const condition = row.condition || (name.toLowerCase().includes('used') ? 'Used - Grade A+' : '');
       
       // Clean numeric prices
       const rawPrice = String(row.price || row.sellingprice || '0').replace(/[^0-9.]/g, '');
@@ -251,9 +251,9 @@ const BulkUploader = {
       const stock = parseInt(rawStock, 10) || 5;
 
       const rawBattery = String(row.batteryhealth || row.battery || '').replace(/[^0-9]/g, '');
-      const batteryHealth = rawBattery ? parseInt(rawBattery, 10) : (condition.includes('New') ? 100 : null);
+      const batteryHealth = rawBattery ? parseInt(rawBattery, 10) : (condition && condition.includes('New') ? 100 : null);
 
-      const warranty = row.warranty || (condition.includes('New') ? '1 Year Official Apple Care + Store Care' : '6-Month Store Warranty');
+      const warranty = row.warranty || (condition && condition.includes('New') ? '1 Year Official Apple Care + Store Care' : '6-Month Store Warranty');
       const image = row.image || row.imageurl || row.photo || 'assets/hero_showcase.jpg';
       const description = row.description || row.desc || `${name} - 100% Genuine Tech available at Universe Hub.`;
 
@@ -270,7 +270,7 @@ const BulkUploader = {
         brand,
         category,
         condition,
-        conditionBadge: condition.includes('New') ? 'Brand New' : 'Certified Used',
+        conditionBadge: condition ? (condition.includes('New') ? 'Brand New' : 'Certified Used') : null,
         batteryHealth,
         price,
         originalPrice,
@@ -283,7 +283,7 @@ const BulkUploader = {
         rating: 5.0,
         reviewsCount: Math.floor(8 + Math.random() * 20),
         isFeatured: row.isfeatured === 'true' || row.featured === 'true' || false,
-        tags: [brand, condition]
+        tags: [brand, condition].filter(Boolean)
       });
     });
 
@@ -324,7 +324,7 @@ const BulkUploader = {
           <div style="font-weight:700; color:#fff;">${p.name}</div>
           <small style="color:var(--text-muted);">${p.brand} • ${p.category}</small>
         </td>
-        <td><span class="badge-pill" style="font-size:11px;">${p.condition}</span></td>
+        <td><span class="badge-pill" style="font-size:11px;">${p.condition || '— None —'}</span></td>
         <td style="font-weight:700; color:var(--neon-cyan);">Rs. ${p.price.toLocaleString()}</td>
         <td style="text-align:center;">${p.stock}</td>
         <td style="color:#10b981; font-weight:700; text-align:center;">Ready</td>

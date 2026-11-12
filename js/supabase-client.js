@@ -357,33 +357,37 @@
 
             const mapped = data
               .filter(item => !deletedIds.includes(String(item.id)))
-              .map(item => ({
-                id: item.id,
-                name: item.title,
-                title: item.title,
-                slug: item.slug || item.id,
-                category: item.category,
-                brand: item.brand,
-                price: Number(item.price),
-                originalPrice: item.original_price ? Number(item.original_price) : null,
-                badge: item.badge,
-                isFeatured: item.is_featured,
-                stock: item.stock,
-                rating: Number(item.rating || 5.0),
-                reviewsCount: item.review_count !== undefined ? Number(item.review_count) : (item.reviews || 0),
-                reviews: item.review_count !== undefined ? Number(item.review_count) : (item.reviews || 0),
-                image: item.image,
-                images: item.images || [item.image],
-                video: item.specs?.video || item.video || null,
-                condition: item.specs?.condition || item.condition || item.badge || "Brand New",
-                conditionBadge: item.badge || item.specs?.conditionBadge || "Brand New",
-                batteryHealth: item.specs?.batteryHealth || item.batteryHealth || null,
-                storageOptions: item.specs?.storageOptions || item.storageOptions || [],
-                colorOptions: item.specs?.colorOptions || item.colorOptions || [],
-                warranty: item.specs?.warranty || item.warranty || "1 Year Store Warranty",
-                description: item.description || "",
-                specs: item.specs || {}
-              }));
+              .map(item => {
+                const resolvedCondition = (item.specs && item.specs.condition !== undefined) ? item.specs.condition : (item.condition || "");
+                const resolvedBadge = item.badge || (item.specs && item.specs.conditionBadge) || (resolvedCondition ? "Brand New" : null);
+                return {
+                  id: item.id,
+                  name: item.title,
+                  title: item.title,
+                  slug: item.slug || item.id,
+                  category: item.category,
+                  brand: item.brand,
+                  price: Number(item.price),
+                  originalPrice: item.original_price ? Number(item.original_price) : null,
+                  badge: resolvedBadge,
+                  isFeatured: item.is_featured,
+                  stock: item.stock,
+                  rating: Number(item.rating || 5.0),
+                  reviewsCount: item.review_count !== undefined ? Number(item.review_count) : (item.reviews || 0),
+                  reviews: item.review_count !== undefined ? Number(item.review_count) : (item.reviews || 0),
+                  image: item.image,
+                  images: item.images || [item.image],
+                  video: item.specs?.video || item.video || null,
+                  condition: resolvedCondition,
+                  conditionBadge: resolvedBadge,
+                  batteryHealth: item.specs?.batteryHealth || item.batteryHealth || null,
+                  storageOptions: item.specs?.storageOptions || item.storageOptions || [],
+                  colorOptions: item.specs?.colorOptions || item.colorOptions || [],
+                  warranty: item.specs?.warranty || item.warranty || "1 Year Store Warranty",
+                  description: item.description || "",
+                  specs: item.specs || {}
+                };
+              });
 
             try {
               localStorage.setItem("UH_PRODUCTS", JSON.stringify(mapped));

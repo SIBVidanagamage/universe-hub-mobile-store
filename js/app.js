@@ -1078,9 +1078,9 @@ const App = {
       const hasColorVariants = Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0;
       const minPrice = hasStorageVariants ? Math.min(...prod.storageOptions.map(t => Number(t.price) || prod.price)) : prod.price;
 
-      const isUsed = prod.condition && !prod.condition.toLowerCase().includes("brand new");
+      const isUsed = !!(prod.condition && !prod.condition.toLowerCase().includes("brand new"));
       let conditionLabel = "Brand New (Sealed)";
-      if (isUsed) {
+      if (isUsed && prod.condition) {
         if (prod.condition.includes("Grade A+")) conditionLabel = "Grade A+ (99% Mint)";
         else if (prod.condition.includes("Grade A")) conditionLabel = "Grade A (95%-98%)";
         else if (prod.condition.includes("Grade B")) conditionLabel = "Grade B (90% Good)";
@@ -1090,10 +1090,11 @@ const App = {
       return `
         <div class="product-card" data-id="${prod.id}">
           <div class="card-top-badges">
-            ${isUsed 
-              ? `<span class="badge-pill badge-used">${conditionLabel}</span>` 
-              : `<span class="badge-pill badge-new">Brand New Sealed</span>`
-            }
+            ${prod.condition ? (
+              isUsed 
+                ? `<span class="badge-pill badge-used">${conditionLabel}</span>` 
+                : `<span class="badge-pill badge-new">${prod.condition.includes("Brand New") ? prod.condition : "Brand New Sealed"}</span>`
+            ) : ''}
             <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
               🏷️ ${prodBrand}
             </span>
@@ -1164,7 +1165,7 @@ const App = {
         <img src="${prod.image}" alt="">
         <div class="search-res-info">
           <h4>${prod.name}</h4>
-          <p>Rs. ${prod.price.toLocaleString()} • <span style="color:#94a3b8; font-weight:normal;">${prod.condition}</span></p>
+          <p>Rs. ${prod.price.toLocaleString()}${prod.condition ? ` • <span style="color:#94a3b8; font-weight:normal;">${prod.condition}</span>` : ''}</p>
         </div>
       </div>
     `).join("");
@@ -1298,9 +1299,9 @@ const App = {
       this.quickViewSelectedColor = null;
     }
 
-    const isUsed = prod.condition && !prod.condition.toLowerCase().includes("brand new");
-    let condTitle = "🌟 Brand New (100% Sealed Box)";
-    if (isUsed) {
+    const isUsed = !!(prod.condition && !prod.condition.toLowerCase().includes("brand new"));
+    let condTitle = prod.condition ? "🌟 Brand New (100% Sealed Box)" : "";
+    if (isUsed && prod.condition) {
       if (prod.condition.includes("Grade A+")) condTitle = "✨ Grade A+ (99% Mint / Like New)";
       else if (prod.condition.includes("Grade A")) condTitle = "✨ Grade A (95% - 98% Super Clean)";
       else if (prod.condition.includes("Grade B")) condTitle = "⚡ Grade B (90% Good Condition)";
@@ -1334,7 +1335,7 @@ const App = {
         <!-- Right: Specs and Details -->
         <div>
           <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-            <span class="badge-pill ${isUsed ? 'badge-used' : 'badge-new'}">${condTitle}</span>
+            ${prod.condition ? `<span class="badge-pill ${isUsed ? 'badge-used' : 'badge-new'}">${condTitle}</span>` : ''}
             ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 Battery: ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''} Original</span>` : ''}
             ${mediaList.some(m => m.type === 'video') ? `<span class="badge-pill" style="background:rgba(224,86,253,0.18); border:1px solid rgba(224,86,253,0.4); color:#e056fd;">🎬 Video Showcase</span>` : ''}
           </div>
