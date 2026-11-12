@@ -383,6 +383,7 @@
                   batteryHealth: item.specs?.batteryHealth || item.batteryHealth || null,
                   storageOptions: item.specs?.storageOptions || item.storageOptions || [],
                   colorOptions: item.specs?.colorOptions || item.colorOptions || [],
+                  stockStatus: item.specs?.stockStatus || (item.stockStatus || "available"),
                   warranty: item.specs?.warranty || item.warranty || "1 Year Store Warranty",
                   description: item.description || "",
                   specs: item.specs || {}
@@ -532,6 +533,7 @@
           storageOptions: product.storageOptions || [],
           colorOptions: product.colorOptions || [],
           condition: product.condition || "",
+          stockStatus: product.stockStatus || "available",
           batteryHealth: product.batteryHealth || null,
           warranty: product.warranty || ""
         },
@@ -975,6 +977,7 @@
               storageOptions: p.storageOptions || [],
               colorOptions: p.colorOptions || [],
               condition: p.condition || "",
+              stockStatus: p.stockStatus || "available",
               batteryHealth: p.batteryHealth || null
             }
           });

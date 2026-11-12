@@ -974,7 +974,7 @@ const App = {
             <div class="brand-feat-title">${b.name}</div>
             <div class="brand-feat-sub">${b.tagline || 'Original Products'}</div>
           </div>
-          <span class="brand-feat-badge">${count} in stock</span>
+          <span class="brand-feat-badge">${count} Products</span>
         </div>
       `;
     }).join("");
@@ -1099,6 +1099,7 @@ const App = {
               🏷️ ${prodBrand}
             </span>
             ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>` : ''}
+            ${prod.stockStatus === 'on-request' ? `<span class="badge-pill" style="background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.5); color:#f59e0b;">⚡ Sourced on Order</span>` : ''}
             ${prod.discount ? `<span class="badge-pill badge-discount">${prod.discount}</span>` : ''}
           </div>
 
@@ -1129,10 +1130,15 @@ const App = {
               ${prod.originalPrice > minPrice ? `<span class="original-price">Rs. ${prod.originalPrice.toLocaleString()}</span>` : ''}
             </div>
 
-            <button class="add-to-cart-btn" onclick="${(hasStorageVariants || hasColorVariants) ? `App.openQuickView('${prod.id}')` : `App.addToCart('${prod.id}')`}">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-              <span>${(hasStorageVariants || hasColorVariants) ? 'Select Capacity & Color' : 'Add to Cart'}</span>
-            </button>
+            <div style="display:flex; gap:6px; margin-top:8px;">
+              <button class="add-to-cart-btn" style="flex:1;" onclick="${(hasStorageVariants || hasColorVariants) ? `App.openQuickView('${prod.id}')` : `App.addToCart('${prod.id}')`}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span>${(hasStorageVariants || hasColorVariants) ? 'Select Options' : 'Add to Cart'}</span>
+              </button>
+              <button type="button" class="btn-card-wa" style="width:38px; height:38px; flex-shrink:0; background:#25d366; color:#061b0f; border:none; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(37,211,102,0.3);" onclick="event.stopPropagation(); App.inquireProductStockWhatsApp('${prod.id}')" title="Check Stock &amp; Inquire on WhatsApp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -1247,6 +1253,43 @@ const App = {
       this.quickViewSelectedColor, 
       this.quickViewSelectedPrice
     );
+  },
+
+  inquireProductStockWhatsApp(prodId) {
+    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || (typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : []);
+    const prod = products.find(p => String(p.id) === String(prodId));
+    if (!prod) return;
+
+    // Use active Quick View selection if inquiring from the open modal, otherwise product defaults
+    const isCurrentModal = String(this.quickViewCurrentProdId) === String(prodId);
+    const storage = (isCurrentModal && this.quickViewSelectedStorage) 
+      ? this.quickViewSelectedStorage 
+      : ((Array.isArray(prod.storageOptions) && prod.storageOptions[0]?.capacity) || "");
+    const color = (isCurrentModal && this.quickViewSelectedColor) 
+      ? this.quickViewSelectedColor 
+      : ((Array.isArray(prod.colorOptions) && prod.colorOptions[0]) || "");
+    const price = (isCurrentModal && this.quickViewSelectedPrice) 
+      ? this.quickViewSelectedPrice 
+      : prod.price;
+
+    let details = [];
+    if (storage) details.push(`💾 Capacity: ${storage}`);
+    if (color) details.push(`🎨 Color: ${color}`);
+    if (prod.condition) details.push(`✨ Condition: ${prod.condition}`);
+    if (price) details.push(`💰 Price: Rs. ${Number(price).toLocaleString()}`);
+
+    const isSourced = prod.stockStatus === "on-request";
+    const statusNote = isSourced ? "\n*(I see this item can be arranged / sourced on request)*" : "";
+
+    const msg = `Hello Universe Hub Store (Maharagama)! 👋\n\nI would like to check stock availability for:\n📱 *${prod.name}*\n${details.join("\n")}${statusNote}\n\nCould you please let me know if this is currently available in the shop, or how fast you can arrange / bring this stock for me?\n\nThank you!`;
+
+    const settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    const rawWa = (settings.whatsapp || settings.phone || "0740219239").replace(/[^0-9]/g, "");
+    let waPhone = rawWa;
+    if (waPhone.startsWith("0")) waPhone = "94" + waPhone.substring(1);
+    else if (!waPhone.startsWith("94")) waPhone = "94" + waPhone;
+
+    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   },
 
   openQuickView(prodId) {
@@ -1393,9 +1436,15 @@ const App = {
               <span style="color:var(--text-muted);">Physical Store Warranty:</span>
               <span style="color:#fff; font-weight:600;">${prod.warranty || '1 Year Store Warranty'}</span>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="color:var(--text-muted);">Stock Availability:</span>
-              <span style="color:var(--success); font-weight:700;">In Stock (${prod.stock} units)</span>
+              ${prod.stockStatus === 'on-request'
+                ? `<span style="color:#f59e0b; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#f59e0b; box-shadow:0 0 8px #f59e0b;"></span> ⚡ Available on Request (Fast Sourcing)</span>`
+                : (prod.stockStatus === 'inquire'
+                    ? `<span style="color:#25d366; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#25d366; box-shadow:0 0 8px #25d366;"></span> 💬 Inquire via WhatsApp</span>`
+                    : `<span style="color:#10b981; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span> 🟢 In Stock &amp; Ready to Order</span>`
+                  )
+              }
             </div>
             <div style="display:flex; justify-content:space-between;">
               <span style="color:var(--text-muted);">Store Pickup &amp; Delivery:</span>
@@ -1403,9 +1452,17 @@ const App = {
             </div>
           </div>
 
-          <button id="qv-add-cart-btn" class="btn-primary-glow" style="width:100%; justify-content:center;" onclick="App.executeAddToCartFromQuickView(); App.closeModal('quickview-modal');">
-            Add to Cart ${this.quickViewSelectedStorage ? `• ${this.quickViewSelectedStorage} ` : ''}(Rs. ${this.quickViewSelectedPrice.toLocaleString()})
-          </button>
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <button id="qv-add-cart-btn" class="btn-primary-glow" style="width:100%; justify-content:center; padding:12px; font-size:14px; font-weight:700;" onclick="App.executeAddToCartFromQuickView(); App.closeModal('quickview-modal');">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+              Add to Cart ${this.quickViewSelectedStorage ? `• ${this.quickViewSelectedStorage} ` : ''}(Rs. ${this.quickViewSelectedPrice.toLocaleString()})
+            </button>
+
+            <button type="button" class="btn-whatsapp-inquire" style="width:100%; justify-content:center; background:#25d366; color:#061b0f; font-weight:800; font-size:13.5px; border:none; border-radius:8px; padding:11px 16px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 0 16px rgba(37,211,102,0.35);" onclick="App.inquireProductStockWhatsApp('${prod.id}')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
+              <span>Check Live Stock &amp; Inquire on WhatsApp</span>
+            </button>
+          </div>
         </div>
       </div>
     `;

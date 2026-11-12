@@ -497,9 +497,10 @@ const AdminController = {
         </td>
         <td style="color:var(--neon-cyan); font-weight:700;">Rs. ${prod.price.toLocaleString()}</td>
         <td>
-          <span style="font-weight:600; color:${prod.stock > 5 ? 'var(--success)' : 'var(--danger)'};">
-            ${prod.stock} in stock
-          </span>
+          <div style="font-weight:700; font-size:12px; color:${prod.stockStatus === 'on-request' ? '#f59e0b' : (prod.stockStatus === 'inquire' ? 'var(--neon-cyan)' : 'var(--success)')};">
+            ${prod.stockStatus === 'on-request' ? '⚡ On Request' : (prod.stockStatus === 'inquire' ? '💬 WhatsApp' : '🟢 In Store')}
+          </div>
+          <div style="font-size:11px; color:var(--text-muted);">${prod.stock || 0} internal units</div>
         </td>
         <td>
           <div class="table-action-btns">
@@ -1081,8 +1082,11 @@ const AdminController = {
       const battEl = document.getElementById("adm-prod-battery");
       const battery = battEl && battEl.value.trim() ? battEl.value.trim() : null;
 
+      const stockStatusEl = document.getElementById("adm-prod-stock-status");
+      const stockStatus = (stockStatusEl && stockStatusEl.value) ? stockStatusEl.value : "available";
+
       const stockEl = document.getElementById("adm-prod-stock");
-      const stock = stockEl && parseInt(stockEl.value, 10) ? parseInt(stockEl.value, 10) : 5;
+      const stock = stockEl && parseInt(stockEl.value, 10) ? parseInt(stockEl.value, 10) : 10;
 
       const warEl = document.getElementById("adm-prod-warranty");
       const warranty = (warEl && warEl.value.trim()) ? warEl.value.trim() : "1 Year Warranty";
@@ -1145,6 +1149,7 @@ const AdminController = {
         rating: 5.0,
         reviewsCount: 1,
         stock,
+        stockStatus,
         isFeatured: true,
         warranty,
         image: imagesList[0],
@@ -1254,7 +1259,10 @@ const AdminController = {
     document.getElementById("edit-prod-price").value = prod.price;
     document.getElementById("edit-prod-origprice").value = prod.originalPrice || prod.price;
     document.getElementById("edit-prod-battery").value = prod.batteryHealth || "";
-    document.getElementById("edit-prod-stock").value = prod.stock;
+    if (document.getElementById("edit-prod-stock-status")) {
+      document.getElementById("edit-prod-stock-status").value = prod.stockStatus || "available";
+    }
+    document.getElementById("edit-prod-stock").value = prod.stock !== undefined ? prod.stock : 10;
     document.getElementById("edit-prod-warranty").value = prod.warranty || "";
     document.getElementById("edit-prod-desc").value = prod.description || "";
     document.getElementById("edit-prod-video").value = prod.video || "";
@@ -1291,7 +1299,8 @@ const AdminController = {
     const price = parseInt(document.getElementById("edit-prod-price").value, 10);
     const origPrice = parseInt(document.getElementById("edit-prod-origprice").value, 10) || price;
     const battery = (document.getElementById("edit-prod-battery")?.value || "").trim() || null;
-    const stock = parseInt(document.getElementById("edit-prod-stock").value, 10) || 1;
+    const stockStatus = document.getElementById("edit-prod-stock-status")?.value || "available";
+    const stock = parseInt(document.getElementById("edit-prod-stock").value, 10) || 10;
     const warranty = document.getElementById("edit-prod-warranty") ? document.getElementById("edit-prod-warranty").value.trim() : "1 Year Warranty";
     const video = (window.MediaUploader && MediaUploader.getVideo('edit')) || (document.getElementById("edit-prod-video") ? document.getElementById("edit-prod-video").value.trim() : "");
     const desc = document.getElementById("edit-prod-desc").value.trim();
@@ -1337,6 +1346,7 @@ const AdminController = {
     prod.originalPrice = origPrice;
     prod.discount = origPrice > price ? `${Math.round(((origPrice - price)/origPrice)*100)}% OFF` : "Best Deal";
     prod.stock = stock;
+    prod.stockStatus = stockStatus;
     prod.warranty = warranty;
     prod.images = imagesList;
     prod.image = imagesList[0];

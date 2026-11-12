@@ -248,7 +248,8 @@ const BulkUploader = {
       const originalPrice = parseFloat(rawOrig) || (price > 0 ? Math.round(price * 1.08) : 0);
 
       const rawStock = String(row.stock || row.qty || row.quantity || '5').replace(/[^0-9]/g, '');
-      const stock = parseInt(rawStock, 10) || 5;
+      const stock = parseInt(rawStock, 10) || 10;
+      const stockStatus = row.stockstatus || row.status || (row.onrequest === 'true' ? 'on-request' : 'available');
 
       const rawBattery = String(row.batteryhealth || row.battery || '').replace(/[^0-9]/g, '');
       const batteryHealth = rawBattery ? parseInt(rawBattery, 10) : (condition && condition.includes('New') ? 100 : null);
@@ -276,6 +277,7 @@ const BulkUploader = {
         originalPrice,
         discount: originalPrice > price ? `${Math.round(((originalPrice - price) / originalPrice) * 100)}% OFF` : null,
         stock,
+        stockStatus,
         warranty,
         image,
         images: [image],
