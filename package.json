@@ -4,6 +4,7 @@
   "description": "Universe Hub - Premium Mobile, Certified iPhones & Repair Lab E-Commerce Platform",
   "main": "server.js",
   "scripts": {
+    "build": "echo 'Static build ready'",
     "start": "node server.js",
     "dev": "node server.js"
   },
