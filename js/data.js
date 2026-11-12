@@ -189,45 +189,7 @@ const INITIAL_BRANDS = [
   }
 ];
 
-const INITIAL_PRODUCTS = [
-  {
-    id: "prod-1794121290955",
-    name: "iphone 13 pro max",
-    title: "iphone 13 pro max",
-    slug: "prod-1794121290955",
-    category: "used-iphones",
-    mainCategory: "iphones",
-    subCategory: "used",
-    brand: "Apple",
-    condition: "Grade B (90% Good)",
-    conditionBadge: "Grade B",
-    batteryHealth: "85%",
-    stockStatus: "available",
-    warranty: "1month",
-    price: 145000,
-    originalPrice: 150000,
-    badge: "85% Battery",
-    isFeatured: true,
-    stock: 5,
-    rating: 5,
-    reviewsCount: 1,
-    image: "assets/hero_showcase.jpg",
-    images: ["assets/hero_showcase.jpg"],
-    description: "full set with box",
-    specs: {
-      video: "",
-      warranty: "1month",
-      condition: "Grade B (90% Good)",
-      colorOptions: ["Midnight / Black", "Starlight / Silver", "Blue / Sierra Blue"],
-      batteryHealth: "85%",
-      storageOptions: [
-        { price: 145000, capacity: "128GB", originalPrice: 150000 },
-        { price: 155000, capacity: "256GB", originalPrice: 160000 },
-        { price: 165000, capacity: "512GB", originalPrice: 169969 }
-      ]
-    }
-  }
-];
+const INITIAL_PRODUCTS = [];
 
 // Physical Store Customer Reviews
 const INITIAL_REVIEWS = [
@@ -454,7 +416,8 @@ function initDatabase() {
     'prod-used-ip14pm', 'prod-used-ip13p', 'prod-used-ip12', 'prod-used-ip11',
     'prod-case-magsafe', 'prod-case-carbon', 'prod-charger-65w', 'prod-pb-20k',
     'prod-cable-braided', 'prod-glass-9h', 'prod-cam-lens', 'prod-airpods-pro',
-    'prod-ugreen-100w', 'prod-baseus-cable', 'prod-wiwu-wallet', 'prod-asper-case'
+    'prod-ugreen-100w', 'prod-baseus-cable', 'prod-wiwu-wallet', 'prod-asper-case',
+    'prod-1794121290955'
   ];
 
   const existingProducts = localStorage.getItem("UH_PRODUCTS");

@@ -1059,6 +1059,21 @@ const App = {
     });
 
     if (filtered.length === 0) {
+      if (products.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 70px 20px;">
+            <div style="font-size:36px; margin-bottom:12px;">✨</div>
+            <h3 style="color:#fff; font-size:18px; font-weight:700; margin-bottom:6px;">Store Inventory Updating</h3>
+            <p style="color:var(--text-secondary); font-size:14px; max-width:480px; margin:0 auto;">We are currently uploading our latest stock of authentic iPhones and premium accessories. Please check back shortly or contact us on WhatsApp!</p>
+            <div style="margin-top:20px;">
+              <a href="https://wa.me/94740219239?text=Hi%20Universe%20Hub,%20I%20want%20to%20inquire%20about%20available%20stock" target="_blank" class="btn-primary-glow" style="display:inline-flex; align-items:center; gap:8px;">
+                <span>💬 Inquire on WhatsApp (074-0219239)</span>
+              </a>
+            </div>
+          </div>
+        `;
+        return;
+      }
       container.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
           <p style="color:var(--text-secondary); font-size:16px;">No products found matching these filters.</p>

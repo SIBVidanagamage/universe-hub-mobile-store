@@ -446,7 +446,10 @@ const AdminController = {
     if (countSpan) countSpan.textContent = `Showing ${filtered.length} of ${products.length} Products`;
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 30px; color: var(--text-muted);">No products found in this category filter. Try selecting "All Products" or add one above!</td></tr>`;
+      const msg = products.length === 0 
+        ? 'Your store inventory is currently completely clear (0 products). Use the "+ Add New Product / Phone to Inventory" form above to add your real products!' 
+        : 'No products found in this category filter. Try selecting "All Products" or add one above!';
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px 20px; color: var(--text-muted); font-size: 13.5px;"><div style="font-size:28px; margin-bottom:8px;">📦</div>${msg}</td></tr>`;
       return;
     }
 
