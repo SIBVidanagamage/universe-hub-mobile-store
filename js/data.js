@@ -338,37 +338,8 @@ const DEMO_REPAIR_ORDERS = [
   }
 ];
 
-// Initial Storefront Orders
-const DEMO_STORE_ORDERS = [
-  {
-    id: "ORD-7712",
-    customerName: "Ruwan Wijetunga",
-    email: "ruwan@gmail.com",
-    phone: "077 345 6789",
-    date: "Today, 02:15 PM",
-    items: [
-      { name: "Anker Nano II 65W GaN Fast Charger", qty: 1, price: 11990 },
-      { name: "Braided 240W Type-C Cable", qty: 1, price: 2990 }
-    ],
-    total: 14980,
-    method: "Island-wide Express Courier (COD)",
-    status: "Dispatched"
-  },
-  {
-    id: "ORD-7711",
-    customerName: "Thilina Jayasuriya",
-    email: "thilina.j@outlook.com",
-    phone: "070 998 7654",
-    date: "Yesterday, 04:40 PM",
-    items: [
-      { name: "iPhone 14 Pro Max 256GB (Certified Used)", qty: 1, price: 245000 },
-      { name: "Spigen Ultra Hybrid MagSafe Case", qty: 1, price: 6490 }
-    ],
-    total: 251490,
-    method: "Physical Store Pickup (Colombo 03)",
-    status: "Ready for Pickup"
-  }
-];
+// Initial Storefront Orders (Production: clean slate, 0 demo orders)
+const DEMO_STORE_ORDERS = [];
 
 // Helper to detect brand from product name and attributes
 function detectProductBrand(prod) {
@@ -460,6 +431,13 @@ function initDatabase() {
   }
   if (!localStorage.getItem("UH_ORDERS")) {
     localStorage.setItem("UH_ORDERS", JSON.stringify([]));
+  } else {
+    try {
+      let curOrd = JSON.parse(localStorage.getItem("UH_ORDERS") || "[]");
+      const purgeIds = ["ORD-2308", "ORD-7968", "ORD-9172", "ORD-7711", "ORD-7712", "ORD-4401", "ORD-4402"];
+      curOrd = curOrd.filter(o => !purgeIds.includes(String(o.id)) && !purgeIds.includes(String(o.orderNumber)));
+      localStorage.setItem("UH_ORDERS", JSON.stringify(curOrd));
+    } catch (e) {}
   }
   if (!localStorage.getItem("UH_CART")) {
     localStorage.setItem("UH_CART", JSON.stringify([]));

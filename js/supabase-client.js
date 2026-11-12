@@ -666,9 +666,16 @@
             try {
               deletedOrderIds = JSON.parse(localStorage.getItem("UH_DELETED_ORDER_IDS") || "[]");
             } catch (e) { deletedOrderIds = []; }
+            const testPurgeIds = ["ORD-2308", "ORD-7968", "ORD-9172", "ORD-7711", "ORD-7712", "ORD-4401", "ORD-4402"];
+            for (const pid of testPurgeIds) {
+              if (!deletedOrderIds.includes(pid)) deletedOrderIds.push(pid);
+            }
+            try {
+              localStorage.setItem("UH_DELETED_ORDER_IDS", JSON.stringify(deletedOrderIds));
+            } catch (e) {}
 
             const cloudOrders = data
-              .filter(ord => !deletedOrderIds.includes(String(ord.id)))
+              .filter(ord => !deletedOrderIds.includes(String(ord.id)) && !deletedOrderIds.includes(String(ord.order_number)))
               .map(ord => ({
                 id: ord.id,
                 orderNumber: ord.order_number || ord.id,
@@ -689,8 +696,8 @@
               }));
 
             let localOrders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
-            // Remove demo placeholder orders from local cache
-            localOrders = localOrders.filter(o => o.id !== 'ORD-7711' && o.id !== 'ORD-7712' && o.id !== 'ORD-4401' && o.id !== 'ORD-4402');
+            // Remove deleted and demo placeholder orders from local cache
+            localOrders = localOrders.filter(o => !deletedOrderIds.includes(String(o.id)) && !deletedOrderIds.includes(String(o.orderNumber)));
 
             const merged = [...cloudOrders];
             for (const lOrd of localOrders) {
@@ -766,6 +773,39 @@
         }
       } else {
         this.enqueueSync("delete_order", { id: strId });
+      }
+    },
+
+    async purgeAllOrders() {
+      // 1. Clear local orders
+      localStorage.setItem("UH_ORDERS", JSON.stringify([]));
+
+      // 2. Mark test orders as deleted
+      let deletedOrderIds = [];
+      try {
+        deletedOrderIds = JSON.parse(localStorage.getItem("UH_DELETED_ORDER_IDS") || "[]");
+      } catch (e) { deletedOrderIds = []; }
+      const testIds = ["ORD-2308", "ORD-7968", "ORD-9172", "ORD-7711", "ORD-7712", "ORD-4401", "ORD-4402"];
+      for (const tid of testIds) {
+        if (!deletedOrderIds.includes(tid)) deletedOrderIds.push(tid);
+      }
+      try {
+        localStorage.setItem("UH_DELETED_ORDER_IDS", JSON.stringify(deletedOrderIds));
+      } catch (e) {}
+
+      // 3. Purge all records from Supabase Cloud orders table
+      if (this.isConnected && this.client) {
+        try {
+          const { error } = await this.client.from("orders").delete().neq("id", "00000000");
+          if (!error) console.log("⚡ [Supabase] All orders successfully purged from cloud.");
+          await this.client.from("store_settings").upsert({
+            key: "deleted_order_ids",
+            value: deletedOrderIds,
+            updated_at: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn("[Supabase] purgeAllOrders error:", e);
+        }
       }
     },
 
