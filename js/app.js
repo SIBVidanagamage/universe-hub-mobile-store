@@ -1305,6 +1305,81 @@ const App = {
     window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   },
 
+  formatProductDescription(desc) {
+    if (!desc) return "";
+    let clean = String(desc).trim();
+
+    // If description doesn't have line breaks (crammed single paragraph with common spec keywords), smartly insert line breaks
+    if (!clean.includes("\n")) {
+      clean = clean
+        .replace(/(Key Features:?)/gi, "\n\n$1\n")
+        .replace(/\s*(Display:)/gi, "\n• Display:")
+        .replace(/\s*(Processor:)/gi, "\n• Processor:")
+        .replace(/\s*(Rear Camera:)/gi, "\n• Rear Camera:")
+        .replace(/\s*(Front Camera:)/gi, "\n• Front Camera:")
+        .replace(/\s*(Battery:)/gi, "\n• Battery:")
+        .replace(/\s*(Security:)/gi, "\n• Security:")
+        .replace(/\s*(Charging:)/gi, "\n• Charging:")
+        .replace(/\s*(Protection:)/gi, "\n• Protection:")
+        .replace(/\s*(Operating System:)/gi, "\n• Operating System:")
+        .replace(/\s*(Storage:)/gi, "\n• Storage:")
+        .replace(/\s*(Warranty:)/gi, "\n• Warranty:")
+        .trim();
+    }
+
+    const escapeHtml = (str) => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+
+    const lines = clean.split("\n");
+    return lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return '<div style="height:8px;"></div>';
+
+      // Heading detection
+      if (/^(Key Features|Specifications|Specs|Highlights|Package Includes|In the Box):?$/i.test(trimmed)) {
+        return `<div style="font-weight:800; color:#fff; font-size:13.5px; margin-top:12px; margin-bottom:6px; display:flex; align-items:center; gap:6px; letter-spacing:0.3px;">
+          <span style="color:var(--neon-cyan);">⚡</span>
+          <span>${escapeHtml(trimmed)}</span>
+        </div>`;
+      }
+
+      // Bullet points (•, -, *)
+      if (/^[•\-\*]\s*/.test(trimmed)) {
+        const text = trimmed.replace(/^[•\-\*]\s*/, '');
+        const colonIdx = text.indexOf(':');
+        if (colonIdx > 0 && colonIdx < 30) {
+          const label = text.substring(0, colonIdx);
+          const val = text.substring(colonIdx + 1);
+          return `<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; line-height:1.55; padding-left:4px;">
+            <span style="color:var(--neon-cyan); font-size:11px; margin-top:3px;">✦</span>
+            <span><strong style="color:#f8fafc; font-weight:700;">${escapeHtml(label)}:</strong><span style="color:#cbd5e1;">${escapeHtml(val)}</span></span>
+          </div>`;
+        }
+        return `<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; line-height:1.55; padding-left:4px;">
+          <span style="color:var(--neon-cyan); font-size:11px; margin-top:3px;">✦</span>
+          <span style="color:#cbd5e1;">${escapeHtml(text)}</span>
+        </div>`;
+      }
+
+      // "Label: Value" format without bullet
+      const colonIdx = trimmed.indexOf(':');
+      if (colonIdx > 0 && colonIdx < 28 && !trimmed.toLowerCase().startsWith('http')) {
+        const label = trimmed.substring(0, colonIdx);
+        const val = trimmed.substring(colonIdx + 1);
+        return `<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:5px; line-height:1.55; padding-left:4px;">
+          <span style="color:var(--neon-cyan); font-size:11px; margin-top:3px;">✦</span>
+          <span><strong style="color:#f8fafc; font-weight:700;">${escapeHtml(label)}:</strong><span style="color:#cbd5e1;">${escapeHtml(val)}</span></span>
+        </div>`;
+      }
+
+      // Normal paragraph
+      return `<p style="margin:0 0 8px 0; color:var(--text-secondary); line-height:1.65;">${escapeHtml(trimmed)}</p>`;
+    }).join("");
+  },
+
   openQuickView(prodId) {
     const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
     const prod = products.find(p => p.id === prodId);
@@ -1442,7 +1517,9 @@ const App = {
             </div>
           ` : ''}
 
-          <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">${prod.description}</p>
+          <div class="quickview-desc-formatted" style="font-size:13.5px; color:var(--text-secondary); line-height:1.65; margin-bottom:18px; background:rgba(255,255,255,0.02); padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);">
+            ${this.formatProductDescription(prod.description)}
+          </div>
 
           <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:12px; margin-bottom:20px; font-size:12.5px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">

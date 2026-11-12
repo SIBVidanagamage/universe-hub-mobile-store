@@ -12,9 +12,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=45">
-  <link rel="stylesheet" href="css/invoice.css?v=45">
-  <link rel="stylesheet" href="css/payment.css?v=45">
+  <link rel="stylesheet" href="css/style.css?v=50">
+  <link rel="stylesheet" href="css/invoice.css?v=50">
+  <link rel="stylesheet" href="css/payment.css?v=50">
   <style>
     .site-main-logo, #admin-logo-preview {
       background: transparent !important;
@@ -64,7 +64,7 @@
       <div class="container nav-row">
         <!-- Official Logo -->
         <a href="#" class="brand-logo" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;" style="display:flex; align-items:center; text-decoration:none;">
-          <img src="assets/universe_hub_logo.png?v=45" alt="Universe Hub - Your One Stop Shop For Everything" class="site-main-logo" style="height:48px; width:auto; max-width:240px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
+          <img src="assets/universe_hub_logo.png?v=50" alt="Universe Hub - Your One Stop Shop For Everything" class="site-main-logo" style="height:48px; width:auto; max-width:240px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
         </a>
 
         <!-- Search with Dropdown -->
@@ -180,7 +180,7 @@
 
         <!-- Hero Showcase Visual -->
         <div class="hero-visual-card">
-          <img id="hero-showcase-img" src="assets/custom_hero_banner.png?v=45" alt="Universe Hub Latest iPhones Showcase" class="hero-visual-img" onerror="this.src='assets/hero_showcase.jpg'">
+          <img id="hero-showcase-img" src="assets/custom_hero_banner.png?v=50" alt="Universe Hub Latest iPhones Showcase" class="hero-visual-img" onerror="this.src='assets/hero_showcase.jpg'">
           
           <div class="floating-annotation annotation-top-right">
             <div class="anno-dot"></div>
@@ -541,7 +541,7 @@
         <div class="footer-columns-grid">
           <div class="footer-col">
             <div style="margin-bottom:14px;">
-              <img src="assets/universe_hub_logo.png?v=45" alt="Universe Hub" class="site-main-logo" style="height:44px; width:auto; max-width:220px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
+              <img src="assets/universe_hub_logo.png?v=50" alt="Universe Hub" class="site-main-logo" style="height:44px; width:auto; max-width:220px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
             </div>
             <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
               Sri Lanka's trusted destination for genuine Apple iPhones, certified used phones with transparent battery diagnostics, GaN chargers, and physical store mobile repairs.
@@ -610,7 +610,7 @@
     <div class="admin-top-nav">
       <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; align-items:center; gap:14px;">
-          <img src="assets/universe_hub_logo.png?v=45" alt="Universe Hub Logo" class="site-main-logo" style="height:40px; width:auto; max-width:180px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
+          <img src="assets/universe_hub_logo.png?v=50" alt="Universe Hub Logo" class="site-main-logo" style="height:40px; width:auto; max-width:180px; object-fit:contain; display:block; background:transparent !important; mix-blend-mode:screen;">
           <div>
             <h2 style="font-size:18px; font-weight:800; color:#fff;">Universe Hub • Admin Center</h2>
             <small style="color:#d8b4fe;">Inventory, Repair Orders, Store &amp; Hero Banner</small>
@@ -861,8 +861,15 @@
               </div>
             </div>
             <div style="grid-column: 1 / -1;">
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brief Description:</label>
-              <input type="text" id="adm-prod-desc" placeholder="Full specs, color options, accessories included..." style="width:100%;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <label style="font-size:12.5px; color:#cbd5e1; font-weight:700; margin:0;">
+                  📝 Detailed Product Description &amp; Specifications:
+                </label>
+                <span style="font-size:11.5px; color:var(--neon-cyan);">
+                  💡 Supports Enter / Line breaks &amp; Bullet points (•)
+                </span>
+              </div>
+              <textarea id="adm-prod-desc" rows="6" placeholder="Enter product overview, key features, display specs, camera details, battery info...&#10;&#10;Key Features:&#10;• Display: 4.7-inch Retina HD Display&#10;• Processor: Apple A13 Bionic Chip&#10;• Camera: 12MP Wide / 7MP Front&#10;• Battery &amp; Charging: Fast Charging Supported" style="width:100%; font-family:inherit; font-size:13px; line-height:1.6; padding:12px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.35); color:#fff; box-sizing:border-box; resize:vertical;"></textarea>
             </div>
             <div style="grid-column: 1 / -1;">
               <button type="button" id="btn-admin-add-product" class="btn-primary-glow" style="padding:10px 24px; cursor:pointer;" onclick="AdminController.handleAddProduct(event)">Add Product to Live Store</button>
@@ -1183,7 +1190,7 @@
                   <span id="admin-hero-dims-badge" class="dimension-detected-badge">Detected: 1376 × 768 px</span>
                 </div>
                 <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:2px solid rgba(0,210,255,0.3); background:#0b0f19; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
-                  <img id="admin-hero-banner-preview" src="assets/custom_hero_banner.png?v=45" alt="Hero Banner Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+                  <img id="admin-hero-banner-preview" src="assets/custom_hero_banner.png?v=50" alt="Hero Banner Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
                   <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); padding:4px 12px; border-radius:20px; border:1px solid rgba(0,210,255,0.4); font-size:11px; color:#fff; display:flex; align-items:center; gap:6px;">
                     <span style="width:7px; height:7px; border-radius:50%; background:var(--neon-cyan); display:inline-block;"></span>
                     Current Live Banner
@@ -1249,7 +1256,7 @@
                   <span id="admin-logo-dims-badge" class="dimension-detected-badge">Detected: 879 × 308 px</span>
                 </div>
                 <div style="background:#090d16; border:1px solid var(--border-subtle); border-radius:12px; padding:20px; display:flex; align-items:center; justify-content:center; min-height:100px;">
-                  <img id="admin-logo-preview" src="assets/universe_hub_logo.png?v=45" alt="Universe Hub Logo" style="height:52px; width:auto; max-width:100%; object-fit:contain; background:transparent !important; mix-blend-mode:screen;">
+                  <img id="admin-logo-preview" src="assets/universe_hub_logo.png?v=50" alt="Universe Hub Logo" style="height:52px; width:auto; max-width:100%; object-fit:contain; background:transparent !important; mix-blend-mode:screen;">
                 </div>
                 <small style="color:var(--text-muted); display:block; margin-top:6px; font-size:11px;">Displays in Header, Footer, Admin, and About Us modal.</small>
               </div>
@@ -2382,8 +2389,15 @@
           </div>
 
           <div style="margin-bottom:18px;">
-            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Description:</label>
-            <textarea id="edit-prod-desc" rows="2" style="width:100%;"></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label style="font-size:12.5px; color:#cbd5e1; font-weight:700; margin:0;">
+                📝 Product Description &amp; Specifications:
+              </label>
+              <span style="font-size:11.5px; color:var(--neon-cyan);">
+                💡 Supports Enter / Line breaks &amp; Bullet points (•)
+              </span>
+            </div>
+            <textarea id="edit-prod-desc" rows="7" placeholder="Full specs, key features, color options..." style="width:100%; font-family:inherit; font-size:13px; line-height:1.6; padding:12px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.35); color:#fff; box-sizing:border-box; resize:vertical;"></textarea>
           </div>
 
           <div style="display:flex; justify-content:flex-end; gap:10px;">
@@ -2448,7 +2462,7 @@
     <div class="modal-box about-modal-box" style="max-width:680px; width:92%; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:28px; box-shadow:0 16px 48px rgba(0,0,0,0.6); max-height:90vh; overflow-y:auto;">
       <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:14px;">
         <div style="display:flex; align-items:center; gap:12px;">
-          <img src="assets/universe_hub_logo.png?v=45" alt="Universe Hub" class="site-main-logo" style="height:40px; width:auto; max-width:180px; object-fit:contain; background:transparent !important; mix-blend-mode:screen;">
+          <img src="assets/universe_hub_logo.png?v=50" alt="Universe Hub" class="site-main-logo" style="height:40px; width:auto; max-width:180px; object-fit:contain; background:transparent !important; mix-blend-mode:screen;">
           <span class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); font-size:11px;">Official Flagship</span>
         </div>
         <button class="close-modal-btn" onclick="App.closeAboutModal()" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;">✕</button>
@@ -3000,14 +3014,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=45"></script>
-  <script src="js/supabase-client.js?v=45"></script>
-  <script src="js/notification-service.js?v=45"></script>
-  <script src="js/invoice.js?v=45"></script>
-  <script src="js/uploader.js?v=45"></script>
-  <script src="js/bulk-uploader.js?v=45"></script>
-  <script src="js/payment-gateway.js?v=45"></script>
-  <script src="js/admin.js?v=45"></script>
-  <script src="js/app.js?v=45"></script>
+  <script src="js/data.js?v=50"></script>
+  <script src="js/supabase-client.js?v=50"></script>
+  <script src="js/notification-service.js?v=50"></script>
+  <script src="js/invoice.js?v=50"></script>
+  <script src="js/uploader.js?v=50"></script>
+  <script src="js/bulk-uploader.js?v=50"></script>
+  <script src="js/payment-gateway.js?v=50"></script>
+  <script src="js/admin.js?v=50"></script>
+  <script src="js/app.js?v=50"></script>
 </body>
 </html>
