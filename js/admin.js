@@ -24,15 +24,36 @@ const AdminController = {
   },
 
   async syncCatalogToCloud() {
-    showToast("☁️ Syncing Laptop inventory with Supabase Cloud...");
+    showToast("☁️ Syncing inventory with Supabase Cloud...");
     if (window.SupabaseSync && typeof window.SupabaseSync.syncLocalCatalogToCloud === "function") {
       const ok = await window.SupabaseSync.syncLocalCatalogToCloud();
       if (ok) {
-        showToast("✅ Cloud database updated! Phone will now show the exact same products.");
+        showToast("✅ Cloud database synchronized!");
         this.renderProductsTable();
         this.renderStats();
       } else {
         showToast("⚠️ Cloud sync notice. Operating safely.");
+      }
+    }
+  },
+
+  async recoverCloudCatalog() {
+    if (!window.SupabaseSync || typeof window.SupabaseSync.recoverCloudProducts !== "function") {
+      if (typeof showToast === "function") showToast("⚠️ Cloud database module not ready.");
+      return;
+    }
+    if (typeof showToast === "function") showToast("⏳ Querying Supabase Cloud for all products...");
+    const res = await window.SupabaseSync.recoverCloudProducts();
+    if (res.success) {
+      if (typeof showToast === "function") {
+        showToast(`✅ Cloud Query Complete: Found & restored ${res.count} product${res.count === 1 ? '' : 's'}!`);
+      }
+      this.renderProductsTable();
+      this.renderStats();
+      this.renderInventoryFilterBar();
+    } else {
+      if (typeof showToast === "function") {
+        showToast(`⚠️ Cloud recovery notice: ${res.message || 'Check connection'}`);
       }
     }
   },

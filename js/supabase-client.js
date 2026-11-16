@@ -120,14 +120,6 @@
         this.updateStatusBadge(true);
         console.log("⚡ [Supabase] Cloud database verified live and synchronized.");
 
-        // If local device has deleted products tracked, purge them from cloud immediately
-        try {
-          const localDel = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
-          if (localDel && localDel.length > 0) {
-            this.syncLocalCatalogToCloud();
-          }
-        } catch (e) { }
-
         // Automatically fetch latest catalog, settings and orders to guarantee real-time cross-device sync (e.g. laptop <-> mobile)
         this.fetchProducts().then(prods => {
           if (prods && prods.length > 0 && typeof window !== "undefined" && window.App) {
@@ -335,28 +327,24 @@
             this.isConnected = true;
             this.updateStatusBadge(true);
 
-            let deletedIds = [];
-            try {
-              deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
-            } catch (e) { deletedIds = []; }
+            // Pull cloud deleted IDs but STRICTLY limit filtering to obsolete sample demo product IDs
+            const SAMPLE_PRODUCT_IDS = [
+              'prod-ip18pm', 'prod-ip16pm', 'prod-ip16p', 'prod-ip15p', 'prod-used-ip13',
+              'prod-used-ip14pm', 'prod-used-ip13p', 'prod-used-ip12', 'prod-used-ip11',
+              'prod-case-magsafe', 'prod-case-carbon', 'prod-charger-65w', 'prod-pb-20k',
+              'prod-cable-braided', 'prod-glass-9h', 'prod-cam-lens', 'prod-airpods-pro',
+              'prod-ugreen-100w', 'prod-baseus-cable', 'prod-wiwu-wallet', 'prod-asper-case',
+              'prod-1794121290955'
+            ];
 
-            // Pull cloud deleted IDs so ALL devices (phones, tablets) filter them out immediately
+            let deletedIds = SAMPLE_PRODUCT_IDS;
             try {
-              const { data: delRow } = await this.client
-                .from("store_settings")
-                .select("value")
-                .eq("key", "deleted_product_ids")
-                .maybeSingle();
-              if (delRow && Array.isArray(delRow.value)) {
-                deletedIds = [...new Set([...deletedIds, ...delRow.value.map(String)])];
-                try {
-                  localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds));
-                } catch (e) { }
-              }
+              localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(SAMPLE_PRODUCT_IDS));
             } catch (e) { }
 
+            // User-added products in Supabase are ALWAYS preserved!
             const mapped = data
-              .filter(item => !deletedIds.includes(String(item.id)))
+              .filter(item => !SAMPLE_PRODUCT_IDS.includes(String(item.id)))
               .map(item => {
                 const resolvedCondition = (item.specs && item.specs.condition !== undefined) ? item.specs.condition : (item.condition || "");
                 const resolvedBadge = item.badge || (item.specs && item.specs.conditionBadge) || (resolvedCondition ? "Brand New" : null);
@@ -418,64 +406,167 @@
       return await this.fetchProducts();
     },
 
-    // Master function: Force Supabase Cloud database to 100% mirror current Laptop inventory
+    // Safe Non-Destructive Cross-Device Sync (Uploads local items & downloads cloud items with ZERO deletes)
     async syncLocalCatalogToCloud() {
       if (!this.client || (typeof navigator !== "undefined" && navigator.onLine === false)) return false;
       try {
-        console.log("☁️ [Supabase] Starting full cross-device inventory sync...");
+        console.log("☁️ [Supabase] Safe bi-directional sync starting...");
         let localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-        let deletedIds = [];
-        try {
-          deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
-        } catch (e) { deletedIds = []; }
+        const SAMPLE_PRODUCT_IDS = [
+          'prod-ip18pm', 'prod-ip16pm', 'prod-ip16p', 'prod-ip15p', 'prod-used-ip13',
+          'prod-used-ip14pm', 'prod-used-ip13p', 'prod-used-ip12', 'prod-used-ip11',
+          'prod-case-magsafe', 'prod-case-carbon', 'prod-charger-65w', 'prod-pb-20k',
+          'prod-cable-braided', 'prod-glass-9h', 'prod-cam-lens', 'prod-airpods-pro',
+          'prod-ugreen-100w', 'prod-baseus-cable', 'prod-wiwu-wallet', 'prod-asper-case',
+          'prod-1794121290955'
+        ];
 
-        // 1. Purge all explicitly deleted products from Cloud
-        if (deletedIds.length > 0) {
-          for (const pid of deletedIds) {
-            await this.client.from("products").delete().eq("id", String(pid));
-          }
-          await this.client.from("store_settings").upsert({
-            key: "deleted_product_ids",
-            value: deletedIds,
-            updated_at: new Date().toISOString()
-          });
-        }
+        // 1. Fetch all products currently in Supabase Cloud
+        const { data: cloudProds, error } = await this.client.from("products").select("*");
+        if (!error && Array.isArray(cloudProds)) {
+          const cloudIds = new Set(cloudProds.map(cp => String(cp.id)));
 
-        // 2. Cross-check Cloud against Laptop: If Cloud has any product NOT on Laptop, delete it!
-        if (localProducts.length > 0) {
-          const localIds = localProducts.map(p => String(p.id));
-          const { data: cloudProds } = await this.client.from("products").select("id");
-          if (cloudProds && cloudProds.length > 0) {
-            for (const cp of cloudProds) {
-              const cpId = String(cp.id);
-              if (!localIds.includes(cpId)) {
-                console.log("🗑️ [Supabase] Purging orphaned cloud product:", cpId);
-                await this.client.from("products").delete().eq("id", cpId);
-                if (!deletedIds.includes(cpId)) {
-                  deletedIds.push(cpId);
-                }
-              }
+          // 2. Upload any local user products that are not yet in Cloud
+          for (const lp of localProducts) {
+            if (!SAMPLE_PRODUCT_IDS.includes(String(lp.id)) && !cloudIds.has(String(lp.id))) {
+              console.log("☁️ Uploading local product to Cloud:", lp.name || lp.title);
+              await this.saveProduct(lp);
             }
-            try {
-              localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds));
-            } catch (e) { }
-            await this.client.from("store_settings").upsert({
-              key: "deleted_product_ids",
-              value: deletedIds,
-              updated_at: new Date().toISOString()
-            });
           }
 
-          // 3. Upsert all active laptop products into Supabase
-          for (const prod of localProducts) {
-            await this.saveProduct(prod);
+          // 3. Merge Cloud products into local cache (SAFE ADDITIVE MERGE - NEVER DELETES)
+          const localIds = new Set(localProducts.map(lp => String(lp.id)));
+          let mergedLocal = [...localProducts];
+          for (const cp of cloudProds) {
+            if (!SAMPLE_PRODUCT_IDS.includes(String(cp.id)) && !localIds.has(String(cp.id))) {
+              console.log("📥 Downloading cloud product to Local:", cp.title);
+              mergedLocal.push({
+                id: cp.id,
+                name: cp.title,
+                title: cp.title,
+                slug: cp.slug || cp.id,
+                category: cp.category,
+                brand: cp.brand,
+                price: Number(cp.price),
+                originalPrice: cp.original_price ? Number(cp.original_price) : null,
+                badge: cp.badge || null,
+                isFeatured: cp.is_featured,
+                stock: cp.stock !== undefined ? Number(cp.stock) : 10,
+                rating: Number(cp.rating || 5.0),
+                reviewsCount: cp.review_count || 0,
+                image: cp.image,
+                images: Array.isArray(cp.images) ? cp.images : [cp.image],
+                video: cp.specs?.video || cp.video || null,
+                condition: cp.specs?.condition || cp.condition || "",
+                batteryHealth: cp.specs?.batteryHealth || cp.batteryHealth || null,
+                storageOptions: cp.specs?.storageOptions || cp.storageOptions || [],
+                colorOptions: cp.specs?.colorOptions || cp.colorOptions || [],
+                stockStatus: cp.specs?.stockStatus || cp.stockStatus || "available",
+                warranty: cp.specs?.warranty || cp.warranty || "1 Year Warranty",
+                description: cp.description || "",
+                specs: cp.specs || {}
+              });
+            }
           }
+
+          try {
+            localStorage.setItem("UH_PRODUCTS", JSON.stringify(mergedLocal));
+          } catch (e) { }
         }
-        console.log("✅ [Supabase] Cloud database is now 100% synchronized with Laptop inventory!");
+
+        console.log("✅ [Supabase] Safe cross-device sync completed!");
         return true;
       } catch (err) {
         console.warn("[Supabase] syncLocalCatalogToCloud notice:", err);
         return false;
+      }
+    },
+
+    // Recovery tool: Clears accidental filters and restores all products directly from Cloud Database
+    async recoverCloudProducts() {
+      if (!this.client) return { success: false, message: "Cloud database client offline." };
+      try {
+        const SAMPLE_PRODUCT_IDS = [
+          'prod-ip18pm', 'prod-ip16pm', 'prod-ip16p', 'prod-ip15p', 'prod-used-ip13',
+          'prod-used-ip14pm', 'prod-used-ip13p', 'prod-used-ip12', 'prod-used-ip11',
+          'prod-case-magsafe', 'prod-case-carbon', 'prod-charger-65w', 'prod-pb-20k',
+          'prod-cable-braided', 'prod-glass-9h', 'prod-cam-lens', 'prod-airpods-pro',
+          'prod-ugreen-100w', 'prod-baseus-cable', 'prod-wiwu-wallet', 'prod-asper-case',
+          'prod-1794121290955'
+        ];
+
+        // 1. Reset deleted IDs filter to ONLY sample demo IDs
+        try {
+          localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(SAMPLE_PRODUCT_IDS));
+        } catch (e) { }
+
+        try {
+          await this.client.from("store_settings").upsert({
+            key: "deleted_product_ids",
+            value: SAMPLE_PRODUCT_IDS,
+            updated_at: new Date().toISOString()
+          });
+        } catch (e) { }
+
+        // 2. Fetch all rows directly from Supabase products table
+        const { data, error } = await this.client
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        // Filter out ONLY sample products
+        const genuine = (data || []).filter(item => !SAMPLE_PRODUCT_IDS.includes(String(item.id)));
+
+        const mapped = genuine.map(item => ({
+          id: item.id,
+          name: item.title,
+          title: item.title,
+          slug: item.slug || item.id,
+          category: item.category,
+          brand: item.brand,
+          price: Number(item.price),
+          originalPrice: item.original_price ? Number(item.original_price) : null,
+          badge: item.badge || null,
+          isFeatured: item.is_featured,
+          stock: item.stock !== undefined ? Number(item.stock) : 10,
+          rating: Number(item.rating || 5.0),
+          reviewsCount: item.review_count !== undefined ? Number(item.review_count) : 0,
+          image: item.image,
+          images: Array.isArray(item.images) ? item.images : [item.image],
+          video: item.specs?.video || item.video || null,
+          condition: item.specs?.condition || item.condition || "",
+          batteryHealth: item.specs?.batteryHealth || item.batteryHealth || null,
+          storageOptions: item.specs?.storageOptions || item.storageOptions || [],
+          colorOptions: item.specs?.colorOptions || item.colorOptions || [],
+          stockStatus: item.specs?.stockStatus || item.stockStatus || "available",
+          warranty: item.specs?.warranty || item.warranty || "1 Year Warranty",
+          description: item.description || "",
+          specs: item.specs || {}
+        }));
+
+        try {
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(mapped));
+        } catch (e) { }
+
+        // Re-render UI
+        if (typeof window !== "undefined") {
+          if (window.AdminController) {
+            if (typeof window.AdminController.renderProductsTable === "function") window.AdminController.renderProductsTable();
+            if (typeof window.AdminController.renderStats === "function") window.AdminController.renderStats();
+            if (typeof window.AdminController.renderInventoryFilterBar === "function") window.AdminController.renderInventoryFilterBar();
+          }
+          if (window.App) {
+            if (typeof window.App.renderCatalog === "function") window.App.renderCatalog();
+            if (typeof window.App.renderCategories === "function") window.App.renderCategories();
+          }
+        }
+
+        return { success: true, count: mapped.length, products: mapped };
+      } catch (err) {
+        console.error("Cloud recovery error:", err);
+        return { success: false, message: err.message };
       }
     },
 

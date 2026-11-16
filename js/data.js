@@ -414,8 +414,8 @@ function initDatabase() {
   } else {
     try {
       let prods = JSON.parse(existingProducts) || [];
-      // Strictly purge any deleted or sample product IDs from local cache
-      const filtered = prods.filter(p => !deletedProductIds.includes(String(p.id)));
+      // Strictly purge ONLY obsolete sample/demo products from local cache
+      const filtered = prods.filter(p => !SAMPLE_PRODUCT_IDS.includes(String(p.id)));
       if (filtered.length !== prods.length) {
         prods = filtered;
         localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
