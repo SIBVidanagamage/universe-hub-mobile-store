@@ -17,9 +17,13 @@ const AdminController = {
     if (typeof BulkUploader !== 'undefined') {
       BulkUploader.init();
     }
-    // Auto-sync laptop's active inventory with cloud database so mobile phones match instantly
-    if (window.SupabaseSync && typeof window.SupabaseSync.syncLocalCatalogToCloud === 'function') {
-      window.SupabaseSync.syncLocalCatalogToCloud();
+    // Auto-sync & recover active inventory directly from Supabase Cloud on load
+    if (window.SupabaseSync && typeof window.SupabaseSync.recoverCloudProducts === 'function') {
+      window.SupabaseSync.recoverCloudProducts().then(() => {
+        this.renderProductsTable();
+        this.renderStats();
+        this.renderInventoryFilterBar();
+      }).catch(() => {});
     }
   },
 
