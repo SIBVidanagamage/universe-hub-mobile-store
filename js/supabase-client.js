@@ -35,6 +35,17 @@
         } catch (e) {
           this.config = MASTER_CONFIG;
         }
+
+        // Sanitize sync queue to ensure no accidental stale delete_product actions linger
+        try {
+          const q = JSON.parse(localStorage.getItem("UH_CLOUD_SYNC_QUEUE") || "[]");
+          if (Array.isArray(q) && q.length > 0) {
+            const cleanQ = q.filter(item => item && item.action !== "delete_product");
+            if (cleanQ.length !== q.length) {
+              localStorage.setItem("UH_CLOUD_SYNC_QUEUE", JSON.stringify(cleanQ));
+            }
+          }
+        } catch (e) { }
       }
 
       // 2. Resolve Supabase createClient SDK
