@@ -52,6 +52,16 @@ const INITIAL_CATEGORIES = [
 
   // --- Accessories Group ---
   {
+    id: "power-banks",
+    name: "Power Banks & MagSafe Battery",
+    group: "accessories",
+    groupName: "Accessories",
+    icon: "🔋",
+    inNav: true,
+    inFilter: true,
+    order: 3
+  },
+  {
     id: "back-covers",
     name: "Back Covers & Cases",
     group: "accessories",
@@ -59,7 +69,7 @@ const INITIAL_CATEGORIES = [
     icon: "🛡️",
     inNav: true,
     inFilter: true,
-    order: 3
+    order: 4
   },
   {
     id: "chargers",
@@ -69,7 +79,7 @@ const INITIAL_CATEGORIES = [
     icon: "⚡",
     inNav: true,
     inFilter: true,
-    order: 4
+    order: 5
   },
   {
     id: "cables",
@@ -79,7 +89,7 @@ const INITIAL_CATEGORIES = [
     icon: "🔌",
     inNav: true,
     inFilter: true,
-    order: 5
+    order: 6
   },
   {
     id: "tempered-glass",
@@ -89,7 +99,7 @@ const INITIAL_CATEGORIES = [
     icon: "📱",
     inNav: true,
     inFilter: true,
-    order: 6
+    order: 7
   },
   {
     id: "camera-protectors",
@@ -99,7 +109,7 @@ const INITIAL_CATEGORIES = [
     icon: "📸",
     inNav: true,
     inFilter: true,
-    order: 7
+    order: 8
   },
   {
     id: "audio",
@@ -109,7 +119,7 @@ const INITIAL_CATEGORIES = [
     icon: "🎧",
     inNav: true,
     inFilter: true,
-    order: 8
+    order: 9
   }
 ];
 

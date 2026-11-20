@@ -702,6 +702,18 @@
             </div>
           </div>
           <form id="admin-add-product-form" onsubmit="event.preventDefault(); AdminController.handleAddProduct(event);" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px;">
+            <!-- Item Type Mode Selector: iPhone vs Accessory -->
+            <div style="grid-column: 1 / -1; margin-bottom: 2px;">
+              <div style="display:inline-flex; background:rgba(255,255,255,0.04); padding:4px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); gap:6px;">
+                <button type="button" id="adm-type-btn-phone" class="btn-item-type active" onclick="AdminController.setItemType('phone', 'adm')">
+                  📱 iPhone / Phone Inventory
+                </button>
+                <button type="button" id="adm-type-btn-accessory" class="btn-item-type" onclick="AdminController.setItemType('accessory', 'adm')">
+                  ⚡ Accessory &amp; Gadget Inventory (Power Banks, Chargers, Covers...)
+                </button>
+              </div>
+            </div>
+
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Product Title: <span style="color:var(--neon-pink);">*</span></label>
               <input type="text" id="adm-prod-name" placeholder="e.g. iPhone 15 Pro Max 256GB" style="width:100%;">
@@ -721,6 +733,7 @@
                   <option value="used-iphones">Certified Used iPhones</option>
                 </optgroup>
                 <optgroup label="⚡ Accessories">
+                  <option value="power-banks">Power Banks &amp; MagSafe Battery</option>
                   <option value="back-covers">Back Covers & Cases</option>
                   <option value="chargers">Fast Chargers & Adapters</option>
                   <option value="cables">Charging Cables</option>
@@ -738,7 +751,7 @@
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Original / Slashed Price (Rs.):</label>
               <input type="number" id="adm-prod-origprice" placeholder="270000" style="width:100%;">
             </div>
-            <div>
+            <div id="adm-prod-battery-wrap">
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health (Used iPhones):</label>
               <input type="text" id="adm-prod-battery" placeholder="e.g. 88% - 93% or 95% (Leave blank if New)" style="width:100%;">
             </div>
@@ -759,8 +772,103 @@
               <input type="text" id="adm-prod-warranty" placeholder="6 Months Store Warranty" style="width:100%;">
             </div>
 
+            <!-- Accessory Technical Specifications Panel -->
+            <div id="adm-accessory-specs-wrap" style="grid-column: 1 / -1; display:none; background:rgba(0, 210, 255, 0.04); border:1px solid rgba(0, 210, 255, 0.22); border-radius:12px; padding:16px; margin: 4px 0 10px 0;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:18px;">⚡</span>
+                  <span style="font-size:13.5px; font-weight:700; color:#fff;">Accessory Technical Specifications &amp; Compatibility</span>
+                </div>
+                <span style="font-size:11px; color:var(--neon-cyan); background:rgba(0,210,255,0.1); border:1px solid rgba(0,210,255,0.25); border-radius:6px; padding:3px 8px;">Power Banks, Chargers, Cables, Protectors &amp; Audio</span>
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+                <!-- Battery Capacity (mAh) -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">🔋 Battery Capacity (mAh) <span style="color:var(--text-muted);">(Power Banks)</span>:</label>
+                  <input type="text" id="adm-acc-mah" placeholder="e.g. 10,000 mAh or 20,000 mAh" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-mah', '5,000 mAh')">5,000 mAh</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-mah', '10,000 mAh')">10,000 mAh</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-mah', '20,000 mAh')">20,000 mAh</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-mah', '30,000 mAh')">30,000 mAh</button>
+                  </div>
+                </div>
+                <!-- Output Wattage / Fast Charge -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">⚡ Power Output / Wattage:</label>
+                  <input type="text" id="adm-acc-wattage" placeholder="e.g. 20W PD, 65W GaN, 100W" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-wattage', '20W PD')">20W PD</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-wattage', '30W GaN')">30W GaN</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-wattage', '65W GaN Fast')">65W GaN</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-wattage', '100W Ultra')">100W Ultra</button>
+                  </div>
+                </div>
+                <!-- Ports / Connector Type -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">🔌 Connector / Ports:</label>
+                  <input type="text" id="adm-acc-ports" placeholder="e.g. Type-C to Lightning, Dual USB-C" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-ports', 'Type-C to Lightning')">Type-C to Lightning</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-ports', 'Type-C to Type-C')">Type-C to Type-C</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-ports', 'USB-C + USB-A Dual')">USB-C + USB-A</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-ports', 'Magnetic MagSafe Wireless')">MagSafe Wireless</button>
+                  </div>
+                </div>
+                <!-- Cable Length / Material -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">📏 Cable Length / Material / Build:</label>
+                  <input type="text" id="adm-acc-length" placeholder="e.g. 1.0m Braided, 2.0m Heavy Duty" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-length', '1.0m Braided')">1.0m</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-length', '1.2m Fast')">1.2m</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-length', '2.0m Long')">2.0m</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('adm-acc-length', '9H Tempered Glass')">9H Tempered</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Compatible iPhone Models -->
+              <div style="margin-top:12px;">
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">📱 Compatible Devices / iPhone Models:</label>
+                <input type="text" id="adm-acc-compatibility" placeholder="e.g. All iPhones, iPhone 16 Pro Max, iPhone 15 Series, iPhone 14 / 13 / 12" style="width:100%;">
+                <div style="display:flex; gap:5px; margin-top:6px; flex-wrap:wrap;">
+                  <span style="font-size:11px; color:var(--text-muted); align-self:center; margin-right:4px;">+ Quick Add:</span>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('adm', 'All iPhones')">All iPhones</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('adm', 'iPhone 16 Series')">iPhone 16 Series</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('adm', 'iPhone 15 Series')">iPhone 15 Series</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('adm', 'iPhone 14 Series')">iPhone 14 Series</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('adm', 'iPhone 13 / 12 / 11')">iPhone 13 / 12 / 11</button>
+                </div>
+              </div>
+
+              <!-- Key Feature Badges / Highlights -->
+              <div style="margin-top:14px; display:flex; gap:16px; flex-wrap:wrap;">
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="adm-acc-feat-magsafe" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>🧲 MagSafe Magnetic</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="adm-acc-feat-fast" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>⚡ PD Fast Charging</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="adm-acc-feat-wireless" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>🔋 Qi Wireless Charging</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="adm-acc-feat-digital" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>📊 LED Digital Display</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="adm-acc-feat-anc" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>🎧 Active Noise Cancelling (ANC)</span>
+                </label>
+              </div>
+            </div>
+
             <!-- Storage Capacities & Dynamic Fixed Pricing Matrix -->
-            <div style="grid-column: 1 / -1;" class="storage-matrix-section">
+            <div id="adm-storage-matrix-wrap" style="grid-column: 1 / -1;" class="storage-matrix-section">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
                 <label style="font-size:12.5px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
                   <span>💾 Storage Capacities &amp; Dynamic Pricing (iPhones / Tech)</span>
@@ -2271,6 +2379,18 @@
         <form id="admin-edit-product-form" onsubmit="AdminController.handleSaveEditProduct(event)">
           <input type="hidden" id="edit-prod-id">
 
+          <!-- Item Type Mode Selector (Edit Modal) -->
+          <div style="grid-column: 1 / -1; margin-bottom: 12px;">
+            <div style="display:inline-flex; background:rgba(255,255,255,0.04); padding:4px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); gap:6px;">
+              <button type="button" id="edit-type-btn-phone" class="btn-item-type active" onclick="AdminController.setItemType('phone', 'edit')">
+                📱 iPhone / Phone Inventory
+              </button>
+              <button type="button" id="edit-type-btn-accessory" class="btn-item-type" onclick="AdminController.setItemType('accessory', 'edit')">
+                ⚡ Accessory &amp; Gadget Inventory (Power Banks, Chargers, Covers...)
+              </button>
+            </div>
+          </div>
+
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:12px;">
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Product Title:</label>
@@ -2291,6 +2411,7 @@
                   <option value="used-iphones">Certified Used iPhones</option>
                 </optgroup>
                 <optgroup label="⚡ Accessories">
+                  <option value="power-banks">Power Banks &amp; MagSafe Battery</option>
                   <option value="back-covers">Back Covers & Cases</option>
                   <option value="chargers">Fast Chargers & Adapters</option>
                   <option value="cables">Charging Cables</option>
@@ -2308,7 +2429,7 @@
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Original Price (Rs.):</label>
               <input type="number" id="edit-prod-origprice" style="width:100%;">
             </div>
-            <div>
+            <div id="edit-prod-battery-wrap">
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Battery Health (Used iPhones):</label>
               <input type="text" id="edit-prod-battery" placeholder="e.g. 88% - 93% or 95% (Leave empty for new)" style="width:100%;">
             </div>
@@ -2329,8 +2450,103 @@
               <input type="text" id="edit-prod-warranty" style="width:100%;">
             </div>
 
+            <!-- Accessory Technical Specifications Panel (Edit Modal) -->
+            <div id="edit-accessory-specs-wrap" style="grid-column: 1 / -1; display:none; background:rgba(0, 210, 255, 0.04); border:1px solid rgba(0, 210, 255, 0.22); border-radius:12px; padding:16px; margin: 4px 0 10px 0;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:18px;">⚡</span>
+                  <span style="font-size:13.5px; font-weight:700; color:#fff;">Accessory Technical Specifications &amp; Compatibility</span>
+                </div>
+                <span style="font-size:11px; color:var(--neon-cyan); background:rgba(0,210,255,0.1); border:1px solid rgba(0,210,255,0.25); border-radius:6px; padding:3px 8px;">Power Banks, Chargers, Cables, Protectors &amp; Audio</span>
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+                <!-- Battery Capacity (mAh) -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">🔋 Battery Capacity (mAh) <span style="color:var(--text-muted);">(Power Banks)</span>:</label>
+                  <input type="text" id="edit-acc-mah" placeholder="e.g. 10,000 mAh or 20,000 mAh" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-mah', '5,000 mAh')">5,000 mAh</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-mah', '10,000 mAh')">10,000 mAh</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-mah', '20,000 mAh')">20,000 mAh</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-mah', '30,000 mAh')">30,000 mAh</button>
+                  </div>
+                </div>
+                <!-- Output Wattage / Fast Charge -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">⚡ Power Output / Wattage:</label>
+                  <input type="text" id="edit-acc-wattage" placeholder="e.g. 20W PD, 65W GaN, 100W" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-wattage', '20W PD')">20W PD</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-wattage', '30W GaN')">30W GaN</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-wattage', '65W GaN Fast')">65W GaN</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-wattage', '100W Ultra')">100W Ultra</button>
+                  </div>
+                </div>
+                <!-- Ports / Connector Type -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">🔌 Connector / Ports:</label>
+                  <input type="text" id="edit-acc-ports" placeholder="e.g. Type-C to Lightning, Dual USB-C" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-ports', 'Type-C to Lightning')">Type-C to Lightning</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-ports', 'Type-C to Type-C')">Type-C to Type-C</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-ports', 'USB-C + USB-A Dual')">USB-C + USB-A</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-ports', 'Magnetic MagSafe Wireless')">MagSafe Wireless</button>
+                  </div>
+                </div>
+                <!-- Cable Length / Material -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">📏 Cable Length / Material / Build:</label>
+                  <input type="text" id="edit-acc-length" placeholder="e.g. 1.0m Braided, 2.0m Heavy Duty" style="width:100%;">
+                  <div style="display:flex; gap:4px; margin-top:5px; flex-wrap:wrap;">
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-length', '1.0m Braided')">1.0m</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-length', '1.2m Fast')">1.2m</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-length', '2.0m Long')">2.0m</button>
+                    <button type="button" class="btn-spec-chip" onclick="AdminController.setSpecValue('edit-acc-length', '9H Tempered Glass')">9H Tempered</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Compatible iPhone Models -->
+              <div style="margin-top:12px;">
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">📱 Compatible Devices / iPhone Models:</label>
+                <input type="text" id="edit-acc-compatibility" placeholder="e.g. All iPhones, iPhone 16 Pro Max, iPhone 15 Series, iPhone 14 / 13 / 12" style="width:100%;">
+                <div style="display:flex; gap:5px; margin-top:6px; flex-wrap:wrap;">
+                  <span style="font-size:11px; color:var(--text-muted); align-self:center; margin-right:4px;">+ Quick Add:</span>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('edit', 'All iPhones')">All iPhones</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('edit', 'iPhone 16 Series')">iPhone 16 Series</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('edit', 'iPhone 15 Series')">iPhone 15 Series</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('edit', 'iPhone 14 Series')">iPhone 14 Series</button>
+                  <button type="button" class="btn-spec-chip" onclick="AdminController.appendCompat('edit', 'iPhone 13 / 12 / 11')">iPhone 13 / 12 / 11</button>
+                </div>
+              </div>
+
+              <!-- Key Feature Badges / Highlights -->
+              <div style="margin-top:14px; display:flex; gap:16px; flex-wrap:wrap;">
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="edit-acc-feat-magsafe" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>🧲 MagSafe Magnetic</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="edit-acc-feat-fast" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>⚡ PD Fast Charging</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="edit-acc-feat-wireless" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>🔋 Qi Wireless Charging</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="edit-acc-feat-digital" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>📊 LED Digital Display</span>
+                </label>
+                <label style="font-size:12px; color:#e2e8f0; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                  <input type="checkbox" id="edit-acc-feat-anc" style="accent-color:var(--neon-cyan); width:15px; height:15px;">
+                  <span>🎧 Active Noise Cancelling (ANC)</span>
+                </label>
+              </div>
+            </div>
+
             <!-- Storage Capacities & Dynamic Fixed Pricing Matrix (Edit Modal) -->
-            <div style="grid-column: 1 / -1;" class="storage-matrix-section">
+            <div id="edit-storage-matrix-wrap" style="grid-column: 1 / -1;" class="storage-matrix-section">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
                 <label style="font-size:12.5px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">
                   <span>💾 Storage Capacities &amp; Dynamic Pricing (iPhones / Tech)</span>
@@ -3080,14 +3296,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=95"></script>
-  <script src="js/supabase-client.js?v=95"></script>
-  <script src="js/notification-service.js?v=95"></script>
-  <script src="js/invoice.js?v=95"></script>
-  <script src="js/uploader.js?v=95"></script>
-  <script src="js/bulk-uploader.js?v=95"></script>
-  <script src="js/payment-gateway.js?v=95"></script>
-  <script src="js/admin.js?v=95"></script>
-  <script src="js/app.js?v=95"></script>
+  <script src="js/data.js?v=110"></script>
+  <script src="js/supabase-client.js?v=110"></script>
+  <script src="js/notification-service.js?v=110"></script>
+  <script src="js/invoice.js?v=110"></script>
+  <script src="js/uploader.js?v=110"></script>
+  <script src="js/bulk-uploader.js?v=110"></script>
+  <script src="js/payment-gateway.js?v=110"></script>
+  <script src="js/admin.js?v=110"></script>
+  <script src="js/app.js?v=110"></script>
 </body>
 </html>

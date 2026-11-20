@@ -1169,6 +1169,9 @@ const App = {
               🏷️ ${prodBrand}
             </span>
             ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>` : ''}
+            ${prod.specs?.mah ? `<span class="badge-pill" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#10b981;">🔋 ${prod.specs.mah}</span>` : ''}
+            ${prod.specs?.wattage ? `<span class="badge-pill" style="background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.4); color:#f59e0b;">⚡ ${prod.specs.wattage}</span>` : ''}
+            ${prod.specs?.magsafe ? `<span class="badge-pill" style="background:rgba(0,210,255,0.18); border:1px solid rgba(0,210,255,0.4); color:var(--neon-cyan);">🧲 MagSafe</span>` : ''}
             ${prod.stockStatus === 'on-request' ? `<span class="badge-pill" style="background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.5); color:#f59e0b;">⚡ Sourced on Order</span>` : ''}
             ${prod.discount ? `<span class="badge-pill badge-discount">${prod.discount}</span>` : ''}
           </div>
@@ -1192,6 +1195,8 @@ const App = {
             <div class="card-meta-tags">
               ${hasStorageVariants ? `<span class="meta-chip" style="color:var(--neon-cyan); border-color:rgba(0,210,255,0.3); font-weight:600;">💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}</span>` : ''}
               ${hasColorVariants ? `<span class="meta-chip" style="color:#e056fd; border-color:rgba(224,86,253,0.3);">🎨 ${prod.colorOptions.length} Colors</span>` : ''}
+              ${prod.specs?.compatibility ? `<span class="meta-chip" style="color:var(--neon-cyan); border-color:rgba(0,210,255,0.25);">📱 ${prod.specs.compatibility}</span>` : ''}
+              ${prod.specs?.ports ? `<span class="meta-chip">🔌 ${prod.specs.ports}</span>` : ''}
               ${(prod.tags || []).slice(0, 2).map(tag => `<span class="meta-chip">${tag}</span>`).join("")}
             </div>
 
@@ -1593,6 +1598,54 @@ const App = {
             ${this.formatProductDescription(prod.description)}
           </div>
 
+          ${(prod.specs && (prod.specs.mah || prod.specs.wattage || prod.specs.ports || prod.specs.cableLength || prod.specs.compatibility || prod.specs.magsafe || prod.specs.fastCharge || prod.specs.wireless || prod.specs.digitalDisplay || prod.specs.anc)) ? `
+            <!-- Accessory Technical Specifications Box -->
+            <div class="acc-spec-highlight-box">
+              <div style="font-size:12px; font-weight:700; color:var(--neon-cyan); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                <span>⚡ Technical Specifications</span>
+              </div>
+              <div class="acc-spec-grid">
+                ${prod.specs.mah ? `
+                  <div class="acc-spec-item">
+                    <span class="acc-spec-label">Battery Capacity</span>
+                    <span class="acc-spec-val" style="color:#10b981;">🔋 ${prod.specs.mah}</span>
+                  </div>
+                ` : ''}
+                ${prod.specs.wattage ? `
+                  <div class="acc-spec-item">
+                    <span class="acc-spec-label">Power Output</span>
+                    <span class="acc-spec-val" style="color:#f59e0b;">⚡ ${prod.specs.wattage}</span>
+                  </div>
+                ` : ''}
+                ${prod.specs.ports ? `
+                  <div class="acc-spec-item">
+                    <span class="acc-spec-label">Connector / Ports</span>
+                    <span class="acc-spec-val">🔌 ${prod.specs.ports}</span>
+                  </div>
+                ` : ''}
+                ${prod.specs.cableLength ? `
+                  <div class="acc-spec-item">
+                    <span class="acc-spec-label">Length / Build</span>
+                    <span class="acc-spec-val">📏 ${prod.specs.cableLength}</span>
+                  </div>
+                ` : ''}
+                ${prod.specs.compatibility ? `
+                  <div class="acc-spec-item" style="grid-column: 1 / -1;">
+                    <span class="acc-spec-label">Compatible Devices</span>
+                    <span class="acc-spec-val" style="color:var(--neon-cyan);">📱 ${prod.specs.compatibility}</span>
+                  </div>
+                ` : ''}
+              </div>
+              <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                ${prod.specs.magsafe ? `<span class="badge-pill" style="background:rgba(0,210,255,0.12); color:var(--neon-cyan); border:1px solid rgba(0,210,255,0.3); font-size:10.5px;">🧲 MagSafe Magnetic</span>` : ''}
+                ${prod.specs.fastCharge ? `<span class="badge-pill" style="background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-size:10.5px;">⚡ PD Fast Charging</span>` : ''}
+                ${prod.specs.wireless ? `<span class="badge-pill" style="background:rgba(16,185,129,0.12); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-size:10.5px;">🔋 Qi Wireless</span>` : ''}
+                ${prod.specs.digitalDisplay ? `<span class="badge-pill" style="background:rgba(224,86,253,0.12); color:#e056fd; border:1px solid rgba(224,86,253,0.3); font-size:10.5px;">📊 LED Digital Display</span>` : ''}
+                ${prod.specs.anc ? `<span class="badge-pill" style="background:rgba(59,130,246,0.12); color:#3b82f6; border:1px solid rgba(59,130,246,0.3); font-size:10.5px;">🎧 Active Noise Cancelling</span>` : ''}
+              </div>
+            </div>
+          ` : ''}
+
           <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:8px; padding:12px; margin-bottom:20px; font-size:12.5px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
               <span style="color:var(--text-muted);">Physical Store Warranty:</span>
@@ -1617,7 +1670,7 @@ const App = {
           <div style="display:flex; flex-direction:column; gap:9px;">
             <button id="qv-add-cart-btn" class="btn-primary-glow" style="width:100%; justify-content:center; padding:12px; font-size:14px; font-weight:700;" onclick="App.executeAddToCartFromQuickView(); App.closeModal('quickview-modal');">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-              Add to Cart ${this.quickViewSelectedStorage ? `• ${this.quickViewSelectedStorage} ` : ''}(Rs. ${this.quickViewSelectedPrice.toLocaleString()})
+              Add to Cart ${this.quickViewSelectedStorage ? `• ${this.quickViewSelectedStorage} ` : (prod.specs?.mah ? `• ${prod.specs.mah} ` : '')}(Rs. ${this.quickViewSelectedPrice.toLocaleString()})
             </button>
 
             <button type="button" class="btn-whatsapp-inquire" style="width:100%; justify-content:center; background:#25d366; color:#061b0f; font-weight:800; font-size:13.5px; border:none; border-radius:8px; padding:11px 16px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 0 16px rgba(37,211,102,0.35);" onclick="App.inquireProductStockWhatsApp('${prod.id}')">

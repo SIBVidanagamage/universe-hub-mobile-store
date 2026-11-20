@@ -4514,5 +4514,85 @@ img, video, iframe {
   box-shadow: 0 0 8px currentColor;
 }
 
+/* ==========================================================================
+   Accessory Mode & Specs Switcher (Admin & QuickView)
+   ========================================================================== */
+.btn-item-type {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-item-type:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-item-type.active {
+  background: linear-gradient(135deg, rgba(0, 210, 255, 0.22), rgba(157, 78, 221, 0.25));
+  color: #fff;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 14px rgba(0, 210, 255, 0.25);
+}
+
+.btn-spec-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-spec-chip:hover {
+  background: rgba(0, 210, 255, 0.18);
+  border-color: var(--neon-cyan);
+  color: #fff;
+}
+
+.acc-spec-highlight-box {
+  background: rgba(0, 210, 255, 0.04);
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.acc-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.acc-spec-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.acc-spec-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.acc-spec-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+
 
 

@@ -108,6 +108,96 @@ const AdminController = {
         this.handleAdminAddRepair();
       });
     }
+
+    // Auto-switch item type mode when category dropdown changes
+    const addCatSelect = document.getElementById("adm-prod-category");
+    if (addCatSelect) {
+      addCatSelect.addEventListener("change", (e) => {
+        const val = e.target.value;
+        const isPhone = (val === 'brand-new-iphones' || val === 'used-iphones');
+        this.setItemType(isPhone ? 'phone' : 'accessory', 'adm');
+      });
+    }
+
+    const editCatSelect = document.getElementById("edit-prod-category");
+    if (editCatSelect) {
+      editCatSelect.addEventListener("change", (e) => {
+        const val = e.target.value;
+        const isPhone = (val === 'brand-new-iphones' || val === 'used-iphones');
+        this.setItemType(isPhone ? 'phone' : 'accessory', 'edit');
+      });
+    }
+  },
+
+  // ==========================================
+  // ITEM TYPE (IPHONE VS ACCESSORY) CONTROLLER
+  // ==========================================
+  activeItemType: { adm: 'phone', edit: 'phone' },
+
+  setItemType(type, prefix = 'adm') {
+    if (!this.activeItemType) this.activeItemType = {};
+    this.activeItemType[prefix] = type;
+
+    const btnPhone = document.getElementById(`${prefix}-type-btn-phone`);
+    const btnAccessory = document.getElementById(`${prefix}-type-btn-accessory`);
+    const batteryWrap = document.getElementById(`${prefix}-prod-battery-wrap`);
+    const storageWrap = document.getElementById(`${prefix}-storage-matrix-wrap`);
+    const accessoryWrap = document.getElementById(`${prefix}-accessory-specs-wrap`);
+
+    if (type === 'accessory') {
+      if (btnPhone) btnPhone.classList.remove('active');
+      if (btnAccessory) btnAccessory.classList.add('active');
+      if (batteryWrap) batteryWrap.style.display = 'none';
+      if (storageWrap) storageWrap.style.display = 'none';
+      if (accessoryWrap) accessoryWrap.style.display = 'block';
+
+      // If category is still an iPhone, switch to power-banks or first accessory
+      const catSelect = document.getElementById(`${prefix}-prod-category`);
+      if (catSelect && (catSelect.value === 'brand-new-iphones' || catSelect.value === 'used-iphones')) {
+        catSelect.value = 'power-banks';
+      }
+
+      const warInput = document.getElementById(`${prefix}-prod-warranty`);
+      if (warInput && (!warInput.value || warInput.value.includes('Apple Store Warranty'))) {
+        warInput.value = '6 Months Store Warranty';
+      }
+    } else {
+      if (btnPhone) btnPhone.classList.add('active');
+      if (btnAccessory) btnAccessory.classList.remove('active');
+      if (batteryWrap) batteryWrap.style.display = 'block';
+      if (storageWrap) storageWrap.style.display = 'block';
+      if (accessoryWrap) accessoryWrap.style.display = 'none';
+
+      const catSelect = document.getElementById(`${prefix}-prod-category`);
+      if (catSelect && catSelect.value !== 'brand-new-iphones' && catSelect.value !== 'used-iphones') {
+        catSelect.value = 'brand-new-iphones';
+      }
+
+      const warInput = document.getElementById(`${prefix}-prod-warranty`);
+      if (warInput && warInput.value === '6 Months Store Warranty') {
+        warInput.value = '1 Year Apple Store Warranty';
+      }
+    }
+  },
+
+  setSpecValue(elementId, val) {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.value = val;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  },
+
+  appendCompat(prefix, model) {
+    const el = document.getElementById(`${prefix}-acc-compatibility`);
+    if (!el) return;
+    let cur = el.value.trim();
+    if (!cur) {
+      el.value = model;
+    } else if (!cur.toLowerCase().includes(model.toLowerCase())) {
+      el.value = cur + ', ' + model;
+    }
+    el.dispatchEvent(new Event('input', { bubbles: true }));
   },
 
   // ==========================================
@@ -574,7 +664,19 @@ const AdminController = {
 
   // Populate dynamic grouped options for Add and Edit product dropdowns
   populateCategoryDropdowns() {
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
+    let categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []);
+    if (typeof INITIAL_CATEGORIES !== 'undefined') {
+      let added = false;
+      INITIAL_CATEGORIES.forEach(initCat => {
+        if (!categories.some(c => c && c.id === initCat.id)) {
+          categories.push(initCat);
+          added = true;
+        }
+      });
+      if (added) {
+        try { localStorage.setItem("UH_CATEGORIES", JSON.stringify(categories)); } catch(e){}
+      }
+    }
     const addSelect = document.getElementById("adm-prod-category");
     const editSelect = document.getElementById("edit-prod-category");
 
@@ -1177,8 +1279,32 @@ const AdminController = {
         imagesList = ["assets/hero_showcase.jpg"];
       }
 
+      const isAccessoryMode = (this.activeItemType && this.activeItemType['adm'] === 'accessory') || (!category.includes('iphone'));
       const isUsed = category === "used-iphones";
-      const storageOptions = this.getStorageOptionsFromForm('adm');
+
+      // If accessory mode, gather technical specs and bypass storage matrix / battery health
+      let storageOptions = [];
+      let finalBattery = null;
+      let accSpecs = null;
+
+      if (isAccessoryMode) {
+        accSpecs = {
+          itemType: 'accessory',
+          mah: document.getElementById('adm-acc-mah')?.value.trim() || null,
+          wattage: document.getElementById('adm-acc-wattage')?.value.trim() || null,
+          ports: document.getElementById('adm-acc-ports')?.value.trim() || null,
+          cableLength: document.getElementById('adm-acc-length')?.value.trim() || null,
+          compatibility: document.getElementById('adm-acc-compatibility')?.value.trim() || null,
+          magsafe: !!document.getElementById('adm-acc-feat-magsafe')?.checked,
+          fastCharge: !!document.getElementById('adm-acc-feat-fast')?.checked,
+          wireless: !!document.getElementById('adm-acc-feat-wireless')?.checked,
+          digitalDisplay: !!document.getElementById('adm-acc-feat-digital')?.checked,
+          anc: !!document.getElementById('adm-acc-feat-anc')?.checked,
+        };
+      } else {
+        storageOptions = this.getStorageOptionsFromForm('adm');
+        finalBattery = battery;
+      }
       const colorOptions = this.getColorOptionsFromForm('adm');
 
       let effectivePrice = price;
@@ -1198,7 +1324,8 @@ const AdminController = {
         subCategory: isUsed ? "used" : "brand-new",
         condition: "",
         conditionBadge: null,
-        batteryHealth: battery,
+        batteryHealth: finalBattery,
+        specs: isAccessoryMode ? accSpecs : { itemType: 'phone', batteryHealth: finalBattery },
         price: effectivePrice,
         originalPrice: effectiveOrigPrice,
         discount: effectiveOrigPrice > effectivePrice ? `${Math.round(((effectiveOrigPrice - effectivePrice)/effectiveOrigPrice)*100)}% OFF` : "Best Price",
@@ -1213,7 +1340,13 @@ const AdminController = {
         video: video,
         storageOptions: storageOptions,
         colorOptions: colorOptions,
-        tags: [category, battery ? `${battery} Battery` : "Official Genuine"].filter(Boolean),
+        tags: [
+          category,
+          isAccessoryMode && accSpecs?.mah ? accSpecs.mah : null,
+          isAccessoryMode && accSpecs?.wattage ? accSpecs.wattage : null,
+          isAccessoryMode && accSpecs?.magsafe ? "MagSafe" : null,
+          !isAccessoryMode && finalBattery ? `${finalBattery} Battery` : "Official Genuine"
+        ].filter(Boolean),
         description: desc
       };
 
@@ -1254,6 +1387,18 @@ const AdminController = {
       this.resetStorageTiers("adm");
       this.renderColorPillSelectors("adm");
       if (window.MediaUploader) MediaUploader.reset("adm");
+
+      // Reset accessory fields
+      if (document.getElementById('adm-acc-mah')) document.getElementById('adm-acc-mah').value = '';
+      if (document.getElementById('adm-acc-wattage')) document.getElementById('adm-acc-wattage').value = '';
+      if (document.getElementById('adm-acc-ports')) document.getElementById('adm-acc-ports').value = '';
+      if (document.getElementById('adm-acc-length')) document.getElementById('adm-acc-length').value = '';
+      if (document.getElementById('adm-acc-compatibility')) document.getElementById('adm-acc-compatibility').value = '';
+      if (document.getElementById('adm-acc-feat-magsafe')) document.getElementById('adm-acc-feat-magsafe').checked = false;
+      if (document.getElementById('adm-acc-feat-fast')) document.getElementById('adm-acc-feat-fast').checked = false;
+      if (document.getElementById('adm-acc-feat-wireless')) document.getElementById('adm-acc-feat-wireless').checked = false;
+      if (document.getElementById('adm-acc-feat-digital')) document.getElementById('adm-acc-feat-digital').checked = false;
+      if (document.getElementById('adm-acc-feat-anc')) document.getElementById('adm-acc-feat-anc').checked = false;
 
       if (typeof showToast === "function") {
         if (cloudOk) {
@@ -1317,6 +1462,22 @@ const AdminController = {
     // Render storage matrix and stock colors for edit modal
     this.renderStorageTiersInputs('edit', prod.storageOptions || []);
     this.renderColorPillSelectors('edit', prod.colorOptions || []);
+
+    // Set item type (Phone vs Accessory)
+    const isAccessory = (prod.mainCategory === 'accessories') || (prod.category && !prod.category.includes('iphone')) || (prod.specs && prod.specs.itemType === 'accessory');
+    this.setItemType(isAccessory ? 'accessory' : 'phone', 'edit');
+
+    const sp = prod.specs || {};
+    if (document.getElementById('edit-acc-mah')) document.getElementById('edit-acc-mah').value = sp.mah || "";
+    if (document.getElementById('edit-acc-wattage')) document.getElementById('edit-acc-wattage').value = sp.wattage || "";
+    if (document.getElementById('edit-acc-ports')) document.getElementById('edit-acc-ports').value = sp.ports || "";
+    if (document.getElementById('edit-acc-length')) document.getElementById('edit-acc-length').value = sp.cableLength || "";
+    if (document.getElementById('edit-acc-compatibility')) document.getElementById('edit-acc-compatibility').value = sp.compatibility || "";
+    if (document.getElementById('edit-acc-feat-magsafe')) document.getElementById('edit-acc-feat-magsafe').checked = !!sp.magsafe;
+    if (document.getElementById('edit-acc-feat-fast')) document.getElementById('edit-acc-feat-fast').checked = !!sp.fastCharge;
+    if (document.getElementById('edit-acc-feat-wireless')) document.getElementById('edit-acc-feat-wireless').checked = !!sp.wireless;
+    if (document.getElementById('edit-acc-feat-digital')) document.getElementById('edit-acc-feat-digital').checked = !!sp.digitalDisplay;
+    if (document.getElementById('edit-acc-feat-anc')) document.getElementById('edit-acc-feat-anc').checked = !!sp.anc;
 
     // Fill images and video into MediaUploader dropzones & previews
     let imgArray = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? [...prod.images] : [prod.image || ""];
@@ -1391,6 +1552,7 @@ const AdminController = {
     if (!prod) return;
 
     const isUsed = category === "used-iphones";
+    const isAccessoryMode = (this.activeItemType && this.activeItemType['edit'] === 'accessory') || (!category.includes('iphone'));
 
     prod.name = name;
     prod.brand = brand;
@@ -1399,7 +1561,6 @@ const AdminController = {
     prod.subCategory = isUsed ? "used" : "brand-new";
     prod.condition = "";
     prod.conditionBadge = null;
-    prod.batteryHealth = battery;
     prod.price = price;
     prod.originalPrice = origPrice;
     prod.discount = origPrice > price ? `${Math.round(((origPrice - price)/origPrice)*100)}% OFF` : "Best Deal";
@@ -1409,9 +1570,42 @@ const AdminController = {
     prod.images = imagesList;
     prod.image = imagesList[0];
     prod.video = video;
-    prod.storageOptions = storageOptions;
     prod.colorOptions = colorOptions;
     prod.description = desc;
+
+    if (isAccessoryMode) {
+      prod.batteryHealth = null;
+      prod.storageOptions = [];
+      prod.specs = {
+        ...(prod.specs || {}),
+        itemType: 'accessory',
+        mah: document.getElementById('edit-acc-mah')?.value.trim() || null,
+        wattage: document.getElementById('edit-acc-wattage')?.value.trim() || null,
+        ports: document.getElementById('edit-acc-ports')?.value.trim() || null,
+        cableLength: document.getElementById('edit-acc-length')?.value.trim() || null,
+        compatibility: document.getElementById('edit-acc-compatibility')?.value.trim() || null,
+        magsafe: !!document.getElementById('edit-acc-feat-magsafe')?.checked,
+        fastCharge: !!document.getElementById('edit-acc-feat-fast')?.checked,
+        wireless: !!document.getElementById('edit-acc-feat-wireless')?.checked,
+        digitalDisplay: !!document.getElementById('edit-acc-feat-digital')?.checked,
+        anc: !!document.getElementById('edit-acc-feat-anc')?.checked,
+      };
+      prod.tags = [
+        category,
+        prod.specs.mah ? prod.specs.mah : null,
+        prod.specs.wattage ? prod.specs.wattage : null,
+        prod.specs.magsafe ? "MagSafe" : null
+      ].filter(Boolean);
+    } else {
+      prod.batteryHealth = battery;
+      prod.storageOptions = storageOptions;
+      prod.specs = {
+        ...(prod.specs || {}),
+        itemType: 'phone',
+        batteryHealth: battery
+      };
+      prod.tags = [category, battery ? `${battery} Battery` : "Official Genuine"].filter(Boolean);
+    }
 
     localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
 
