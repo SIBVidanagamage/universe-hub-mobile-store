@@ -32,9 +32,38 @@ const App = {
   currentUser: null,
   pendingCartProdId: null,
 
+  getProducts() {
+    if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length > 0) {
+      return window.UH_PRODUCTS_CACHE;
+    }
+    try {
+      const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
+      if (Array.isArray(stored) && stored.length > 0) {
+        if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = stored;
+        return stored;
+      }
+    } catch (e) {}
+    return typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : [];
+  },
+
   init() {
     this.loadUserSession();
     this.applyStoreSettings();
+
+    // Async pre-load from IndexedDB if memory cache isn't warm yet
+    if (window.UHStorage && typeof window.UHStorage.loadProducts === "function") {
+      window.UHStorage.loadProducts().then(prods => {
+        if (Array.isArray(prods) && prods.length > 0) {
+          window.UH_PRODUCTS_CACHE = prods;
+          this.renderCatalogTabs();
+          this.renderBrandFilterBar();
+          this.renderCategories();
+          this.renderBrandsSection();
+          this.renderCatalog();
+        }
+      });
+    }
+
     this.renderNavbar();
     this.renderCatalogTabs();
     this.renderBrandFilterBar();
@@ -49,10 +78,15 @@ const App = {
 
     // Fetch fresh cloud products & settings if Supabase is connected
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchProducts === "function") {
-      window.SupabaseSync.fetchProducts().then(() => {
-        this.renderCatalog();
+      window.SupabaseSync.fetchProducts().then((prods) => {
+        if (Array.isArray(prods) && prods.length > 0) {
+          window.UH_PRODUCTS_CACHE = prods;
+        }
+        this.renderCatalogTabs();
+        this.renderBrandFilterBar();
         this.renderCategories();
         this.renderBrandsSection();
+        this.renderCatalog();
       });
     }
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchStoreSettings === "function") {
@@ -514,7 +548,7 @@ const App = {
     if (this.pendingCartProdId) {
       const prodId = this.pendingCartProdId;
       this.pendingCartProdId = null;
-      const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      const products = this.getProducts();
       const prod = products.find(p => p.id === prodId);
       if (prod) {
         this.executeAddToCart(prod);
@@ -694,7 +728,7 @@ const App = {
 
     const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
     const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
 
     // Filter active brands for Navbar
     const navBrands = brands.filter(b => b.inNav !== false);
@@ -880,7 +914,7 @@ const App = {
 
     const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
     const filterBrands = brands.filter(b => b.inFilter !== false);
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
 
     const getCount = (bName, bId) => {
       return products.filter(p => {
@@ -917,7 +951,7 @@ const App = {
     if (!container) return;
 
     const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
 
     container.innerHTML = categories.map(cat => {
       const count = products.filter(p => {
@@ -962,7 +996,7 @@ const App = {
     if (!container) return;
 
     const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
 
     container.innerHTML = brands.map(b => {
       const count = products.filter(p => {
@@ -1015,7 +1049,7 @@ const App = {
     const container = document.getElementById("products-catalog-container");
     if (!container) return;
 
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     let filtered = products;
 
     // Filter by Category
@@ -1166,7 +1200,7 @@ const App = {
       return;
     }
 
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     const matches = products.filter(p => 
       p.name.toLowerCase().includes(query) || 
       p.category.toLowerCase().includes(query) ||
@@ -1256,7 +1290,7 @@ const App = {
   },
 
   executeAddToCartFromQuickView() {
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     const prod = products.find(p => p.id === this.quickViewCurrentProdId);
     if (!prod) return;
 
@@ -1269,7 +1303,7 @@ const App = {
   },
 
   inquireProductStockWhatsApp(prodId) {
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || (typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : []);
+    const products = this.getProducts();
     const prod = products.find(p => String(p.id) === String(prodId));
     if (!prod) return;
 
@@ -1392,7 +1426,7 @@ const App = {
   },
 
   openQuickView(prodId) {
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 
@@ -1643,7 +1677,7 @@ const App = {
 
   // 5. Cart Management
   addToCart(prodId, selectedStorage = null, selectedColor = null, selectedPrice = null) {
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 

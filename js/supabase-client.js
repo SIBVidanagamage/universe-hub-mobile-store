@@ -13,12 +13,141 @@
     key: "sb_publishable_f20oiNxVRdSdz7FhICoWlg_8PEoqOVS"
   };
 
+  /**
+   * Dual-Tier Storage Manager (In-Memory + IndexedDB + LocalStorage Quota Fallback)
+   * Solves iOS Safari 5MB localStorage limit for multi-megabyte base64 catalog
+   */
+  const UHStorage = {
+    _dbPromise: null,
+    getDB() {
+      if (this._dbPromise) return this._dbPromise;
+      if (typeof indexedDB === "undefined") return Promise.resolve(null);
+      this._dbPromise = new Promise((resolve) => {
+        try {
+          const req = indexedDB.open("UniverseHubStoreDB", 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("products")) {
+              db.createObjectStore("products", { keyPath: "id" });
+            }
+          };
+          req.onsuccess = (e) => resolve(e.target.result);
+          req.onerror = () => resolve(null);
+        } catch (err) {
+          resolve(null);
+        }
+      });
+      return this._dbPromise;
+    },
+
+    async saveProducts(products) {
+      if (!Array.isArray(products)) return;
+
+      // 1. In-memory cache update for instant sync across all scripts
+      if (typeof window !== "undefined") {
+        window.UH_PRODUCTS_CACHE = products;
+      }
+
+      // 2. Persist to IndexedDB (Virtually unlimited quota on Safari iOS & Chrome, never QuotaExceededError)
+      try {
+        const db = await this.getDB();
+        if (db) {
+          const tx = db.transaction("products", "readwrite");
+          const store = tx.objectStore("products");
+          store.clear();
+          for (const p of products) {
+            store.put(p);
+          }
+        }
+      } catch (dbErr) {
+        console.warn("[UHStorage] IndexedDB save notice:", dbErr);
+      }
+
+      // 3. Persist to LocalStorage with progressive quota-saving fallbacks
+      try {
+        localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+      } catch (quotaErr) {
+        console.warn("[UHStorage] LocalStorage full. Optimizing catalog for LocalStorage quota...");
+        try {
+          // Keep only primary cover image per product to reduce size by ~50%
+          const optimized = products.map(p => ({
+            ...p,
+            images: [p.image || (p.images && p.images[0]) || "assets/hero_showcase.jpg"]
+          }));
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(optimized));
+        } catch (err2) {
+          try {
+            // Keep minimal product metadata
+            const minimal = products.map(p => ({
+              id: p.id,
+              name: p.name || p.title,
+              title: p.title || p.name,
+              brand: p.brand,
+              category: p.category,
+              price: p.price,
+              originalPrice: p.originalPrice,
+              badge: p.badge,
+              image: p.image,
+              images: [p.image],
+              storageOptions: p.storageOptions,
+              colorOptions: p.colorOptions,
+              stockStatus: p.stockStatus,
+              specs: p.specs
+            }));
+            localStorage.setItem("UH_PRODUCTS", JSON.stringify(minimal));
+          } catch (err3) {
+            console.warn("[UHStorage] LocalStorage quota completely full. Active in IndexedDB & Memory.");
+          }
+        }
+      }
+    },
+
+    async loadProducts() {
+      // 1. Check in-memory
+      if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length > 0) {
+        return window.UH_PRODUCTS_CACHE;
+      }
+
+      // 2. Check IndexedDB
+      try {
+        const db = await this.getDB();
+        if (db) {
+          const stored = await new Promise((resolve) => {
+            const tx = db.transaction("products", "readonly");
+            const store = tx.objectStore("products");
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          });
+          if (Array.isArray(stored) && stored.length > 0) {
+            if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = stored;
+            return stored;
+          }
+        }
+      } catch (e) { }
+
+      // 3. Check LocalStorage
+      try {
+        const local = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
+        if (Array.isArray(local) && local.length > 0) {
+          if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = local;
+          return local;
+        }
+      } catch (e) { }
+
+      return typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : [];
+    }
+  };
+
+  if (typeof window !== "undefined") window.UHStorage = UHStorage;
+
   const SupabaseSync = {
     client: null,
     isConnected: false,
     config: MASTER_CONFIG,
     isSyncingQueue: false,
     lastDiagnosticMessage: "",
+    _fetchProductsPromise: null,
 
     init() {
       // 1. Sanitize & Load Config from localStorage override if valid
@@ -134,9 +263,12 @@
         // Automatically fetch latest catalog, settings and orders to guarantee real-time cross-device sync (e.g. laptop <-> mobile)
         this.fetchProducts().then(prods => {
           if (prods && prods.length > 0 && typeof window !== "undefined" && window.App) {
-            if (typeof window.App.renderCatalog === "function") window.App.renderCatalog();
+            window.UH_PRODUCTS_CACHE = prods;
+            if (typeof window.App.renderCatalogTabs === "function") window.App.renderCatalogTabs();
+            if (typeof window.App.renderBrandFilterBar === "function") window.App.renderBrandFilterBar();
             if (typeof window.App.renderCategories === "function") window.App.renderCategories();
             if (typeof window.App.renderBrandsSection === "function") window.App.renderBrandsSection();
+            if (typeof window.App.renderCatalog === "function") window.App.renderCatalog();
           }
         });
         this.fetchStoreSettings().then(st => {
@@ -317,13 +449,24 @@
       }
     },
 
-    // --- PRODUCTS SYNC ---
+    // --- PRODUCTS SYNC (Deduplicated with 25s timeout & Dual-Tier Storage) ---
     async fetchProducts() {
+      if (this._fetchProductsPromise) {
+        return this._fetchProductsPromise;
+      }
+      this._fetchProductsPromise = this._fetchProductsInternal().finally(() => {
+        this._fetchProductsPromise = null;
+      });
+      return this._fetchProductsPromise;
+    },
+
+    async _fetchProductsInternal() {
       // 1. If online and client is active, query latest cloud catalog directly
       if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
         try {
           const controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
-          const timer = controller ? setTimeout(() => controller.abort(), 6000) : null;
+          // 25 second timeout to allow complete transmission over mobile networks (4G / 3G)
+          const timer = controller ? setTimeout(() => controller.abort(), 25000) : null;
 
           const query = this.client
             .from("products")
@@ -370,12 +513,12 @@
                   originalPrice: item.original_price ? Number(item.original_price) : null,
                   badge: resolvedBadge,
                   isFeatured: item.is_featured,
-                  stock: item.stock,
+                  stock: item.stock !== undefined ? Number(item.stock) : 10,
                   rating: Number(item.rating || 5.0),
                   reviewsCount: item.review_count !== undefined ? Number(item.review_count) : (item.reviews || 0),
                   reviews: item.review_count !== undefined ? Number(item.review_count) : (item.reviews || 0),
                   image: item.image,
-                  images: item.images || [item.image],
+                  images: Array.isArray(item.images) && item.images.length > 0 ? item.images : [item.image],
                   video: item.specs?.video || item.video || null,
                   condition: resolvedCondition,
                   conditionBadge: resolvedBadge,
@@ -389,28 +532,28 @@
                 };
               });
 
-            try {
-              localStorage.setItem("UH_PRODUCTS", JSON.stringify(mapped));
-            } catch (quotaErr) { }
+            // Persist to Memory, IndexedDB and LocalStorage
+            await UHStorage.saveProducts(mapped);
+
+            // Notify storefront to immediately re-render all sections with full catalog
+            if (typeof window !== "undefined" && window.App) {
+              if (typeof window.App.renderCatalogTabs === "function") window.App.renderCatalogTabs();
+              if (typeof window.App.renderBrandFilterBar === "function") window.App.renderBrandFilterBar();
+              if (typeof window.App.renderCategories === "function") window.App.renderCategories();
+              if (typeof window.App.renderBrandsSection === "function") window.App.renderBrandsSection();
+              if (typeof window.App.renderCatalog === "function") window.App.renderCatalog();
+            }
+
             return mapped;
           }
         } catch (e) {
-          // Silent fallback to local cache
+          console.warn("[Supabase] Cloud fetch notice, reading from storage engine:", e);
         }
       }
 
-      // 2. LocalStorage Fallback (Guaranteed to return products instantly)
-      let localProducts = [];
-      try {
-        localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || (typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : []);
-        let deletedIds = JSON.parse(localStorage.getItem("UH_DELETED_PRODUCT_IDS") || "[]");
-        if (deletedIds.length > 0) {
-          localProducts = localProducts.filter(p => !deletedIds.includes(String(p.id)));
-        }
-      } catch (e) {
-        localProducts = [];
-      }
-      return localProducts;
+      // 2. Storage Engine Fallback (Memory -> IndexedDB -> LocalStorage)
+      return await UHStorage.loadProducts();
+    },
     },
 
     async syncProductsToLocal() {
@@ -666,7 +809,7 @@
     },
 
     async saveProduct(product) {
-      // 1. ALWAYS update LocalStorage immediately for instant zero-lag UI response
+      // 1. ALWAYS update Memory, IndexedDB & LocalStorage immediately for zero-lag UI response
       let localProducts = [];
       try {
         localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
@@ -681,14 +824,7 @@
         localProducts.unshift(product);
       }
 
-      try {
-        localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts));
-      } catch (quotaErr) {
-        console.warn("[Supabase] LocalStorage near capacity, saving recent subset...", quotaErr);
-        try {
-          localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts.slice(0, 10)));
-        } catch (e2) { }
-      }
+      await UHStorage.saveProducts(localProducts);
 
       // 2. Prepare Cloud Payload
       const payload = this.productToPayload(product);
@@ -732,13 +868,13 @@
         try { localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds)); } catch (e) { }
       }
 
-      // 2. Remove locally
+      // 2. Remove locally from Memory, IndexedDB & LocalStorage
       let localProducts = [];
       try {
         localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
       } catch (e) { localProducts = []; }
       localProducts = localProducts.filter(p => String(p.id) !== strId);
-      try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts)); } catch (e) { }
+      await UHStorage.saveProducts(localProducts);
 
       // 3. Delete from Supabase or Enqueue
       if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
