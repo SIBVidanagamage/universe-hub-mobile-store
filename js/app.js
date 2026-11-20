@@ -33,22 +33,39 @@ const App = {
   pendingCartProdId: null,
 
   getProducts() {
-    const minExpected = (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS)) ? INITIAL_PRODUCTS.length : 0;
-    if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length >= minExpected && window.UH_PRODUCTS_CACHE.length > 0) {
+    // 1. In-Memory cache is instant priority
+    if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length > 0) {
       return window.UH_PRODUCTS_CACHE;
     }
+
+    // 2. Check stored products in localStorage
     try {
+      const storedVer = localStorage.getItem("UH_CATALOG_VERSION");
+      // If client has stale legacy cache (< 95), auto-upgrade to INITIAL_PRODUCTS
+      if (storedVer !== "95") {
+        if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
+          if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
+          try {
+            localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS));
+            localStorage.setItem("UH_CATALOG_VERSION", "95");
+          } catch (e) { }
+          return INITIAL_PRODUCTS;
+        }
+      }
+
       const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
-      if (Array.isArray(stored) && stored.length >= minExpected && stored.length > 0) {
+      if (Array.isArray(stored) && stored.length > 0) {
         if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = stored;
         return stored;
       }
-    } catch (e) {}
-    if (minExpected > 0) {
+    } catch (e) { }
+
+    // 3. Fallback to bundled products
+    if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
       if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
-      try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS)); } catch (e) {}
       return INITIAL_PRODUCTS;
     }
+
     return [];
   },
 
