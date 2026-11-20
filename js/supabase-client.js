@@ -581,6 +581,90 @@
       }
     },
 
+    // Helper to format product object for Supabase PostgreSQL
+    productToPayload(product) {
+      return {
+        id: String(product.id),
+        title: product.title || product.name,
+        slug: product.slug || product.id,
+        category: product.category,
+        brand: product.brand || "Apple",
+        price: Number(product.price),
+        original_price: product.originalPrice ? Number(product.originalPrice) : null,
+        badge: product.badge || product.conditionBadge || null,
+        is_featured: !!product.isFeatured,
+        stock: product.stock !== undefined ? Number(product.stock) : 10,
+        rating: product.rating !== undefined ? Number(product.rating) : 5.0,
+        review_count: product.reviewsCount || product.review_count || product.reviews || 0,
+        image: product.image,
+        images: Array.isArray(product.images) && product.images.length > 0 ? product.images : [product.image],
+        description: product.description || "",
+        specs: {
+          ...(product.specs || {}),
+          video: typeof product.video === "string" ? product.video : "",
+          storageOptions: product.storageOptions || [],
+          colorOptions: product.colorOptions || [],
+          condition: product.condition || "",
+          stockStatus: product.stockStatus || "available",
+          batteryHealth: product.batteryHealth || null,
+          warranty: product.warranty || ""
+        },
+        updated_at: new Date().toISOString()
+      };
+    },
+
+    // Upload ALL active local products from laptop to Supabase Cloud directly
+    async uploadAllLocalToCloud() {
+      if (!this.client) return { success: false, message: "Supabase client not initialized." };
+      try {
+        let localProducts = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+        const SAMPLE_PRODUCT_IDS = [
+          'prod-ip18pm', 'prod-ip16pm', 'prod-ip16p', 'prod-ip15p', 'prod-used-ip13',
+          'prod-used-ip14pm', 'prod-used-ip13p', 'prod-used-ip12', 'prod-used-ip11',
+          'prod-case-magsafe', 'prod-case-carbon', 'prod-charger-65w', 'prod-pb-20k',
+          'prod-cable-braided', 'prod-glass-9h', 'prod-cam-lens', 'prod-airpods-pro',
+          'prod-ugreen-100w', 'prod-baseus-cable', 'prod-wiwu-wallet', 'prod-asper-case',
+          'prod-1794121290955'
+        ];
+        const genuine = localProducts.filter(p => !SAMPLE_PRODUCT_IDS.includes(String(p.id)));
+        let uploaded = 0;
+        let errors = [];
+
+        console.log(`☁️ [Supabase] Uploading ${genuine.length} laptop products to Cloud Database...`);
+
+        for (const prod of genuine) {
+          const payload = this.productToPayload(prod);
+          try {
+            const { error } = await this.client.from("products").upsert(payload);
+            if (error) {
+              console.warn(`[Supabase] Upsert failed for "${prod.name || prod.title}":`, error.message);
+              errors.push(`${prod.name || prod.id}: ${error.message}`);
+            } else {
+              uploaded++;
+              console.log(`  ✓ Synced to Cloud: "${payload.title}"`);
+            }
+          } catch (itemErr) {
+            errors.push(`${prod.name || prod.id}: ${itemErr.message || itemErr}`);
+          }
+        }
+
+        if (uploaded > 0) {
+          this.isConnected = true;
+          this.updateStatusBadge(true);
+        }
+
+        return {
+          success: errors.length === 0,
+          uploaded,
+          total: genuine.length,
+          errors
+        };
+      } catch (err) {
+        console.error("Bulk upload error:", err);
+        return { success: false, message: err.message };
+      }
+    },
+
     async saveProduct(product) {
       // 1. ALWAYS update LocalStorage immediately for instant zero-lag UI response
       let localProducts = [];
@@ -602,61 +686,35 @@
       } catch (quotaErr) {
         console.warn("[Supabase] LocalStorage near capacity, saving recent subset...", quotaErr);
         try {
-          // If browser storage is full, keep recent 10 items without corrupting real image data
           localStorage.setItem("UH_PRODUCTS", JSON.stringify(localProducts.slice(0, 10)));
         } catch (e2) { }
       }
 
       // 2. Prepare Cloud Payload
-      const payload = {
-        id: String(product.id),
-        title: product.title || product.name,
-        slug: product.slug || product.id,
-        category: product.category,
-        brand: product.brand || "Apple",
-        price: Number(product.price),
-        original_price: product.originalPrice ? Number(product.originalPrice) : null,
-        badge: product.badge || product.conditionBadge || null,
-        is_featured: !!product.isFeatured,
-        stock: product.stock !== undefined ? Number(product.stock) : 10,
-        rating: product.rating !== undefined ? Number(product.rating) : 5.0,
-        review_count: product.reviewsCount || product.review_count || product.reviews || 0,
-        image: product.image,
-        images: product.images || [product.image],
-        description: product.description || "",
-        specs: {
-          ...(product.specs || {}),
-          video: typeof product.video === "string" ? product.video : "",
-          storageOptions: product.storageOptions || [],
-          colorOptions: product.colorOptions || [],
-          condition: product.condition || "",
-          stockStatus: product.stockStatus || "available",
-          batteryHealth: product.batteryHealth || null,
-          warranty: product.warranty || ""
-        },
-        updated_at: new Date().toISOString()
-      };
+      const payload = this.productToPayload(product);
 
-      // 3. Dispatch to Supabase or Enqueue if offline / network error
-      if (this.client && this.isConnected) {
+      // 3. Dispatch DIRECTLY to Supabase Cloud Database
+      if (this.client) {
         try {
           const { error } = await this.client.from("products").upsert(payload);
           if (error) {
             console.warn("[Supabase] Upsert notice:", error.message);
             this.enqueueSync("upsert_product", payload);
+            return false;
           } else {
-            console.log("⚡ [Supabase] Product saved to cloud:", payload.title);
+            this.isConnected = true;
+            this.updateStatusBadge(true);
+            console.log("⚡ [Supabase] Product saved directly to cloud:", payload.title);
+            return true;
           }
         } catch (err) {
-          // Network / AdBlocker interception caught safely
-          console.warn("[Supabase] Cloud upload offline, safely queued for background sync:", err.message || err);
+          console.warn("[Supabase] Direct cloud upload notice:", err.message || err);
           this.enqueueSync("upsert_product", payload);
-          this.isConnected = false;
-          this.updateStatusBadge(false, "Local Mode (Queued)");
+          return false;
         }
       } else {
-        // Enqueue for later when connected
         this.enqueueSync("upsert_product", payload);
+        return false;
       }
     },
 

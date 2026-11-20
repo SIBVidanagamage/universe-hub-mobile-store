@@ -17,26 +17,26 @@ const AdminController = {
     if (typeof BulkUploader !== 'undefined') {
       BulkUploader.init();
     }
-    // Auto-sync & recover active inventory directly from Supabase Cloud on load
-    if (window.SupabaseSync && typeof window.SupabaseSync.recoverCloudProducts === 'function') {
-      window.SupabaseSync.recoverCloudProducts().then(() => {
-        this.renderProductsTable();
-        this.renderStats();
-        this.renderInventoryFilterBar();
+    // Auto-sync & upload active laptop inventory directly to Supabase Cloud on load so all devices match
+    if (window.SupabaseSync && typeof window.SupabaseSync.uploadAllLocalToCloud === 'function') {
+      window.SupabaseSync.uploadAllLocalToCloud().then(res => {
+        if (res && res.uploaded > 0) {
+          console.log(`⚡ [Supabase] Auto-synced ${res.uploaded} laptop products to Cloud!`);
+        }
       }).catch(() => {});
     }
   },
 
   async syncCatalogToCloud() {
-    showToast("☁️ Syncing inventory with Supabase Cloud...");
-    if (window.SupabaseSync && typeof window.SupabaseSync.syncLocalCatalogToCloud === "function") {
-      const ok = await window.SupabaseSync.syncLocalCatalogToCloud();
-      if (ok) {
-        showToast("✅ Cloud database synchronized!");
+    showToast("☁️ Pushing all Laptop products to Supabase Cloud...");
+    if (window.SupabaseSync && typeof window.SupabaseSync.uploadAllLocalToCloud === "function") {
+      const res = await window.SupabaseSync.uploadAllLocalToCloud();
+      if (res && res.uploaded !== undefined) {
+        showToast(`✅ Successfully uploaded ${res.uploaded} of ${res.total} products to Cloud! All other devices will now show them.`);
         this.renderProductsTable();
         this.renderStats();
       } else {
-        showToast("⚠️ Cloud sync notice. Operating safely.");
+        showToast(`⚠️ Cloud upload notice: ${res.message || 'Check connection'}`);
       }
     }
   },
@@ -1239,9 +1239,10 @@ const AdminController = {
       }
 
       // 2. Sync to Supabase Cloud Database
+      let cloudOk = false;
       if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
         try {
-          await window.SupabaseSync.saveProduct(newProduct);
+          cloudOk = await window.SupabaseSync.saveProduct(newProduct);
         } catch (cloudErr) {
           console.error("Supabase cloud save error:", cloudErr);
         }
@@ -1255,7 +1256,11 @@ const AdminController = {
       if (window.MediaUploader) MediaUploader.reset("adm");
 
       if (typeof showToast === "function") {
-        showToast(`✅ Product "${name}" added to Live Store with ${imagesList.length} photos!`);
+        if (cloudOk) {
+          showToast(`✅ "${name}" saved to Live Store & Cloud (visible on all devices)!`);
+        } else {
+          showToast(`✅ "${name}" saved on Laptop! Click "Push to Cloud" to sync across all devices.`);
+        }
       }
 
       if (typeof this.renderProductsTable === "function") this.renderProductsTable();
@@ -1337,7 +1342,7 @@ const AdminController = {
   },
 
   // Save Full Product Edit
-  handleSaveEditProduct(e) {
+  async handleSaveEditProduct(e) {
     e.preventDefault();
     const prodId = document.getElementById("edit-prod-id").value;
     const name = document.getElementById("edit-prod-name").value.trim();
@@ -1411,8 +1416,13 @@ const AdminController = {
     localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
 
     // Sync to Supabase Cloud Database
+    let cloudOk = false;
     if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
-      window.SupabaseSync.saveProduct(prod);
+      try {
+        cloudOk = await window.SupabaseSync.saveProduct(prod);
+      } catch (cloudErr) {
+        console.error("Supabase cloud save error:", cloudErr);
+      }
     }
 
     if (window.App && typeof App.closeModal === "function") {
@@ -1422,7 +1432,13 @@ const AdminController = {
     this.renderProductsTable();
     this.renderInventoryFilterBar();
     this.renderStats();
-    showToast(`Updated "${name}" with ${imagesList.length} photos and video!`);
+    if (typeof showToast === "function") {
+      if (cloudOk) {
+        showToast(`✅ Updated "${name}" & synced to Cloud (visible on all devices)!`);
+      } else {
+        showToast(`✅ Updated "${name}" on Laptop! Click "Push to Cloud" to sync across all devices.`);
+      }
+    }
 
     if (window.App && typeof App.renderCatalog === "function") {
       App.renderCatalog();

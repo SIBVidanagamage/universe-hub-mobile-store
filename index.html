@@ -903,20 +903,20 @@
         </div>
 
         <!-- Live Inventory Action Bar & Recovery Tool -->
-        <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.35); border-radius:12px; padding:14px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 4px 20px rgba(0,0,0,0.25);">
+        <div style="background:rgba(2,132,199,0.12); border:1px solid rgba(2,132,199,0.35); border-radius:12px; padding:14px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 4px 20px rgba(0,0,0,0.25);">
           <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:40px; height:40px; border-radius:10px; background:rgba(16,185,129,0.2); display:flex; align-items:center; justify-content:center; font-size:20px; color:#10b981;">🔄</div>
+            <div style="width:40px; height:40px; border-radius:10px; background:rgba(2,132,199,0.2); display:flex; align-items:center; justify-content:center; font-size:20px; color:#38bdf8;">☁️</div>
             <div>
-              <div style="font-weight:800; color:#fff; font-size:14px;">Supabase Cloud Database Recovery &amp; Cross-Device Sync</div>
-              <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">If you added products on another device or if products went missing, click here to query &amp; restore directly from Supabase Cloud.</div>
+              <div style="font-weight:800; color:#fff; font-size:14px;">Cross-Device Inventory Cloud Sync (Laptop ➔ Phone / Other Devices)</div>
+              <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Click "Push Laptop Products to Cloud" to upload all items from this laptop to Supabase Cloud so other devices see them instantly.</div>
             </div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button type="button" class="btn-primary-glow" style="padding:10px 20px; font-size:13px; font-weight:800; border-radius:8px; background:#10b981; box-shadow:0 0 18px rgba(16,185,129,0.4); cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="window.AdminController && AdminController.recoverCloudCatalog()">
-              🔄 Restore All Missing Products from Cloud
+            <button type="button" class="btn-primary-glow" style="padding:10px 20px; font-size:13px; font-weight:800; border-radius:8px; background:#0284c7; box-shadow:0 0 18px rgba(2,132,199,0.4); cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="window.AdminController && AdminController.syncCatalogToCloud()">
+              ☁️ Push Laptop Products to Cloud (Sync to Phone)
             </button>
-            <button type="button" class="btn-glass" style="padding:10px 16px; font-size:12.5px; border-radius:8px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.4); cursor:pointer; display:inline-flex; align-items:center; gap:6px;" onclick="window.AdminController && AdminController.syncCatalogToCloud()">
-              ☁️ Force Cloud Sync
+            <button type="button" class="btn-glass" style="padding:10px 16px; font-size:12.5px; border-radius:8px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.4); cursor:pointer; display:inline-flex; align-items:center; gap:6px;" onclick="window.AdminController && AdminController.recoverCloudCatalog()">
+              🔄 Pull from Cloud
             </button>
           </div>
         </div>
@@ -3080,14 +3080,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=80"></script>
-  <script src="js/supabase-client.js?v=80"></script>
-  <script src="js/notification-service.js?v=80"></script>
-  <script src="js/invoice.js?v=80"></script>
-  <script src="js/uploader.js?v=80"></script>
-  <script src="js/bulk-uploader.js?v=80"></script>
-  <script src="js/payment-gateway.js?v=80"></script>
-  <script src="js/admin.js?v=80"></script>
-  <script src="js/app.js?v=80"></script>
+  <script src="js/data.js?v=85"></script>
+  <script src="js/supabase-client.js?v=85"></script>
+  <script src="js/notification-service.js?v=85"></script>
+  <script src="js/invoice.js?v=85"></script>
+  <script src="js/uploader.js?v=85"></script>
+  <script src="js/bulk-uploader.js?v=85"></script>
+  <script src="js/payment-gateway.js?v=85"></script>
+  <script src="js/admin.js?v=85"></script>
+  <script src="js/app.js?v=85"></script>
 </body>
 </html>
