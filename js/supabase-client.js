@@ -103,8 +103,10 @@
     },
 
     async loadProducts() {
+      const minExpected = (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS)) ? INITIAL_PRODUCTS.length : 0;
+
       // 1. Check in-memory
-      if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length > 0) {
+      if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length >= minExpected && window.UH_PRODUCTS_CACHE.length > 0) {
         return window.UH_PRODUCTS_CACHE;
       }
 
@@ -119,7 +121,7 @@
             req.onsuccess = () => resolve(req.result || []);
             req.onerror = () => resolve([]);
           });
-          if (Array.isArray(stored) && stored.length > 0) {
+          if (Array.isArray(stored) && stored.length >= minExpected && stored.length > 0) {
             if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = stored;
             return stored;
           }
@@ -129,11 +131,17 @@
       // 3. Check LocalStorage
       try {
         const local = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
-        if (Array.isArray(local) && local.length > 0) {
+        if (Array.isArray(local) && local.length >= minExpected && local.length > 0) {
           if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = local;
           return local;
         }
       } catch (e) { }
+
+      if (minExpected > 0) {
+        if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
+        try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS)); } catch (e) { }
+        return INITIAL_PRODUCTS;
+      }
 
       return typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : [];
     }

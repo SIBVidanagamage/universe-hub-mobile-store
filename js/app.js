@@ -33,17 +33,23 @@ const App = {
   pendingCartProdId: null,
 
   getProducts() {
-    if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length > 0) {
+    const minExpected = (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS)) ? INITIAL_PRODUCTS.length : 0;
+    if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length >= minExpected && window.UH_PRODUCTS_CACHE.length > 0) {
       return window.UH_PRODUCTS_CACHE;
     }
     try {
       const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
-      if (Array.isArray(stored) && stored.length > 0) {
+      if (Array.isArray(stored) && stored.length >= minExpected && stored.length > 0) {
         if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = stored;
         return stored;
       }
     } catch (e) {}
-    return typeof INITIAL_PRODUCTS !== "undefined" ? INITIAL_PRODUCTS : [];
+    if (minExpected > 0) {
+      if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
+      try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS)); } catch (e) {}
+      return INITIAL_PRODUCTS;
+    }
+    return [];
   },
 
   init() {
