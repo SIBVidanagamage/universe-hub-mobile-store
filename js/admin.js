@@ -144,12 +144,26 @@ const AdminController = {
     const storageWrap = document.getElementById(`${prefix}-storage-matrix-wrap`);
     const accessoryWrap = document.getElementById(`${prefix}-accessory-specs-wrap`);
 
+    const formTitle = document.getElementById(`${prefix}-form-card-title`);
+    const formSubtitle = document.getElementById(`${prefix}-form-card-subtitle`);
+    const submitBtn = document.getElementById(`btn-${prefix}-add-product`) || document.getElementById('btn-admin-add-product');
+
     if (type === 'accessory') {
       if (btnPhone) btnPhone.classList.remove('active');
       if (btnAccessory) btnAccessory.classList.add('active');
       if (batteryWrap) batteryWrap.style.display = 'none';
       if (storageWrap) storageWrap.style.display = 'none';
       if (accessoryWrap) accessoryWrap.style.display = 'block';
+
+      if (formTitle) formTitle.innerHTML = '⚡ Add New Accessory / Gadget to Inventory';
+      if (formSubtitle) formSubtitle.textContent = 'Add Power Banks (with mAh capacity), Fast Chargers (Wattage), Cables, Cases & Audio.';
+      if (submitBtn) submitBtn.innerHTML = '⚡ Add Accessory to Live Store';
+
+      // Set placeholder on title input
+      const nameInput = document.getElementById(`${prefix}-prod-name`);
+      if (nameInput && (!nameInput.value || nameInput.placeholder.includes('iPhone 15'))) {
+        nameInput.placeholder = 'e.g. Anker 20,000mAh 65W GaN Power Bank or MagSafe Case';
+      }
 
       // If category is still an iPhone, switch to power-banks or first accessory
       const catSelect = document.getElementById(`${prefix}-prod-category`);
@@ -167,6 +181,15 @@ const AdminController = {
       if (batteryWrap) batteryWrap.style.display = 'block';
       if (storageWrap) storageWrap.style.display = 'block';
       if (accessoryWrap) accessoryWrap.style.display = 'none';
+
+      if (formTitle) formTitle.innerHTML = '📱 Add New iPhone / Smartphone to Inventory';
+      if (formSubtitle) formSubtitle.textContent = 'Add Brand New or Certified Used iPhones with Storage Matrix & Battery Health.';
+      if (submitBtn) submitBtn.innerHTML = 'Add Product to Live Store';
+
+      const nameInput = document.getElementById(`${prefix}-prod-name`);
+      if (nameInput && nameInput.placeholder.includes('Anker')) {
+        nameInput.placeholder = 'e.g. iPhone 15 Pro Max 256GB';
+      }
 
       const catSelect = document.getElementById(`${prefix}-prod-category`);
       if (catSelect && catSelect.value !== 'brand-new-iphones' && catSelect.value !== 'used-iphones') {
@@ -392,6 +415,30 @@ const AdminController = {
       const match = (btn.dataset && btn.dataset.tab === tabName) || (btn.getAttribute("data-tab") === tabName);
       btn.classList.toggle("active", !!match);
     });
+
+    if (tabName === 'accessories') {
+      document.querySelectorAll(".admin-tab-content").forEach(content => {
+        content.style.display = content.id === 'admin-tab-products' ? "block" : "none";
+      });
+      this.setItemType('accessory', 'adm');
+      this.filterCategory = 'accessories';
+      this.renderInventoryFilterBar();
+      this.renderProductsTable();
+      const formEl = document.getElementById("admin-add-product-form");
+      if (formEl) formEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    if (tabName === 'products') {
+      document.querySelectorAll(".admin-tab-content").forEach(content => {
+        content.style.display = content.id === 'admin-tab-products' ? "block" : "none";
+      });
+      this.setItemType('phone', 'adm');
+      this.filterCategory = 'all';
+      this.renderInventoryFilterBar();
+      this.renderProductsTable();
+      return;
+    }
 
     document.querySelectorAll(".admin-tab-content").forEach(content => {
       content.style.display = content.id === `admin-tab-${tabName}` ? "block" : "none";

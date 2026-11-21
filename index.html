@@ -667,8 +667,9 @@
 
       <!-- Navigation Tabs in Admin -->
       <div class="admin-tabs-list">
-        <button class="admin-tab-btn active" data-tab="products" onclick="AdminController.switchTab('products')">📱 Products &amp; Inventory</button>
-        <button class="admin-tab-btn" data-tab="brands" onclick="AdminController.switchTab('brands')">🏷️ Brands &amp; Accessories</button>
+        <button class="admin-tab-btn active" data-tab="products" onclick="AdminController.switchTab('products')">📱 Phones &amp; Inventory</button>
+        <button class="admin-tab-btn" data-tab="accessories" onclick="AdminController.switchTab('accessories')">⚡ Add / Manage Accessories</button>
+        <button class="admin-tab-btn" data-tab="brands" onclick="AdminController.switchTab('brands')">🏷️ Brands &amp; Makers</button>
         <button class="admin-tab-btn" data-tab="categories" onclick="AdminController.switchTab('categories')">📂 Categories &amp; Navbar</button>
         <button class="admin-tab-btn" data-tab="repairs" onclick="AdminController.switchTab('repairs')">🔧 Repair Orders Queue</button>
         <button class="admin-tab-btn" data-tab="reviews" onclick="AdminController.switchTab('reviews')">⭐ Customer Reviews Moderation</button>
@@ -683,8 +684,8 @@
         <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; margin-bottom:28px;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
             <div>
-              <h3 style="font-size:17px; font-weight:800; color:#fff; margin:0;">+ Add New Product / Phone to Inventory</h3>
-              <p style="font-size:12.5px; color:var(--text-secondary); margin:3px 0 0 0;">Add single items manually or use bulk CSV import to add hundreds instantly.</p>
+              <h3 id="adm-form-card-title" style="font-size:17px; font-weight:800; color:#fff; margin:0;">📱 Add New iPhone / Smartphone to Inventory</h3>
+              <p id="adm-form-card-subtitle" style="font-size:12.5px; color:var(--text-secondary); margin:3px 0 0 0;">Add Brand New or Certified Used iPhones with Storage Matrix &amp; Battery Health.</p>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button type="button" class="btn-primary-glow" style="padding:8px 14px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; background:#10b981; box-shadow:0 0 16px rgba(16,185,129,0.35);" onclick="window.AdminController && AdminController.recoverCloudCatalog()" title="Restore and reload all products directly from Supabase Cloud Database">
@@ -3296,14 +3297,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=110"></script>
-  <script src="js/supabase-client.js?v=110"></script>
-  <script src="js/notification-service.js?v=110"></script>
-  <script src="js/invoice.js?v=110"></script>
-  <script src="js/uploader.js?v=110"></script>
-  <script src="js/bulk-uploader.js?v=110"></script>
-  <script src="js/payment-gateway.js?v=110"></script>
-  <script src="js/admin.js?v=110"></script>
-  <script src="js/app.js?v=110"></script>
+  <script src="js/data.js?v=115"></script>
+  <script src="js/supabase-client.js?v=115"></script>
+  <script src="js/notification-service.js?v=115"></script>
+  <script src="js/invoice.js?v=115"></script>
+  <script src="js/uploader.js?v=115"></script>
+  <script src="js/bulk-uploader.js?v=115"></script>
+  <script src="js/payment-gateway.js?v=115"></script>
+  <script src="js/admin.js?v=115"></script>
+  <script src="js/app.js?v=115"></script>
 </body>
 </html>
