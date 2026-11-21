@@ -119,7 +119,7 @@
           <li><a href="#catalog-section" onclick="App.filterByCategory('chargers');">Chargers & Cables</a></li>
           <li><a href="#catalog-section" onclick="App.filterByCategory('audio');">Audio & AirPods</a></li>
           <li><a href="#repair-center" class="nav-pill-highlight">🔧 Mobile Repair Lab</a></li>
-          <li><a href="#store-reviews">⭐ Store Reviews (4.9★)</a></li>
+          <li><a href="javascript:void(0)" onclick="App.openStoreReviewsModal()">⭐ Store Reviews (4.9★)</a></li>
           <li><a href="#store-location">📍 Physical Shop</a></li>
           <li><a href="javascript:void(0)" onclick="InvoiceService.showCustomerOrders()" style="color:var(--neon-cyan); font-weight:600;">🧾 Invoices &amp; Orders</a></li>
           <li><a href="javascript:void(0)" onclick="App.openAboutModal()" style="color:#d8b4fe; font-weight:600;">ℹ️ About Us</a></li>
@@ -393,49 +393,28 @@
       </div>
     </section>
 
-    <!-- Customer Reviews Section (Physical Store Focus) -->
-    <section id="store-reviews" class="reviews-section">
+    <!-- Compact Store Trust & Reviews Strip (De-cluttered & High-Converting) -->
+    <section class="store-trust-strip-section" id="store-reviews-strip">
       <div class="container">
-        <div class="section-head">
-          <div class="section-title-wrap">
-            <h2>Physical Store Customer Reviews</h2>
-            <p>Real feedback from customers who visited our Universe Hub outlet for phones, accessories, and repairs.</p>
+        <div class="store-trust-strip">
+          <div class="trust-strip-left" onclick="App.openStoreReviewsModal()" style="cursor:pointer;" title="Click to view all verified store reviews">
+            <div class="trust-strip-stars">★★★★★</div>
+            <div class="trust-strip-rating"><b>4.9</b> / 5.0 Rating</div>
+            <span class="trust-strip-badge">✓ 1,480+ Verified Physical Store Visitors</span>
+            <span class="trust-strip-divider">•</span>
+            <span class="trust-strip-item">100% Genuine Apple</span>
+            <span class="trust-strip-divider">•</span>
+            <span class="trust-strip-item">6 Months Warranty</span>
           </div>
-          <button class="btn-primary-glow" onclick="App.openWriteReviewModal()">
-            ✍️ Write Store Review
-          </button>
-        </div>
-
-        <!-- Rating Stat Banner -->
-        <div class="reviews-stat-banner">
-          <div class="stat-score-col">
-            <div class="big-rating-number">4.9</div>
-            <div>
-              <div class="big-stars">★★★★★</div>
-              <div class="rating-subtext">Overall Store Satisfaction Rate</div>
-              <div class="verified-store-badge">✓ 1,480+ Verified Physical Store Visitors</div>
-            </div>
+          <div class="trust-strip-cta">
+            <button class="btn-view-all-reviews" onclick="App.openStoreReviewsModal()">
+              <span>💬 View All Customer Reviews</span>
+              <span class="reviews-count-pill">1,480+</span>
+            </button>
+            <button class="btn-write-review-compact" onclick="App.openWriteReviewModal()">
+              ✍️ Write Review
+            </button>
           </div>
-
-          <div style="display:flex; gap:24px; flex-wrap:wrap;">
-            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:20px;">
-              <div style="font-size:20px; font-weight:800; color:#fff;">100%</div>
-              <div style="font-size:12px; color:var(--text-muted);">Genuine Guarantee</div>
-            </div>
-            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:20px;">
-              <div style="font-size:20px; font-weight:800; color:var(--neon-cyan);">Express</div>
-              <div style="font-size:12px; color:var(--text-muted);">In-Store Repairs</div>
-            </div>
-            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:20px;">
-              <div style="font-size:20px; font-weight:800; color:var(--success);">6 Months</div>
-              <div style="font-size:12px; color:var(--text-muted);">Repair & Used Phone Warranty</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Reviews Grid -->
-        <div id="reviews-grid-container" class="reviews-grid">
-          <!-- Dynamically Populated -->
         </div>
       </div>
     </section>
@@ -568,7 +547,7 @@
               <li><a href="javascript:void(0)" onclick="App.openAboutModal()">About Universe Hub</a></li>
               <li><a href="#repair-center">Mobile Repair Lab</a></li>
               <li><a href="#repair-center">Track Device Status</a></li>
-              <li><a href="#store-reviews">Store Customer Reviews</a></li>
+              <li><a href="javascript:void(0)" onclick="App.openStoreReviewsModal()">Store Customer Reviews (4.9★)</a></li>
               <li><a href="javascript:void(0)" onclick="InvoiceService.showCustomerOrders()">🧾 Download Order Invoices (PDF)</a></li>
               <li><a id="footer-store-location-link" href="https://maps.app.goo.gl/r1BY5dMznxRunVC58" target="_blank" rel="noopener noreferrer">Maharagama Flagship Location ↗</a></li>
             </ul>
@@ -2223,6 +2202,68 @@
     </div>
   </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Customer Reviews Hub Modal (Clean Sub-View) -->
+  <div id="modal-store-reviews" class="modal-overlay">
+    <div class="modal-box reviews-modal-box">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:38px; height:38px; border-radius:10px; background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.3); display:flex; align-items:center; justify-content:center; font-size:18px;">
+            ⭐
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:18px; font-weight:800; color:#fff;">Store Customer Reviews &amp; Feedback</h3>
+            <p style="margin:0; font-size:12px; color:var(--text-muted);">Verified customer experiences from Universe Hub physical store &amp; online deliveries</p>
+          </div>
+        </div>
+        <button class="close-modal-btn" data-close="modal-store-reviews">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Reviews Stat Summary Banner -->
+        <div class="reviews-stat-banner">
+          <div class="stat-score-col">
+            <div class="big-rating-number">4.9</div>
+            <div>
+              <div class="big-stars">★★★★★</div>
+              <div class="rating-subtext">Overall Store Satisfaction Rate</div>
+              <div class="verified-store-badge">✓ 1,480+ Verified Physical Store Visitors</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
+            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:16px;">
+              <div style="font-size:18px; font-weight:800; color:#fff;">100%</div>
+              <div style="font-size:11px; color:var(--text-muted);">Genuine Guarantee</div>
+            </div>
+            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:16px;">
+              <div style="font-size:18px; font-weight:800; color:var(--neon-cyan);">Express</div>
+              <div style="font-size:11px; color:var(--text-muted);">In-Store Repairs</div>
+            </div>
+            <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:16px;">
+              <div style="font-size:18px; font-weight:800; color:var(--success);">6 Months</div>
+              <div style="font-size:11px; color:var(--text-muted);">Store Warranty</div>
+            </div>
+          </div>
+
+          <button class="btn-primary-glow" onclick="App.openWriteReviewModal()" style="margin-left:auto; white-space:nowrap;">
+            ✍️ Write Store Review
+          </button>
+        </div>
+
+        <!-- Filter / Sub-header bar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <span style="font-size:13.5px; font-weight:700; color:#fff;">All Verified Reviews</span>
+          <span style="font-size:12px; color:var(--text-muted);">Real feedback from genuine customers</span>
+        </div>
+
+        <!-- Reviews Grid -->
+        <div id="reviews-grid-container" class="reviews-grid">
+          <!-- Dynamically Populated by App.renderReviews() -->
+        </div>
       </div>
     </div>
   </div>

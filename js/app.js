@@ -404,6 +404,11 @@ const App = {
         this.requestAdminAccess();
       }
     }
+
+    // Check if URL has store reviews hash
+    if (window.location.hash === "#store-reviews" || window.location.hash === "#reviews") {
+      this.openStoreReviewsModal();
+    }
   },
 
   applyStoreSettings(overrideSettings = null) {
@@ -1148,7 +1153,7 @@ const App = {
 
       <!-- 5. Store Sections Links -->
       <li><a href="#repair-center" class="nav-pill-highlight">🔧 Mobile Repair Lab</a></li>
-      <li><a href="#store-reviews">⭐ Store Reviews (4.9★)</a></li>
+      <li><a href="javascript:void(0)" onclick="App.openStoreReviewsModal()">⭐ Store Reviews (4.9★)</a></li>
       <li><a href="#store-location">📍 Physical Shop</a></li>
     `;
 
@@ -1399,12 +1404,43 @@ const App = {
       const minPrice = hasStorageVariants ? Math.min(...prod.storageOptions.map(t => Number(t.price) || prod.price)) : prod.price;
 
       const isUsed = !!(prod.condition && !prod.condition.toLowerCase().includes("brand new"));
-      let conditionLabel = "Brand New (Sealed)";
-      if (isUsed && prod.condition) {
-        if (prod.condition.includes("Grade A+")) conditionLabel = "Grade A+ (99% Mint)";
-        else if (prod.condition.includes("Grade A")) conditionLabel = "Grade A (95%-98%)";
-        else if (prod.condition.includes("Grade B")) conditionLabel = "Grade B (90% Good)";
-        else conditionLabel = prod.condition;
+
+      // Sleek single primary highlight badge (prevents messy badge stacking)
+      let primaryBadge = '';
+      if (prod.discount) {
+        primaryBadge = `<span class="badge-pill badge-discount">${prod.discount}</span>`;
+      } else if (prod.batteryHealth) {
+        primaryBadge = `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>`;
+      } else if (prod.specs?.mah) {
+        primaryBadge = `<span class="badge-pill badge-tech">🔋 ${prod.specs.mah}</span>`;
+      } else if (prod.specs?.wattage) {
+        primaryBadge = `<span class="badge-pill badge-watt">⚡ ${prod.specs.wattage}</span>`;
+      } else if (isUsed) {
+        primaryBadge = `<span class="badge-pill badge-used">Grade A+</span>`;
+      } else if (prod.stockStatus === 'on-request') {
+        primaryBadge = `<span class="badge-pill badge-request">On Order</span>`;
+      }
+
+      // Sleek 1-line micro-spec text (never wraps or clutters)
+      let specLine = '';
+      if (hasStorageVariants) {
+        specLine = `💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}`;
+      } else if (prod.specs?.mah || prod.specs?.wattage) {
+        const parts = [];
+        if (prod.specs.mah) parts.push(prod.specs.mah);
+        if (prod.specs.wattage) parts.push(prod.specs.wattage);
+        if (prod.specs.magsafe) parts.push('MagSafe');
+        specLine = `⚡ ${parts.join(" • ")}`;
+      } else if (prod.batteryHealth) {
+        specLine = `🔋 ${prod.batteryHealth}% Battery • Grade A+ Mint`;
+      } else if (prod.specs?.compatibility) {
+        specLine = `📱 ${prod.specs.compatibility}`;
+      } else if (prod.specs?.ports) {
+        specLine = `🔌 ${prod.specs.ports}`;
+      } else if (Array.isArray(prod.tags) && prod.tags.length > 0) {
+        specLine = `✨ ${prod.tags.slice(0, 2).join(" • ")}`;
+      } else {
+        specLine = `✓ 100% Genuine Apple & Flagship Tech`;
       }
 
       return `
@@ -1412,25 +1448,20 @@ const App = {
           <div class="card-top-badges">
             <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
               ${brandLogo
-          ? `<img src="${brandLogo}" alt="${prodBrand}" style="width:13px; height:13px; object-fit:contain; vertical-align:middle; margin-right:4px;">`
+          ? `<img src="${brandLogo}" alt="${prodBrand}" style="width:12px; height:12px; object-fit:contain; vertical-align:middle; margin-right:3px;">`
           : (matchedBrand && matchedBrand.icon ? `${matchedBrand.icon} ` : '🏷️ ')
         }${prodBrand}
             </span>
-            ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>` : ''}
-            ${prod.specs?.mah ? `<span class="badge-pill" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#10b981;">🔋 ${prod.specs.mah}</span>` : ''}
-            ${prod.specs?.wattage ? `<span class="badge-pill" style="background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.4); color:#f59e0b;">⚡ ${prod.specs.wattage}</span>` : ''}
-            ${prod.specs?.magsafe ? `<span class="badge-pill" style="background:rgba(0,210,255,0.18); border:1px solid rgba(0,210,255,0.4); color:var(--neon-cyan);">🧲 MagSafe</span>` : ''}
-            ${prod.stockStatus === 'on-request' ? `<span class="badge-pill" style="background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.5); color:#f59e0b;">⚡ Sourced on Order</span>` : ''}
-            ${prod.discount ? `<span class="badge-pill badge-discount">${prod.discount}</span>` : ''}
+            ${primaryBadge}
           </div>
 
           <button class="card-wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="App.toggleWishlist('${prod.id}', this)" title="Add to Wishlist">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
           </button>
 
           <div class="card-media" onclick="App.openQuickView('${prod.id}')">
             <img src="${prod.image}" alt="${prod.name}" loading="lazy" onerror="this.src='assets/hero_showcase.jpg'">
-            <button class="quick-view-btn">Quick Specs &amp; Storage</button>
+            <button class="quick-view-btn">Quick Specs</button>
           </div>
 
           <div class="card-details">
@@ -1440,26 +1471,22 @@ const App = {
 
             <h3 class="card-title" title="${prod.name}" onclick="App.openQuickView('${prod.id}')">${prod.name}</h3>
 
-            <div class="card-meta-tags">
-              ${hasStorageVariants ? `<span class="meta-chip" style="color:var(--neon-cyan); border-color:rgba(0,210,255,0.3); font-weight:600;">💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}</span>` : ''}
-              ${hasColorVariants ? `<span class="meta-chip" style="color:#e056fd; border-color:rgba(224,86,253,0.3);">🎨 ${prod.colorOptions.length} Colors</span>` : ''}
-              ${prod.specs?.compatibility ? `<span class="meta-chip" style="color:var(--neon-cyan); border-color:rgba(0,210,255,0.25);">📱 ${prod.specs.compatibility}</span>` : ''}
-              ${prod.specs?.ports ? `<span class="meta-chip">🔌 ${prod.specs.ports}</span>` : ''}
-              ${(prod.tags || []).slice(0, 2).map(tag => `<span class="meta-chip">${tag}</span>`).join("")}
+            <div class="card-spec-line" title="${specLine}">
+              ${specLine}
             </div>
 
             <div class="card-price-row">
-              <span class="current-price">${hasStorageVariants ? `<small style="font-size:12px; font-weight:normal; color:var(--text-muted);">From </small>` : ''}Rs. ${minPrice.toLocaleString()}</span>
+              <span class="current-price">${hasStorageVariants ? `<small style="font-size:11px; font-weight:normal; color:var(--text-muted);">From </small>` : ''}Rs. ${minPrice.toLocaleString()}</span>
               ${prod.originalPrice > minPrice ? `<span class="original-price">Rs. ${prod.originalPrice.toLocaleString()}</span>` : ''}
             </div>
 
-            <div style="display:flex; gap:6px; margin-top:8px;">
+            <div style="display:flex; gap:6px; margin-top:auto;">
               <button class="add-to-cart-btn" style="flex:1;" onclick="${(hasStorageVariants || hasColorVariants) ? `App.openQuickView('${prod.id}')` : `App.addToCart('${prod.id}')`}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <span>${(hasStorageVariants || hasColorVariants) ? 'Select Options' : 'Add to Cart'}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span>${(hasStorageVariants || hasColorVariants) ? 'Options' : 'Add to Cart'}</span>
               </button>
-              <button type="button" class="btn-card-wa" style="width:38px; height:38px; flex-shrink:0; background:#25d366; color:#061b0f; border:none; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 0 10px rgba(37,211,102,0.3);" onclick="event.stopPropagation(); App.inquireProductStockWhatsApp('${prod.id}')" title="Check Stock &amp; Inquire on WhatsApp">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
+              <button type="button" class="btn-card-wa" onclick="event.stopPropagation(); App.inquireProductStockWhatsApp('${prod.id}')" title="Check Stock &amp; Inquire on WhatsApp">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
               </button>
             </div>
           </div>
@@ -2693,6 +2720,15 @@ const App = {
         ` : ''}
       </div>
     `).join("");
+  },
+
+  openStoreReviewsModal() {
+    this.renderReviews();
+    this.openModal("modal-store-reviews");
+  },
+
+  closeStoreReviewsModal() {
+    this.closeModal("modal-store-reviews");
   },
 
   openWriteReviewModal() {
