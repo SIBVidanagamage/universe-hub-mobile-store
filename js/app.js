@@ -150,6 +150,121 @@ const App = {
     return result;
   },
 
+  getDefaultCategoryTagline(catId) {
+    const id = (catId || '').toLowerCase();
+    if (id.includes('power') || id.includes('bank') || id.includes('magsafe-battery')) return '10,000mAh - 20,000mAh Qi2 & MagSafe';
+    if (id.includes('charger') || id.includes('gan')) return '65W-100W Anker, Ugreen & Baseus';
+    if (id.includes('cable')) return '240W Braided Type-C & Lightning';
+    if (id.includes('cover') || id.includes('case')) return 'MagSafe, Spigen & Carbon Fiber';
+    if (id.includes('glass') || id.includes('screen')) return '9H Sapphire & Privacy Protectors';
+    if (id.includes('camera') || id.includes('lens')) return 'Titanium Individual Lens Rings';
+    if (id.includes('audio') || id.includes('airpod')) return 'AirPods Pro, Earphones & Hi-Fi';
+    return '100% Genuine & Official Store Warranty';
+  },
+
+  isProductInCategory(prod, catId) {
+    if (!prod || !catId) return false;
+    if (catId === 'all') return true;
+
+    const target = String(catId).toLowerCase().trim();
+    const pCat = String(prod.category || '').toLowerCase().trim();
+    const pSub = String(prod.subCategory || '').toLowerCase().trim();
+    const pMain = String(prod.mainCategory || '').toLowerCase().trim();
+    const pName = String(prod.name || prod.title || '').toLowerCase().trim();
+
+    // 1. All iPhones group
+    if (target === 'iphones') {
+      return pMain === 'iphones' || pCat.includes('iphone') || pName.includes('iphone');
+    }
+
+    // 2. Brand New iPhones
+    if (target === 'brand-new-iphones' || target === 'brand-new') {
+      const isBrandNewCond = prod.condition && prod.condition.toLowerCase().includes('brand new');
+      return pCat === 'brand-new-iphones' || 
+             (pMain === 'iphones' && isBrandNewCond) || 
+             (pCat.includes('iphone') && isBrandNewCond) ||
+             (pCat === 'iphones' && isBrandNewCond);
+    }
+
+    // 3. Certified Used iPhones
+    if (target === 'used-iphones' || target === 'used') {
+      const isUsedCond = !prod.condition || !prod.condition.toLowerCase().includes('brand new');
+      return pCat === 'used-iphones' || 
+             (pMain === 'iphones' && isUsedCond) || 
+             (pCat.includes('iphone') && isUsedCond) ||
+             (pCat === 'iphones' && isUsedCond);
+    }
+
+    // 4. All Accessories group
+    if (target === 'accessories') {
+      const isPhone = pMain === 'iphones' || pCat === 'brand-new-iphones' || pCat === 'used-iphones' || (pCat.includes('iphone') && !pCat.includes('case') && !pCat.includes('cover') && !pCat.includes('charger'));
+      return !isPhone || pMain === 'accessories';
+    }
+
+    // 5. Power Banks & MagSafe Battery (universal matching)
+    if (target === 'power-banks' || target === 'powerbanks' || target === 'powerbank' || target.includes('power') || target.includes('magsafe-battery')) {
+      if (pCat === 'power-banks' || pCat === 'powerbanks' || pCat === 'powerbank' || pCat.includes('power-bank') || pCat.includes('magsafe-battery')) return true;
+      if (pSub === 'power-banks' || pSub === 'powerbanks' || pSub.includes('power')) return true;
+      if (pName.includes('power bank') || pName.includes('powerbank') || pName.includes('maggo') || pName.includes('battery pack')) return true;
+      if (prod.specs && (prod.specs.mah || prod.specs.itemType === 'power-bank')) return true;
+      return false;
+    }
+
+    // 6. Fast Chargers & GaN
+    if (target === 'chargers' || target === 'fast-chargers' || target === 'fast-chargers-gan' || target.includes('charger') || target.includes('gan')) {
+      if (pCat === 'chargers' || pCat === 'fast-chargers' || pCat === 'fast-chargers-gan' || pCat.includes('charger') || pCat.includes('gan') || pCat.includes('adapter')) return true;
+      if (pSub.includes('charger') || pSub.includes('gan')) return true;
+      if (pName.includes('charger') || pName.includes('gan') || pName.includes('adapter') || pName.includes('wall plug')) return true;
+      if (prod.specs && (prod.specs.wattage || prod.specs.ports) && !pName.includes('power bank')) return true;
+      return false;
+    }
+
+    // 7. Charging Cables
+    if (target === 'cables' || target === 'charging-cables' || target.includes('cable')) {
+      if (pCat === 'cables' || pCat === 'charging-cables' || pCat.includes('cable') || pCat.includes('cord')) return true;
+      if (pSub.includes('cable')) return true;
+      if (pName.includes('cable') || pName.includes('cord') || pName.includes('type-c to') || pName.includes('lightning to')) return true;
+      if (prod.specs && prod.specs.cableLength) return true;
+      return false;
+    }
+
+    // 8. Back Covers & Cases
+    if (target === 'back-covers' || target === 'cases' || target.includes('cover') || target.includes('case')) {
+      if (pCat === 'back-covers' || pCat === 'cases' || pCat.includes('cover') || pCat.includes('case')) return true;
+      if (pSub.includes('cover') || pSub.includes('case')) return true;
+      if (pName.includes('case') || pName.includes('cover') || pName.includes('bumper') || pName.includes('armor')) return true;
+      return false;
+    }
+
+    // 9. Tempered Glass & Screen Protectors
+    if (target === 'tempered-glass' || target === 'tempered-glass-protectors' || target.includes('glass') || target.includes('screen-protector')) {
+      if (pCat === 'tempered-glass' || pCat === 'tempered-glass-protectors' || pCat.includes('glass') || pCat.includes('screen')) return true;
+      if (pSub.includes('glass') || pSub.includes('screen')) return true;
+      if (pName.includes('tempered') || pName.includes('glass') || pName.includes('screen protector') || pName.includes('privacy glass')) return true;
+      return false;
+    }
+
+    // 10. Camera Lens Protectors
+    if (target === 'camera-protectors' || target === 'camera-lens-protectors' || target.includes('camera') || target.includes('lens')) {
+      if (pCat === 'camera-protectors' || pCat === 'camera-lens-protectors' || pCat.includes('camera') || pCat.includes('lens')) return true;
+      if (pSub.includes('camera') || pSub.includes('lens')) return true;
+      if (pName.includes('camera protector') || pName.includes('lens protector') || pName.includes('lens ring') || pName.includes('camera lens')) return true;
+      return false;
+    }
+
+    // 11. Audio & AirPods
+    if (target === 'audio' || target === 'audio-airpods' || target.includes('audio') || target.includes('airpod') || target.includes('earphone')) {
+      if (pCat === 'audio' || pCat === 'audio-airpods' || pCat.includes('audio') || pCat.includes('airpod') || pCat.includes('headphone') || pCat.includes('earphone')) return true;
+      if (pSub.includes('audio') || pSub.includes('airpod')) return true;
+      if (pName.includes('airpod') || pName.includes('earphone') || pName.includes('headphone') || pName.includes('earbud') || pName.includes('audio')) return true;
+      if (prod.specs && prod.specs.anc) return true;
+      return false;
+    }
+
+    // Default exact or slug match
+    return pCat === target || pSub === target || pCat.replace(/[^a-z0-9]/g, '') === target.replace(/[^a-z0-9]/g, '');
+  },
+
   getCategories() {
     let storedCategories = [];
     try {
@@ -165,26 +280,44 @@ const App = {
         map.set(c.id.toLowerCase(), { ...c });
       }
     });
+
     storedCategories.forEach(c => {
       if (c && c.id && !deletedCategoryIds.includes(String(c.id))) {
-        map.set(c.id.toLowerCase(), { ...(map.get(c.id.toLowerCase()) || {}), ...c });
+        const rawId = c.id.toLowerCase();
+        // Consolidate duplicate slug variants
+        const normId = (rawId === 'powerbanks' || rawId === 'power-bank') ? 'power-banks' : rawId;
+        const prev = map.get(normId) || {};
+        map.set(normId, {
+          ...prev,
+          ...c,
+          id: normId,
+          name: (prev.name && prev.name.length >= (c.name || '').length) ? prev.name : c.name,
+          tagline: c.tagline || prev.tagline || this.getDefaultCategoryTagline(normId),
+          icon: (c.icon && c.icon !== '🏷️') ? c.icon : (prev.icon || c.icon || '🏷️')
+        });
       }
     });
 
-    // Dynamic Discovery: If any product has category 'power-banks', ensure it exists!
+    // Dynamic Discovery: Check products for any new custom category
     const products = this.getProducts();
     products.forEach(p => {
-      if (p.category && typeof p.category === "string" && !map.has(p.category.toLowerCase())) {
-        const catId = p.category.toLowerCase();
-        map.set(catId, {
-          id: catId,
-          name: catId.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
-          group: "accessories",
-          icon: "⚡",
-          inFilter: true,
-          inNav: true,
-          order: map.size + 1
-        });
+      if (p.category && typeof p.category === "string") {
+        const raw = p.category.toLowerCase().trim();
+        const norm = (raw === 'powerbanks' || raw === 'power-bank' || raw.includes('magsafe-battery')) ? 'power-banks' :
+                     (raw === 'fast-chargers' || raw === 'fast-chargers-gan' || raw.includes('charger')) ? 'chargers' : raw;
+        if (!map.has(norm)) {
+          const initMatch = initial.find(ic => ic.id.toLowerCase() === norm);
+          map.set(norm, {
+            id: norm,
+            name: initMatch ? initMatch.name : norm.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+            group: (norm.includes("iphone") ? "iphones" : "accessories"),
+            icon: initMatch ? initMatch.icon : "⚡",
+            tagline: initMatch ? initMatch.tagline : this.getDefaultCategoryTagline(norm),
+            inFilter: true,
+            inNav: true,
+            order: map.size + 1
+          });
+        }
       }
     });
 
@@ -897,6 +1030,8 @@ const App = {
       }).length;
     };
 
+    const accessoryCategories = categories.filter(c => c && c.group === 'accessories' && c.inNav !== false);
+
     const isHomeActive = this.activeCategory === 'all' && this.activeBrand === 'all';
     const isIphoneActive = this.activeCategory === 'iphones' || this.activeCategory === 'brand-new-iphones' || this.activeCategory === 'used-iphones';
     const isAccessoryActive = this.activeCategory === 'accessories' || (this.activeCategory !== 'all' && !isIphoneActive);
@@ -918,30 +1053,30 @@ const App = {
         </a>
         <div class="nav-dropdown-menu">
           <div class="dropdown-header">APPLE IPHONE COLLECTION</div>
-          <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('brand-new-iphones')">
+          <a href="#catalog-section" class="dropdown-link ${this.activeCategory === 'brand-new-iphones' ? 'active' : ''}" onclick="App.filterByCategory('brand-new-iphones')">
             <span class="dropdown-link-icon">🍏</span>
             <div class="dropdown-link-text">
               <strong>Brand New iPhones</strong>
               <small>Sealed Box with Apple Care Official</small>
             </div>
-            <span class="dropdown-badge-count">${products.filter(p => p.category === 'brand-new-iphones').length}</span>
+            <span class="dropdown-badge-count">${products.filter(p => this.isProductInCategory(p, 'brand-new-iphones')).length}</span>
           </a>
-          <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('used-iphones')">
+          <a href="#catalog-section" class="dropdown-link ${this.activeCategory === 'used-iphones' ? 'active' : ''}" onclick="App.filterByCategory('used-iphones')">
             <span class="dropdown-link-icon">🔄</span>
             <div class="dropdown-link-text">
               <strong>Certified Pre-Owned iPhones</strong>
               <small>Tested Grade A+ with Store Warranty</small>
             </div>
-            <span class="dropdown-badge-count">${products.filter(p => p.category === 'used-iphones').length}</span>
+            <span class="dropdown-badge-count">${products.filter(p => this.isProductInCategory(p, 'used-iphones')).length}</span>
           </a>
           <div class="dropdown-divider"></div>
           <a href="#catalog-section" class="dropdown-footer-link" onclick="App.filterByCategory('iphones')">
-            <span>View All iPhones & Models →</span>
+            <span>View All iPhones & Models (${products.filter(p => this.isProductInCategory(p, 'iphones')).length}) →</span>
           </a>
         </div>
       </li>
 
-      <!-- 3. Accessories Dropdown -->
+      <!-- 3. Accessories Dropdown (Dynamic from Categories) -->
       <li class="nav-dropdown-item">
         <a href="#catalog-section" class="nav-dropdown-trigger ${isAccessoryActive ? 'active' : ''}" onclick="App.filterByCategory('accessories'); return false;">
           <span>⚡ Accessories</span>
@@ -950,52 +1085,26 @@ const App = {
         <div class="nav-dropdown-menu dropdown-menu-wide">
           <div class="dropdown-header">BROWSE ACCESSORIES BY TYPE</div>
           <div class="dropdown-grid-2col">
-            <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('chargers')">
-              <span class="dropdown-link-icon">⚡</span>
-              <div class="dropdown-link-text">
-                <strong>Fast Chargers &amp; GaN</strong>
-                <small>65W-100W Anker, Ugreen &amp; Baseus</small>
-              </div>
-            </a>
-            <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('cables')">
-              <span class="dropdown-link-icon">🔌</span>
-              <div class="dropdown-link-text">
-                <strong>Charging Cables</strong>
-                <small>240W Braided Type-C &amp; Lightning</small>
-              </div>
-            </a>
-            <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('back-covers')">
-              <span class="dropdown-link-icon">🛡️</span>
-              <div class="dropdown-link-text">
-                <strong>Back Covers &amp; Cases</strong>
-                <small>MagSafe, Spigen &amp; Carbon Fiber</small>
-              </div>
-            </a>
-            <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('tempered-glass')">
-              <span class="dropdown-link-icon">📱</span>
-              <div class="dropdown-link-text">
-                <strong>Tempered Glass</strong>
-                <small>9H Sapphire &amp; Privacy Protectors</small>
-              </div>
-            </a>
-            <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('camera-protectors')">
-              <span class="dropdown-link-icon">📸</span>
-              <div class="dropdown-link-text">
-                <strong>Camera Protectors</strong>
-                <small>Titanium Individual Lens Rings</small>
-              </div>
-            </a>
-            <a href="#catalog-section" class="dropdown-link" onclick="App.filterByCategory('audio')">
-              <span class="dropdown-link-icon">🎧</span>
-              <div class="dropdown-link-text">
-                <strong>Audio &amp; AirPods</strong>
-                <small>AirPods Pro, Earphones &amp; Hi-Fi</small>
-              </div>
-            </a>
+            ${accessoryCategories.map(cat => {
+              const safeIcon = this.getSafeCategoryIcon(cat);
+              const count = products.filter(p => this.isProductInCategory(p, cat.id)).length;
+              const subText = cat.tagline || this.getDefaultCategoryTagline(cat.id);
+              const isCatActive = this.activeCategory.toLowerCase() === cat.id.toLowerCase();
+              return `
+                <a href="#catalog-section" class="dropdown-link ${isCatActive ? 'active' : ''}" onclick="App.filterByCategory('${cat.id}')">
+                  <span class="dropdown-link-icon">${safeIcon}</span>
+                  <div class="dropdown-link-text">
+                    <strong>${cat.name}</strong>
+                    <small>${subText}</small>
+                  </div>
+                  <span class="dropdown-badge-count">${count}</span>
+                </a>
+              `;
+            }).join('')}
           </div>
           <div class="dropdown-divider"></div>
           <a href="#catalog-section" class="dropdown-footer-link" onclick="App.filterByCategory('accessories')">
-            <span>Explore All 100% Genuine Accessories →</span>
+            <span>Explore All 100% Genuine Accessories (${products.filter(p => this.isProductInCategory(p, 'accessories')).length}) →</span>
           </a>
         </div>
       </li>
@@ -1077,7 +1186,12 @@ const App = {
     const getCount = (bName, bId) => {
       return products.filter(p => {
         const pb = (p.brand || '').toLowerCase();
-        return pb === bName.toLowerCase() || pb === bId.toLowerCase();
+        const brandMatches = pb === bName.toLowerCase() || pb === bId.toLowerCase();
+        if (!brandMatches) return false;
+        if (this.activeCategory !== 'all') {
+          return this.isProductInCategory(p, this.activeCategory);
+        }
+        return true;
       }).length;
     };
 
@@ -1117,13 +1231,7 @@ const App = {
     const products = this.getProducts();
 
     container.innerHTML = categories.map(cat => {
-      const count = products.filter(p => {
-        if (cat.id === "brand-new-iphones") return p.category === "brand-new-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Brand New"));
-        if (cat.id === "used-iphones") return p.category === "used-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Used"));
-        if (cat.id === "back-covers") return p.category === "back-covers" || p.category === "cases";
-        return p.category === cat.id || p.mainCategory === cat.id;
-      }).length;
-
+      const count = products.filter(p => this.isProductInCategory(p, cat.id)).length;
       const safeIcon = this.getSafeCategoryIcon(cat);
 
       return `
@@ -1188,7 +1296,7 @@ const App = {
   },
 
   // Filter actions
-  filterByCategory(catId) {
+  filterByCategory(catId, resetBrand = true) {
     if (catId === "repair") {
       const rep = document.getElementById("repair-center");
       if (rep) rep.scrollIntoView({ behavior: "smooth" });
@@ -1196,8 +1304,12 @@ const App = {
     }
 
     this.activeCategory = catId;
+    if (resetBrand) {
+      this.activeBrand = "all";
+    }
     this.renderNavbar();
     this.renderCatalogTabs();
+    this.renderBrandFilterBar();
     this.renderCatalog();
 
     const catalogSec = document.getElementById("catalog-section");
@@ -1222,26 +1334,9 @@ const App = {
     const products = this.getProducts();
     let filtered = products;
 
-    // Filter by Category
+    // Filter by Category using universal smart matching
     if (this.activeCategory !== "all") {
-      filtered = filtered.filter(p => {
-        if (this.activeCategory === "brand-new-iphones" || this.activeCategory === "brand-new") {
-          return p.category === "brand-new-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Brand New"));
-        }
-        if (this.activeCategory === "used-iphones" || this.activeCategory === "used") {
-          return p.category === "used-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Used"));
-        }
-        if (this.activeCategory === "iphones") {
-          return p.mainCategory === "iphones" || p.category === "brand-new-iphones" || p.category === "used-iphones";
-        }
-        if (this.activeCategory === "accessories") {
-          return p.mainCategory === "accessories" || (p.category !== "brand-new-iphones" && p.category !== "used-iphones");
-        }
-        if (this.activeCategory === "cases" || this.activeCategory === "back-covers") {
-          return p.category === "back-covers" || p.category === "cases";
-        }
-        return p.category === this.activeCategory || p.subCategory === this.activeCategory;
-      });
+      filtered = filtered.filter(p => this.isProductInCategory(p, this.activeCategory));
     }
 
     // Filter by Brand
@@ -2646,6 +2741,7 @@ const App = {
 
 // Expose App globally
 window.App = App;
+window.isProductInCategory = App.isProductInCategory.bind(App);
 
 // Start application when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {

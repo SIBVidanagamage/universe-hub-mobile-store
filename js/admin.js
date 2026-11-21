@@ -532,12 +532,7 @@ const AdminController = {
 
     const getCount = (catId) => {
       if (catId === "all") return products.length;
-      if (catId === "iphones") return products.filter(p => p.mainCategory === "iphones" || p.category === "brand-new-iphones" || p.category === "used-iphones").length;
-      if (catId === "accessories") return products.filter(p => p.mainCategory === "accessories" || (p.category !== "brand-new-iphones" && p.category !== "used-iphones")).length;
-      if (catId === "brand-new-iphones") return products.filter(p => p.category === "brand-new-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Brand New"))).length;
-      if (catId === "used-iphones") return products.filter(p => p.category === "used-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Used"))).length;
-      if (catId === "back-covers") return products.filter(p => p.category === "back-covers" || p.category === "cases").length;
-      return products.filter(p => p.category === catId).length;
+      return products.filter(p => (typeof window !== "undefined" && typeof window.isProductInCategory === "function") ? window.isProductInCategory(p, catId) : (p.category === catId)).length;
     };
 
     let html = `
@@ -591,24 +586,7 @@ const AdminController = {
 
     let filtered = products;
     if (this.inventoryFilterCat !== "all") {
-      filtered = products.filter(p => {
-        if (this.inventoryFilterCat === "iphones") {
-          return p.mainCategory === "iphones" || p.category === "brand-new-iphones" || p.category === "used-iphones";
-        }
-        if (this.inventoryFilterCat === "accessories") {
-          return p.mainCategory === "accessories" || (p.category !== "brand-new-iphones" && p.category !== "used-iphones");
-        }
-        if (this.inventoryFilterCat === "brand-new-iphones") {
-          return p.category === "brand-new-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Brand New"));
-        }
-        if (this.inventoryFilterCat === "used-iphones") {
-          return p.category === "used-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Used"));
-        }
-        if (this.inventoryFilterCat === "back-covers") {
-          return p.category === "back-covers" || p.category === "cases";
-        }
-        return p.category === this.inventoryFilterCat || p.subCategory === this.inventoryFilterCat;
-      });
+      filtered = products.filter(p => (typeof window !== "undefined" && typeof window.isProductInCategory === "function") ? window.isProductInCategory(p, this.inventoryFilterCat) : (p.category === this.inventoryFilterCat));
     }
 
     const countSpan = document.getElementById("admin-inventory-items-count");
@@ -711,26 +689,37 @@ const AdminController = {
 
   // Populate dynamic grouped options for Add and Edit product dropdowns
   populateCategoryDropdowns() {
-    let categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []);
-    if (typeof INITIAL_CATEGORIES !== 'undefined') {
-      let added = false;
-      INITIAL_CATEGORIES.forEach(initCat => {
-        if (!categories.some(c => c && c.id === initCat.id)) {
-          categories.push(initCat);
-          added = true;
-        }
-      });
-      if (added) {
-        try { localStorage.setItem("UH_CATEGORIES", JSON.stringify(categories)); } catch(e){}
+    let categories = (window.App && typeof App.getCategories === 'function')
+      ? App.getCategories()
+      : (JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []));
+
+    // Deduplicate any redundant slug variants (e.g. powerbanks vs power-banks)
+    const cleanMap = new Map();
+    categories.forEach(c => {
+      if (!c || !c.id) return;
+      const rawId = String(c.id).toLowerCase();
+      const normId = (rawId === 'powerbanks' || rawId === 'power-bank') ? 'power-banks' : rawId;
+      if (!cleanMap.has(normId)) {
+        cleanMap.set(normId, { ...c, id: normId });
+      } else {
+        const existing = cleanMap.get(normId);
+        cleanMap.set(normId, {
+          ...existing,
+          ...c,
+          id: normId,
+          name: (existing.name && existing.name.length >= (c.name || '').length) ? existing.name : c.name
+        });
       }
-    }
+    });
+    const cleanCategories = Array.from(cleanMap.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+
     const addSelect = document.getElementById("adm-prod-category");
     const editSelect = document.getElementById("edit-prod-category");
 
     const buildOptions = () => {
-      const iphoneCats = categories.filter(c => c.group === "iphones");
-      const accessoryCats = categories.filter(c => c.group === "accessories");
-      const otherCats = categories.filter(c => c.group !== "iphones" && c.group !== "accessories");
+      const iphoneCats = cleanCategories.filter(c => c.group === "iphones");
+      const accessoryCats = cleanCategories.filter(c => c.group === "accessories");
+      const otherCats = cleanCategories.filter(c => c.group !== "iphones" && c.group !== "accessories");
 
       let html = "";
       if (iphoneCats.length > 0) {
@@ -1284,12 +1273,7 @@ const AdminController = {
     if (!tbody) return;
 
     tbody.innerHTML = categories.map(cat => {
-      const count = products.filter(p => {
-        if (cat.id === "brand-new-iphones") return p.category === "brand-new-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Brand New"));
-        if (cat.id === "used-iphones") return p.category === "used-iphones" || (p.mainCategory === "iphones" && p.condition && p.condition.includes("Used"));
-        if (cat.id === "back-covers") return p.category === "back-covers" || p.category === "cases";
-        return p.category === cat.id;
-      }).length;
+      const count = products.filter(p => (typeof window !== "undefined" && typeof window.isProductInCategory === "function") ? window.isProductInCategory(p, cat.id) : (p.category === cat.id)).length;
 
       const groupBadge = cat.group === "iphones" 
         ? `<span class="badge-pill badge-cat-iphone">📱 iPhones</span>` 

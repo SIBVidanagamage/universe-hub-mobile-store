@@ -57,19 +57,10 @@ const INITIAL_CATEGORIES = [
     group: "accessories",
     groupName: "Accessories",
     icon: "🔋",
+    tagline: "10,000mAh - 20,000mAh Qi2 & MagSafe",
     inNav: true,
     inFilter: true,
     order: 3
-  },
-  {
-    id: "back-covers",
-    name: "Back Covers & Cases",
-    group: "accessories",
-    groupName: "Accessories",
-    icon: "🛡️",
-    inNav: true,
-    inFilter: true,
-    order: 4
   },
   {
     id: "chargers",
@@ -77,9 +68,10 @@ const INITIAL_CATEGORIES = [
     group: "accessories",
     groupName: "Accessories",
     icon: "⚡",
+    tagline: "65W-100W Anker, Ugreen & Baseus",
     inNav: true,
     inFilter: true,
-    order: 5
+    order: 4
   },
   {
     id: "cables",
@@ -87,6 +79,18 @@ const INITIAL_CATEGORIES = [
     group: "accessories",
     groupName: "Accessories",
     icon: "🔌",
+    tagline: "240W Braided Type-C & Lightning",
+    inNav: true,
+    inFilter: true,
+    order: 5
+  },
+  {
+    id: "back-covers",
+    name: "Back Covers & Cases",
+    group: "accessories",
+    groupName: "Accessories",
+    icon: "🛡️",
+    tagline: "MagSafe, Spigen & Carbon Fiber",
     inNav: true,
     inFilter: true,
     order: 6
@@ -97,6 +101,7 @@ const INITIAL_CATEGORIES = [
     group: "accessories",
     groupName: "Accessories",
     icon: "📱",
+    tagline: "9H Sapphire & Privacy Protectors",
     inNav: true,
     inFilter: true,
     order: 7
@@ -107,6 +112,7 @@ const INITIAL_CATEGORIES = [
     group: "accessories",
     groupName: "Accessories",
     icon: "📸",
+    tagline: "Titanium Individual Lens Rings",
     inNav: true,
     inFilter: true,
     order: 8
@@ -117,6 +123,7 @@ const INITIAL_CATEGORIES = [
     group: "accessories",
     groupName: "Accessories",
     icon: "🎧",
+    tagline: "AirPods Pro, Earphones & Hi-Fi",
     inNav: true,
     inFilter: true,
     order: 9
@@ -1211,16 +1218,47 @@ function initDatabase() {
   // 1. Categories initialization (Self-Healing: ensures power-banks and all new categories are present)
   try {
     let currentCategories = JSON.parse(localStorage.getItem("UH_CATEGORIES") || "[]");
+    const deletedCatIds = JSON.parse(localStorage.getItem("UH_DELETED_CATEGORY_IDS") || "[]");
     if (!Array.isArray(currentCategories) || currentCategories.length === 0) {
       currentCategories = [...INITIAL_CATEGORIES];
     } else {
       INITIAL_CATEGORIES.forEach(cat => {
-        const exists = currentCategories.some(c => c && c.id && c.id.toLowerCase() === cat.id.toLowerCase());
-        if (!exists) {
-          currentCategories.push(cat);
+        if (!deletedCatIds.includes(String(cat.id))) {
+          const idx = currentCategories.findIndex(c => c && c.id && c.id.toLowerCase() === cat.id.toLowerCase());
+          if (idx < 0) {
+            currentCategories.push({ ...cat });
+          } else {
+            // Heal existing category properties
+            const cur = currentCategories[idx];
+            if (cur.inNav === undefined) cur.inNav = true;
+            if (cur.inFilter === undefined) cur.inFilter = true;
+            if (cat.tagline && !cur.tagline) cur.tagline = cat.tagline;
+            if (cat.name && (!cur.name || cur.name.length < cat.name.length)) cur.name = cat.name;
+            if (cat.icon && (!cur.icon || cur.icon === '🏷️')) cur.icon = cat.icon;
+          }
         }
       });
     }
+
+    // Deduplicate any redundant category slug variants (e.g. "powerbanks" vs "power-banks")
+    const cleanMap = new Map();
+    currentCategories.forEach(cat => {
+      if (!cat || !cat.id || deletedCatIds.includes(String(cat.id))) return;
+      const normId = (cat.id === 'powerbanks' || cat.id === 'power-bank') ? 'power-banks' : cat.id.toLowerCase();
+      if (!cleanMap.has(normId)) {
+        cleanMap.set(normId, { ...cat, id: normId });
+      } else {
+        const existing = cleanMap.get(normId);
+        cleanMap.set(normId, {
+          ...existing,
+          ...cat,
+          id: normId,
+          name: (existing.name && existing.name.length >= cat.name.length) ? existing.name : cat.name,
+          tagline: existing.tagline || cat.tagline
+        });
+      }
+    });
+    currentCategories = Array.from(cleanMap.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
     localStorage.setItem("UH_CATEGORIES", JSON.stringify(currentCategories));
   } catch (e) {
     localStorage.setItem("UH_CATEGORIES", JSON.stringify(INITIAL_CATEGORIES));
@@ -1306,6 +1344,34 @@ function initDatabase() {
             prods.push(ip);
           }
         }
+      });
+
+      // Auto-heal and normalize product categories (e.g. powerbanks -> power-banks, chargers, accessories)
+      prods = prods.map(p => {
+        if (!p) return p;
+        if (!p.brand) p.brand = detectProductBrand(p);
+        const catStr = (p.category || '').toLowerCase().trim();
+        const pName = (p.name || p.title || '').toLowerCase();
+        if (catStr === 'powerbanks' || catStr === 'power-bank' || catStr.includes('magsafe-battery') || (pName.includes('power bank') || pName.includes('maggo'))) {
+          p.category = 'power-banks';
+          p.mainCategory = 'accessories';
+        } else if (catStr === 'fast-chargers' || catStr === 'fast-chargers-gan' || catStr.includes('charger') || (pName.includes('charger') && !pName.includes('power bank'))) {
+          p.category = 'chargers';
+          p.mainCategory = 'accessories';
+        } else if (catStr.includes('cable')) {
+          p.category = 'cables';
+          p.mainCategory = 'accessories';
+        } else if (catStr.includes('glass') || catStr.includes('protector') && !catStr.includes('camera')) {
+          p.category = 'tempered-glass';
+          p.mainCategory = 'accessories';
+        } else if (catStr.includes('camera')) {
+          p.category = 'camera-protectors';
+          p.mainCategory = 'accessories';
+        } else if (catStr.includes('audio') || catStr.includes('airpod')) {
+          p.category = 'audio';
+          p.mainCategory = 'accessories';
+        }
+        return p;
       });
 
       localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
