@@ -1297,8 +1297,8 @@
           const { error } = await this.client.from("brands").upsert({
             id: b.id,
             name: b.name,
-            icon: b.icon || null,
-            badge: b.badge || null,
+            icon: b.logo || b.icon || null,
+            badge: b.tagline || b.badge || null,
             order: b.order || 0
           });
           if (!error) results.brands++;

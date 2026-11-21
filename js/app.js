@@ -880,10 +880,14 @@ const App = {
           <div class="dropdown-grid-brands">
             ${navBrands.map(b => {
               const count = getBrandCount(b.name, b.id);
+              const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
               return `
                 <a href="#catalog-section" class="dropdown-brand-card" onclick="App.filterByBrand('${b.id}')">
                   <div class="brand-card-top">
-                    <span class="brand-emoji">${b.icon || '🏷️'}</span>
+                    ${hasLogo 
+                      ? `<img src="${b.logo}" alt="${b.name}" class="dropdown-brand-logo" style="width:24px; height:24px; object-fit:contain; border-radius:4px;">` 
+                      : `<span class="brand-emoji">${b.icon || '🏷️'}</span>`
+                    }
                     <span class="brand-name-tag">${b.name}</span>
                   </div>
                   <div class="brand-tagline-text">${b.tagline || 'Original Tech'}</div>
@@ -955,9 +959,14 @@ const App = {
         ${filterBrands.map(b => {
           const isSel = this.activeBrand.toLowerCase() === b.id.toLowerCase() || this.activeBrand.toLowerCase() === b.name.toLowerCase();
           const count = getCount(b.name, b.id);
+          const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
           return `
             <button class="brand-filter-pill ${isSel ? 'active' : ''}" onclick="App.filterByBrand('${b.id}')">
-              <span>${b.icon || '🏷️'} ${b.name}</span>
+              ${hasLogo 
+                ? `<img src="${b.logo}" alt="${b.name}" style="width:16px; height:16px; object-fit:contain; border-radius:3px; vertical-align:middle; margin-right:5px;">` 
+                : `<span style="margin-right:4px;">${b.icon || '🏷️'}</span>`
+              }
+              <span>${b.name}</span>
               <span class="brand-pill-count">${count}</span>
             </button>
           `;
@@ -1027,9 +1036,16 @@ const App = {
         return pb === b.name.toLowerCase() || pb === b.id.toLowerCase();
       }).length;
 
+      const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
+
       return `
         <div class="brand-feature-card" onclick="App.filterByBrand('${b.id}')">
-          <div class="brand-feat-icon-box">${b.icon || '🏷️'}</div>
+          <div class="brand-feat-icon-box">
+            ${hasLogo 
+              ? `<img src="${b.logo}" alt="${b.name}" style="width:36px; height:36px; object-fit:contain;">` 
+              : (b.icon || '🏷️')
+            }
+          </div>
           <div class="brand-feat-content">
             <div class="brand-feat-title">${b.name}</div>
             <div class="brand-feat-sub">${b.tagline || 'Original Products'}</div>
@@ -1144,10 +1160,13 @@ const App = {
     }
 
     const wishlist = JSON.parse(localStorage.getItem("UH_WISHLIST")) || [];
+    const allBrands = JSON.parse(localStorage.getItem("UH_BRANDS")) || (typeof INITIAL_BRANDS !== 'undefined' ? INITIAL_BRANDS : []);
 
     container.innerHTML = filtered.map(prod => {
       const isWishlisted = wishlist.includes(prod.id);
       const prodBrand = prod.brand || 'Apple';
+      const matchedBrand = allBrands.find(b => (b.name && b.name.toLowerCase() === prodBrand.toLowerCase()) || (b.id && b.id.toLowerCase() === prodBrand.toLowerCase()));
+      const brandLogo = matchedBrand && matchedBrand.logo;
 
       const hasStorageVariants = Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0;
       const hasColorVariants = Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0;
@@ -1166,7 +1185,10 @@ const App = {
         <div class="product-card" data-id="${prod.id}">
           <div class="card-top-badges">
             <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
-              🏷️ ${prodBrand}
+              ${brandLogo 
+                ? `<img src="${brandLogo}" alt="${prodBrand}" style="width:13px; height:13px; object-fit:contain; vertical-align:middle; margin-right:4px;">` 
+                : (matchedBrand && matchedBrand.icon ? `${matchedBrand.icon} ` : '🏷️ ')
+              }${prodBrand}
             </span>
             ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>` : ''}
             ${prod.specs?.mah ? `<span class="badge-pill" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#10b981;">🔋 ${prod.specs.mah}</span>` : ''}

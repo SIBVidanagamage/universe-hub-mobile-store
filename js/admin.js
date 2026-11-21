@@ -795,6 +795,100 @@ const AdminController = {
 
   quickBrandTarget: "adm",
 
+  handleBrandLogoUpload(event, prefix) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      if (typeof showToast === "function") showToast("⚠️ Please select an image file (PNG, SVG, JPG)!");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const rawData = e.target.result;
+      if (file.type.includes("svg")) {
+        this.applyBrandLogoData(rawData, prefix);
+        return;
+      }
+      // Compress logo with HTML5 canvas to ~160px PNG for clean high-DPI display & lightweight storage
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 160;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL("image/png", 0.92);
+          this.applyBrandLogoData(compressed, prefix);
+        } catch (err) {
+          this.applyBrandLogoData(rawData, prefix);
+        }
+      };
+      img.onerror = () => {
+        this.applyBrandLogoData(rawData, prefix);
+      };
+      img.src = rawData;
+    };
+    reader.readAsDataURL(file);
+  },
+
+  handleBrandLogoUrlChange(url, prefix) {
+    const trimmed = (url || "").trim();
+    if (trimmed) {
+      this.applyBrandLogoData(trimmed, prefix);
+    } else {
+      this.clearBrandLogo(prefix);
+    }
+  },
+
+  applyBrandLogoData(logoUrlOrData, prefix) {
+    const hiddenData = document.getElementById(`${prefix}-brand-logo-data`);
+    if (hiddenData) hiddenData.value = logoUrlOrData;
+
+    const preview = document.getElementById(`${prefix}-brand-logo-preview`);
+    if (preview) {
+      preview.innerHTML = `<img src="${logoUrlOrData}" alt="Brand Logo" style="width:100%; height:100%; object-fit:contain; padding:4px;">`;
+    }
+
+    const removeBtn = document.getElementById(`${prefix}-brand-logo-remove-btn`);
+    if (removeBtn) removeBtn.style.display = "inline-flex";
+  },
+
+  clearBrandLogo(prefix) {
+    const hiddenData = document.getElementById(`${prefix}-brand-logo-data`);
+    if (hiddenData) hiddenData.value = "";
+
+    const urlInput = document.getElementById(`${prefix}-brand-logo-url`);
+    if (urlInput) urlInput.value = "";
+
+    const fileInput = document.getElementById(`${prefix}-brand-logo-file`);
+    if (fileInput) fileInput.value = "";
+
+    const preview = document.getElementById(`${prefix}-brand-logo-preview`);
+    const emojiInput = document.getElementById(`${prefix}-brand-icon`);
+    const fallbackEmoji = (emojiInput && emojiInput.value.trim()) || "🏷️";
+    if (preview) {
+      preview.innerHTML = `<span id="${prefix}-brand-logo-preview-icon" style="font-size:24px;">${fallbackEmoji}</span>`;
+    }
+
+    const removeBtn = document.getElementById(`${prefix}-brand-logo-remove-btn`);
+    if (removeBtn) removeBtn.style.display = "none";
+  },
+
   openQuickAddBrandModal(target = "adm") {
     this.quickBrandTarget = target;
     const modal = document.getElementById("admin-quick-brand-modal");
@@ -809,6 +903,7 @@ const AdminController = {
       if (tagInp) tagInp.value = "";
       const iconInp = document.getElementById("quick-brand-icon");
       if (iconInp) iconInp.value = "🏷️";
+      this.clearBrandLogo("quick");
       const navCheck = document.getElementById("quick-brand-in-nav");
       if (navCheck) navCheck.checked = true;
       const filterCheck = document.getElementById("quick-brand-in-filter");
@@ -833,6 +928,7 @@ const AdminController = {
     if (e) e.preventDefault();
     const name = document.getElementById("quick-brand-name").value.trim();
     const icon = document.getElementById("quick-brand-icon").value.trim() || "🏷️";
+    const logo = document.getElementById("quick-brand-logo-data")?.value.trim() || null;
     const tagline = document.getElementById("quick-brand-tagline").value.trim() || `${name} Official Accessories`;
     const inNav = document.getElementById("quick-brand-in-nav") ? document.getElementById("quick-brand-in-nav").checked : true;
     const inFilter = document.getElementById("quick-brand-in-filter") ? document.getElementById("quick-brand-in-filter").checked : true;
@@ -851,12 +947,18 @@ const AdminController = {
         id: slug,
         name,
         icon,
+        logo,
         tagline,
         inNav,
         inFilter,
         order: brands.length + 1
       };
       brands.push(newBrand);
+      localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
+    } else {
+      if (logo) existing.logo = logo;
+      existing.icon = icon;
+      existing.tagline = tagline;
       localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
     }
 
@@ -900,15 +1002,21 @@ const AdminController = {
         return pb === b.name.toLowerCase() || pb === b.id.toLowerCase();
       }).length;
 
+      const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
+
       return `
         <tr>
           <td>
             <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:22px; width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border-radius:8px;">
-                ${b.icon || '🏷️'}
+              <span style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; overflow:hidden;">
+                ${hasLogo 
+                  ? `<img src="${b.logo}" alt="${b.name}" style="width:28px; height:28px; object-fit:contain;">` 
+                  : `<span style="font-size:22px;">${b.icon || '🏷️'}</span>`
+                }
               </span>
               <div>
                 <strong style="color:#fff; font-size:14px;">${b.name}</strong>
+                ${hasLogo ? `<span style="display:block; font-size:10.5px; color:var(--neon-cyan);">✓ Image Logo Active</span>` : `<span style="display:block; font-size:10.5px; color:var(--text-muted);">Emoji Icon</span>`}
               </div>
             </div>
           </td>
@@ -943,6 +1051,7 @@ const AdminController = {
     if (e) e.preventDefault();
     const name = document.getElementById("adm-brand-name").value.trim();
     const icon = document.getElementById("adm-brand-icon").value.trim() || "🏷️";
+    const logo = document.getElementById("adm-brand-logo-data")?.value.trim() || null;
     const tagline = document.getElementById("adm-brand-tagline").value.trim() || `${name} Official Accessories`;
     let slug = document.getElementById("adm-brand-slug").value.trim();
     const inNav = document.getElementById("adm-brand-in-nav").checked;
@@ -967,6 +1076,7 @@ const AdminController = {
       id: slug,
       name,
       icon,
+      logo,
       tagline,
       inNav,
       inFilter,
@@ -980,6 +1090,7 @@ const AdminController = {
     document.getElementById("adm-brand-icon").value = "🏷️";
     document.getElementById("adm-brand-in-nav").checked = true;
     document.getElementById("adm-brand-in-filter").checked = true;
+    this.clearBrandLogo("adm");
 
     this.populateBrandDropdowns();
     this.renderBrandsManager();

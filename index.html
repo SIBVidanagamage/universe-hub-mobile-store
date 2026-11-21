@@ -1079,12 +1079,12 @@
 
           <form id="admin-add-brand-form" onsubmit="AdminController.handleAddBrand(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px;">
             <div>
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Name:</label>
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Name: <span style="color:var(--neon-pink);">*</span></label>
               <input type="text" id="adm-brand-name" placeholder="e.g. Joyroom or Torras" required style="width:100%;">
             </div>
             <div>
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Logo / Emoji Icon:</label>
-              <input type="text" id="adm-brand-icon" placeholder="e.g. ⚡ or 🔋 or 🎧" value="🏷️" required style="width:100%;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Fallback Emoji:</label>
+              <input type="text" id="adm-brand-icon" placeholder="e.g. ⚡ or 🔋 or 🎧" value="🏷️" required style="width:100%; font-size:16px;">
             </div>
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Specialty / Short Tagline:</label>
@@ -1094,6 +1094,32 @@
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Identifier Slug (Optional):</label>
               <input type="text" id="adm-brand-slug" placeholder="e.g. joyroom" style="width:100%;">
             </div>
+
+            <!-- Brand Official Logo Upload & URL Box -->
+            <div style="grid-column: 1 / -1; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:12px 14px; border-radius:10px;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:6px;">Brand Official Logo Image (PNG / SVG / JPG):</label>
+              <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                <div id="adm-brand-logo-preview" style="width:52px; height:52px; border-radius:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; cursor:pointer;" onclick="document.getElementById('adm-brand-logo-file').click()" title="Click to upload brand logo image">
+                  <span id="adm-brand-logo-preview-icon" style="font-size:26px;">🏷️</span>
+                </div>
+                <div style="flex:1; min-width:240px;">
+                  <input type="file" id="adm-brand-logo-file" accept="image/*" style="display:none;" onchange="AdminController.handleBrandLogoUpload(event, 'adm')">
+                  <input type="hidden" id="adm-brand-logo-data">
+                  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <button type="button" class="btn-glass" style="font-size:12px; padding:6px 14px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.35); display:inline-flex; align-items:center; gap:6px;" onclick="document.getElementById('adm-brand-logo-file').click()">
+                      <span>📸 Upload Brand Logo</span>
+                    </button>
+                    <button type="button" id="adm-brand-logo-remove-btn" class="btn-glass" style="display:none; font-size:11.5px; padding:5px 10px; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="AdminController.clearBrandLogo('adm')">
+                      ✕ Remove Logo
+                    </button>
+                  </div>
+                  <div style="margin-top:6px;">
+                    <input type="text" id="adm-brand-logo-url" placeholder="Or paste Logo Image URL (https://.../logo.png)" style="width:100%; font-size:11.5px; padding:6px 10px; border-radius:6px;" oninput="AdminController.handleBrandLogoUrlChange(this.value, 'adm')">
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div style="display:flex; align-items:center; gap:20px; grid-column: 1 / -1; background:rgba(255,255,255,0.02); padding:12px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
               <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#fff; cursor:pointer;">
                 <input type="checkbox" id="adm-brand-in-nav" checked style="accent-color:var(--neon-cyan); width:16px; height:16px;">
@@ -2708,13 +2734,39 @@
         </p>
         <form id="quick-add-brand-form" onsubmit="AdminController.handleQuickAddBrandSubmit(event)">
           <div style="margin-bottom:12px;">
-            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Name (e.g. Joyroom, WiWU, Torras):</label>
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Brand Name (e.g. Joyroom, WiWU, Torras): <span style="color:var(--neon-pink);">*</span></label>
             <input type="text" id="quick-brand-name" placeholder="Brand Name" required style="width:100%;">
           </div>
-          <div style="display:grid; grid-template-columns: 100px 1fr; gap:10px; margin-bottom:12px;">
+
+          <!-- Official Brand Logo Image Upload / URL Section -->
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:6px;">Official Brand Logo (Image / Transparent PNG / SVG):</label>
+            <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px 12px; border-radius:10px;">
+              <div id="quick-brand-logo-preview" style="width:48px; height:48px; border-radius:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; cursor:pointer;" onclick="document.getElementById('quick-brand-logo-file').click()" title="Click to upload brand logo image">
+                <span id="quick-brand-logo-preview-icon" style="font-size:24px;">🏷️</span>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <input type="file" id="quick-brand-logo-file" accept="image/*" style="display:none;" onchange="AdminController.handleBrandLogoUpload(event, 'quick')">
+                <input type="hidden" id="quick-brand-logo-data">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <button type="button" class="btn-glass" style="font-size:11.5px; padding:5px 12px; color:var(--neon-cyan); border-color:rgba(0,210,255,0.35); display:inline-flex; align-items:center; gap:5px;" onclick="document.getElementById('quick-brand-logo-file').click()">
+                    <span>📸 Upload Logo File</span>
+                  </button>
+                  <button type="button" id="quick-brand-logo-remove-btn" class="btn-glass" style="display:none; font-size:11px; padding:5px 9px; color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="AdminController.clearBrandLogo('quick')">
+                    ✕ Remove Logo
+                  </button>
+                </div>
+                <div style="margin-top:6px;">
+                  <input type="text" id="quick-brand-logo-url" placeholder="Or paste Logo Image URL (PNG/SVG/WebP)" style="width:100%; font-size:11px; padding:5px 8px; border-radius:5px;" oninput="AdminController.handleBrandLogoUrlChange(this.value, 'quick')">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 80px 1fr; gap:10px; margin-bottom:12px;">
             <div>
-              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Icon / Emoji:</label>
-              <input type="text" id="quick-brand-icon" value="🏷️" style="width:100%; text-align:center; font-size:18px;">
+              <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Fallback Icon:</label>
+              <input type="text" id="quick-brand-icon" value="🏷️" style="width:100%; text-align:center; font-size:16px;">
             </div>
             <div>
               <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Short Tagline / Focus:</label>
@@ -3297,14 +3349,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=115"></script>
-  <script src="js/supabase-client.js?v=115"></script>
-  <script src="js/notification-service.js?v=115"></script>
-  <script src="js/invoice.js?v=115"></script>
-  <script src="js/uploader.js?v=115"></script>
-  <script src="js/bulk-uploader.js?v=115"></script>
-  <script src="js/payment-gateway.js?v=115"></script>
-  <script src="js/admin.js?v=115"></script>
-  <script src="js/app.js?v=115"></script>
+  <script src="js/data.js?v=120"></script>
+  <script src="js/supabase-client.js?v=120"></script>
+  <script src="js/notification-service.js?v=120"></script>
+  <script src="js/invoice.js?v=120"></script>
+  <script src="js/uploader.js?v=120"></script>
+  <script src="js/bulk-uploader.js?v=120"></script>
+  <script src="js/payment-gateway.js?v=120"></script>
+  <script src="js/admin.js?v=120"></script>
+  <script src="js/app.js?v=120"></script>
 </body>
 </html>
