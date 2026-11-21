@@ -12,9 +12,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=65">
-  <link rel="stylesheet" href="css/invoice.css?v=65">
-  <link rel="stylesheet" href="css/payment.css?v=65">
+  <link rel="stylesheet" href="css/style.css?v=70">
+  <link rel="stylesheet" href="css/invoice.css?v=70">
+  <link rel="stylesheet" href="css/payment.css?v=70">
   <style>
     .site-main-logo, #admin-logo-preview {
       background: transparent !important;
@@ -127,66 +127,86 @@
       </div>
     </nav>
 
-    <!-- Hero Section (Mobix Aesthetic) -->
-    <section class="hero-section">
-      <div class="hero-glow-circle"></div>
-      <div class="container hero-grid">
-        <div class="hero-content">
+    <!-- Hero Section (dbrand Inspired Cinematic Showcase) -->
+    <section class="hero-section cinematic-hero-stage">
+      <div class="hero-ambient-glow"></div>
+      <div class="container hero-container-widescreen">
+        
+        <!-- Top Editorial Telemetry & Eyebrow -->
+        <div class="hero-telemetry-header">
           <div class="hero-tag-pill">
             <span class="pulse-dot"></span>
-            PREMIUM MOBILE & APPLE SPECIALISTS
+            <span>FLAGSHIP DEVICES // CERTIFIED REPAIRS</span>
           </div>
-          <h1 class="hero-title">
-            Upgrade Your
-            <span class="gradient-text">Mobile Experience</span>
-          </h1>
-          <p class="hero-desc">
-            Discover official brand new Apple iPhones, certified pre-owned phones tested with 100% battery guarantee, ultra-fast 65W GaN chargers, and certified express in-store repairs.
-          </p>
-          <div class="hero-cta-group">
-            <a href="#catalog-section" class="btn-primary-glow">
-              <span>Shop Collection</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </a>
-            <button class="btn-glass" onclick="App.openRepairBookingModal()">
-              <span>Book Repair ⚡</span>
-            </button>
+          <div class="hero-geo-tag">
+            <span>SRI LANKA'S PREMIER TECH DESTINATION</span>
+          </div>
+        </div>
+
+        <!-- Master Typographic Headline & Stage Grid -->
+        <div class="hero-cinematic-grid">
+          <div class="hero-narrative-col">
+            <h1 class="hero-title hero-headline-dbrand">
+              TECH WITHOUT
+              <span class="gradient-text">LIMITS.</span>
+            </h1>
+            <p class="hero-desc hero-lead-dbrand">
+              Discover official brand new Apple iPhones, certified pre-owned phones tested with 100% battery guarantee, ultra-fast 65W GaN chargers, and certified express in-store repairs.
+            </p>
+            <div class="hero-cta-group hero-cta-dbrand">
+              <a href="#catalog-section" class="btn-primary-glow btn-hero-dbrand">
+                <span>EXPLORE COLLECTION</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+              <button class="btn-glass btn-hero-glass-dbrand" onclick="App.openRepairBookingModal()">
+                <span>DIAGNOSTIC LAB ⚡</span>
+              </button>
+            </div>
           </div>
 
-          <div class="hero-features-row">
-            <div class="hero-feat-item">
-              <div class="feat-icon-box">🛡️</div>
-              <div class="feat-text">
-                <h5>100% Genuine</h5>
-                <p>Apple Care & Store Warranty</p>
+          <!-- Hero Showcase Visual (Curved Podium & Ambient Halo) -->
+          <div class="hero-stage-wrapper">
+            <div class="hero-stage-podium">
+              <div class="stage-radial-light"></div>
+              <img id="hero-showcase-img" src="assets/custom_hero_banner.png?v=65" alt="Universe Hub Latest iPhones Showcase" class="hero-visual-img hero-img-dbrand" onerror="this.src='assets/hero_showcase.jpg'">
+              
+              <div class="floating-annotation annotation-top-right hero-chip-dbrand">
+                <div class="anno-dot"></div>
+                <div class="anno-text">Next-Gen Titanium Series • 100% Original</div>
               </div>
-            </div>
-            <div class="hero-feat-item">
-              <div class="feat-icon-box">🚚</div>
-              <div class="feat-text">
-                <h5>Fast Island Delivery</h5>
-                <p>Cash on Delivery Available</p>
-              </div>
-            </div>
-            <div class="hero-feat-item">
-              <div class="feat-icon-box">🔋</div>
-              <div class="feat-text">
-                <h5>Tested Battery Health</h5>
-                <p>Zero Part Replacement Alerts</p>
+              <div class="floating-annotation annotation-bottom-left hero-chip-dbrand hero-chip-battery">
+                <span style="font-size:12px;">🔋</span>
+                <div class="anno-text">100% Battery Guarantee • Zero Part Alerts</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Hero Showcase Visual -->
-        <div class="hero-visual-card">
-          <img id="hero-showcase-img" src="assets/custom_hero_banner.png?v=60" alt="Universe Hub Latest iPhones Showcase" class="hero-visual-img" onerror="this.src='assets/hero_showcase.jpg'">
-          
-          <div class="floating-annotation annotation-top-right">
-            <div class="anno-dot"></div>
-            <div class="anno-text">Next-Gen Titanium Series • 100% Original</div>
+        <!-- Architectural Telemetry Specs Strip -->
+        <div class="hero-telemetry-bar">
+          <div class="telemetry-cell">
+            <span class="telemetry-index">[01]</span>
+            <div class="telemetry-info">
+              <h5>100% GENUINE APPLE</h5>
+              <p>Apple Care &amp; Store Warranty</p>
+            </div>
+          </div>
+          <div class="telemetry-cell">
+            <span class="telemetry-index">[02]</span>
+            <div class="telemetry-info">
+              <h5>ISLAND-WIDE DISPATCH</h5>
+              <p>Cash on Delivery Available</p>
+            </div>
+          </div>
+          <div class="telemetry-cell">
+            <span class="telemetry-index">[03]</span>
+            <div class="telemetry-info">
+              <h5>EXPRESS LAB REPAIRS</h5>
+              <p>Same-Day Physical Shop Care</p>
+            </div>
           </div>
         </div>
+
       </div>
     </section>
 
@@ -3390,14 +3410,14 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
-  <script src="js/data.js?v=125"></script>
-  <script src="js/supabase-client.js?v=125"></script>
-  <script src="js/notification-service.js?v=125"></script>
-  <script src="js/invoice.js?v=125"></script>
-  <script src="js/uploader.js?v=125"></script>
-  <script src="js/bulk-uploader.js?v=125"></script>
-  <script src="js/payment-gateway.js?v=125"></script>
-  <script src="js/admin.js?v=125"></script>
-  <script src="js/app.js?v=125"></script>
+  <script src="js/data.js?v=130"></script>
+  <script src="js/supabase-client.js?v=130"></script>
+  <script src="js/notification-service.js?v=130"></script>
+  <script src="js/invoice.js?v=130"></script>
+  <script src="js/uploader.js?v=130"></script>
+  <script src="js/bulk-uploader.js?v=130"></script>
+  <script src="js/payment-gateway.js?v=130"></script>
+  <script src="js/admin.js?v=130"></script>
+  <script src="js/app.js?v=130"></script>
 </body>
 </html>
