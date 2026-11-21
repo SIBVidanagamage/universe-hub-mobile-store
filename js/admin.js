@@ -1001,7 +1001,7 @@ const AdminController = {
 
   // 2. Brands & Accessories Management Tab
   renderBrandsManager() {
-    const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
+    const brands = (window.App && typeof App.getBrands === "function") ? App.getBrands() : (JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS);
     const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
     const tbody = document.getElementById("admin-brands-tbody");
     if (!tbody) return;
@@ -1018,15 +1018,19 @@ const AdminController = {
         <tr>
           <td>
             <div style="display:flex; align-items:center; gap:10px;">
-              <span style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; overflow:hidden;">
+              <input type="file" id="brand-quick-file-${b.id}" accept="image/*" style="display:none;" onchange="AdminController.handleBrandLogoQuickChange(event, '${b.id}')">
+              <label for="brand-quick-file-${b.id}" style="width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.15); border-radius:8px; overflow:hidden; cursor:pointer;" title="Click to upload or change logo image for ${b.name}">
                 ${hasLogo 
-                  ? `<img src="${b.logo}" alt="${b.name}" style="width:28px; height:28px; object-fit:contain;">` 
+                  ? `<img src="${b.logo}" alt="${b.name}" style="width:30px; height:30px; object-fit:contain;">` 
                   : `<span style="font-size:22px;">${b.icon || '🏷️'}</span>`
                 }
-              </span>
+              </label>
               <div>
                 <strong style="color:#fff; font-size:14px;">${b.name}</strong>
-                ${hasLogo ? `<span style="display:block; font-size:10.5px; color:var(--neon-cyan);">✓ Image Logo Active</span>` : `<span style="display:block; font-size:10.5px; color:var(--text-muted);">Emoji Icon</span>`}
+                ${hasLogo 
+                  ? `<span style="display:block; font-size:10.5px; color:var(--neon-cyan); cursor:pointer;" onclick="document.getElementById('brand-quick-file-${b.id}').click()">✓ Image Logo Active (Click to Change)</span>` 
+                  : `<span style="display:block; font-size:10.5px; color:#38bdf8; text-decoration:underline; cursor:pointer;" onclick="document.getElementById('brand-quick-file-${b.id}').click()">+ Click to Upload Logo</span>`
+                }
               </div>
             </div>
           </td>
@@ -1047,7 +1051,10 @@ const AdminController = {
               ${b.inFilter !== false ? '✓ In Filter' : '✕ Hidden'}
             </button>
           </td>
-          <td>
+          <td style="white-space:nowrap;">
+            <button class="btn-icon-action" title="Upload/Change Brand Logo Image" onclick="document.getElementById('brand-quick-file-${b.id}').click()" style="margin-right:6px; color:var(--neon-cyan); background:rgba(0,210,255,0.1); border:1px solid rgba(0,210,255,0.25);">
+              📷
+            </button>
             <button class="btn-icon-action btn-delete" title="Delete Brand" onclick="AdminController.deleteBrand('${b.id}')">
               🗑️
             </button>
@@ -1055,6 +1062,71 @@ const AdminController = {
         </tr>
       `;
     }).join("");
+  },
+
+  handleBrandLogoQuickChange(e, brandId) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => {
+      const rawData = loadEvt.target.result;
+      if (file.type.includes("svg")) {
+        this.saveBrandLogoDirect(brandId, rawData);
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 160;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+            else { w = Math.round((w * maxDim) / h); h = maxDim; }
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL("image/png", 0.92);
+          this.saveBrandLogoDirect(brandId, compressed);
+        } catch (err) {
+          this.saveBrandLogoDirect(brandId, rawData);
+        }
+      };
+      img.onerror = () => this.saveBrandLogoDirect(brandId, rawData);
+      img.src = rawData;
+    };
+    reader.readAsDataURL(file);
+  },
+
+  saveBrandLogoDirect(brandId, logoData) {
+    let brands = JSON.parse(localStorage.getItem("UH_BRANDS") || "[]");
+    let b = brands.find(item => item.id.toLowerCase() === brandId.toLowerCase());
+    if (!b) {
+      const initial = (typeof INITIAL_BRANDS !== "undefined") ? INITIAL_BRANDS : [];
+      const initB = initial.find(item => item.id.toLowerCase() === brandId.toLowerCase());
+      b = initB ? { ...initB } : { id: brandId, name: brandId, inNav: true, inFilter: true, order: brands.length + 1 };
+      brands.push(b);
+    }
+    b.logo = logoData;
+    localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
+
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveBrand === "function") {
+      window.SupabaseSync.saveBrand(b);
+    }
+
+    this.renderBrandsManager();
+    if (window.App) {
+      if (typeof App.renderNavbar === "function") App.renderNavbar();
+      if (typeof App.renderBrandFilterBar === "function") App.renderBrandFilterBar();
+      if (typeof App.renderBrandsSection === "function") App.renderBrandsSection();
+      if (typeof App.renderCatalogTabs === "function") App.renderCatalogTabs();
+      if (typeof App.renderCatalog === "function") App.renderCatalog();
+    }
+    if (typeof showToast === "function") {
+      showToast(`✅ Logo updated for ${b.name} and synced live!`);
+    }
   },
 
   handleAddBrand(e) {
@@ -1077,8 +1149,28 @@ const AdminController = {
     }
 
     const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
-    if (brands.some(b => b.id === slug)) {
-      alert(`Brand with ID "${slug}" already exists!`);
+    const existingIdx = brands.findIndex(b => b.id.toLowerCase() === slug.toLowerCase() || b.name.toLowerCase() === name.toLowerCase());
+
+    if (existingIdx >= 0) {
+      if (logo) brands[existingIdx].logo = logo;
+      brands[existingIdx].icon = icon;
+      brands[existingIdx].tagline = tagline;
+      brands[existingIdx].inNav = inNav;
+      brands[existingIdx].inFilter = inFilter;
+      localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
+      if (window.SupabaseSync && typeof window.SupabaseSync.saveBrand === "function") {
+        window.SupabaseSync.saveBrand(brands[existingIdx]);
+      }
+      this.populateBrandDropdowns();
+      this.renderBrandsManager();
+      if (window.App) {
+        if (typeof App.renderNavbar === "function") App.renderNavbar();
+        if (typeof App.renderBrandFilterBar === "function") App.renderBrandFilterBar();
+        if (typeof App.renderBrandsSection === "function") App.renderBrandsSection();
+        if (typeof App.renderCatalogTabs === "function") App.renderCatalogTabs();
+        if (typeof App.renderCatalog === "function") App.renderCatalog();
+      }
+      showToast(`Brand "${name}" logo & details updated successfully!`);
       return;
     }
 

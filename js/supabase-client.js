@@ -1017,14 +1017,20 @@
       localBrands.forEach(b => {
         if (b && b.id && !deletedBrandIds.includes(String(b.id))) {
           const k = b.id.toLowerCase();
-          map.set(k, { ...(map.get(k) || {}), ...b });
+          const prev = map.get(k) || {};
+          const validLogo = (b.logo && typeof b.logo === "string" && (b.logo.startsWith("data:") || b.logo.startsWith("http") || b.logo.startsWith("assets/"))) ? b.logo : prev.logo;
+          const validIcon = (b.icon && b.icon !== "🏷️") ? b.icon : (prev.icon || b.icon || "🏷️");
+          map.set(k, { ...prev, ...b, logo: validLogo, icon: validIcon });
         }
       });
       if (Array.isArray(cloudBrands)) {
         cloudBrands.forEach(b => {
           if (b && b.id && !deletedBrandIds.includes(String(b.id))) {
             const k = b.id.toLowerCase();
-            map.set(k, { ...(map.get(k) || {}), ...b });
+            const prev = map.get(k) || {};
+            const validLogo = (b.logo && typeof b.logo === "string" && (b.logo.startsWith("data:") || b.logo.startsWith("http") || b.logo.startsWith("assets/"))) ? b.logo : prev.logo;
+            const validIcon = (b.icon && b.icon !== "🏷️") ? b.icon : (prev.icon || b.icon || "🏷️");
+            map.set(k, { ...prev, ...b, logo: validLogo, icon: validIcon });
           }
         });
       }

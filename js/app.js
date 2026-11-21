@@ -103,7 +103,18 @@ const App = {
       if (b && b.id && !deletedBrandIds.includes(String(b.id))) {
         const k = b.id.toLowerCase();
         if (map.has(k)) {
-          map.set(k, { ...map.get(k), ...b });
+          const existing = map.get(k);
+          const hasValidStoredLogo = b.logo && typeof b.logo === "string" && (b.logo.startsWith("data:") || b.logo.startsWith("http") || b.logo.startsWith("assets/"));
+          const resolvedLogo = hasValidStoredLogo ? b.logo : existing.logo;
+          const resolvedIcon = (b.icon && b.icon !== "🏷️") ? b.icon : (existing.icon || b.icon || "🏷️");
+          const resolvedTagline = (b.tagline && b.tagline !== `${b.name} Official Accessories`) ? b.tagline : (existing.tagline || b.tagline);
+          map.set(k, {
+            ...existing,
+            ...b,
+            logo: resolvedLogo,
+            icon: resolvedIcon,
+            tagline: resolvedTagline
+          });
         } else {
           map.set(k, { ...b });
         }
@@ -117,12 +128,13 @@ const App = {
         const bName = p.brand.trim();
         const bId = bName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
         if (!map.has(bId) && !map.has(bName.toLowerCase())) {
+          const initMatch = initial.find(ib => ib.id.toLowerCase() === bId || ib.name.toLowerCase() === bName.toLowerCase());
           map.set(bId, {
             id: bId,
             name: bName,
-            icon: "🏷️",
-            logo: null,
-            tagline: `${bName} Official Accessories`,
+            icon: initMatch ? initMatch.icon : "🏷️",
+            logo: initMatch ? initMatch.logo : null,
+            tagline: initMatch ? initMatch.tagline : `${bName} Official Accessories`,
             inNav: true,
             inFilter: true,
             order: map.size + 1
