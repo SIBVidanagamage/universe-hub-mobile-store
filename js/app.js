@@ -143,7 +143,11 @@ const App = {
       }
     });
 
-    return Array.from(map.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+    const result = Array.from(map.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+    try {
+      localStorage.setItem("UH_BRANDS", JSON.stringify(result));
+    } catch (e) { }
+    return result;
   },
 
   getCategories() {
@@ -184,7 +188,11 @@ const App = {
       }
     });
 
-    return Array.from(map.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+    const result = Array.from(map.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+    try {
+      localStorage.setItem("UH_CATEGORIES", JSON.stringify(result));
+    } catch (e) { }
+    return result;
   },
 
   init() {

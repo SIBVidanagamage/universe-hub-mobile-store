@@ -1239,9 +1239,18 @@ function initDatabase() {
           if (idx < 0) {
             currentBrands.push({ ...b });
           } else {
-            // Upgrade brand logo if current stored brand has no custom image logo
-            if (!currentBrands[idx].logo && b.logo) {
-              currentBrands[idx].logo = b.logo;
+            // Upgrade brand logo, icon, and tagline if stored brand has missing or placeholder data
+            const cur = currentBrands[idx];
+            const curLogo = cur.logo;
+            const hasValidLogo = curLogo && typeof curLogo === 'string' && (curLogo.startsWith('data:') || curLogo.startsWith('http') || curLogo.startsWith('assets/'));
+            if (!hasValidLogo && b.logo) {
+              cur.logo = b.logo;
+            }
+            if ((!cur.icon || cur.icon === '🏷️') && b.icon) {
+              cur.icon = b.icon;
+            }
+            if ((!cur.tagline || cur.tagline.includes('Official Accessories')) && b.tagline) {
+              cur.tagline = b.tagline;
             }
           }
         }
