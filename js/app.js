@@ -409,6 +409,50 @@ const App = {
     if (window.location.hash === "#store-reviews" || window.location.hash === "#reviews") {
       this.openStoreReviewsModal();
     }
+
+    // Initialize Cinematic Scroll Reveal Observer
+    this.setupScrollObserver();
+  },
+
+  setupScrollObserver() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal-on-scroll').forEach(el => el.classList.add('revealed'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -40px 0px',
+      threshold: 0.08
+    });
+
+    const targetSelectors = [
+      '.hero-content',
+      '.hero-visual-card',
+      '.category-grid',
+      '.brands-grid',
+      '.promo-banners-grid',
+      '#products-container',
+      '.repair-split-grid',
+      '.store-trust-strip-section',
+      '.store-location-grid',
+      '.trust-footer-bar'
+    ];
+
+    targetSelectors.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el && !el.classList.contains('reveal-on-scroll')) {
+        el.classList.add('reveal-on-scroll');
+        observer.observe(el);
+      }
+    });
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
   },
 
   applyStoreSettings(overrideSettings = null) {
