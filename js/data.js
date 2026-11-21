@@ -129,7 +129,7 @@ const INITIAL_BRANDS = [
     id: "apple",
     name: "Apple",
     icon: "🍏",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 170 170'%3E%3Cpath fill='%23ffffff' d='M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.67-7.81-11.96-14.34-5.88-8.91-10.45-19.11-13.71-30.61-3.26-11.5-4.9-22.37-4.9-32.61 0-16.14 4.09-29.35 12.27-39.63 8.18-10.28 18.52-15.53 31.02-15.75 4.9 0 10.41 1.25 16.53 3.76 6.12 2.51 10.13 3.76 12.03 3.76 1.63 0 5.88-1.31 12.74-3.92 6.86-2.61 12.87-3.76 18.04-3.46 13.92.76 25.04 6.26 33.37 16.5-12.18 7.39-18.15 17.5-17.92 30.33.22 10.22 4.19 18.8 11.91 25.75 7.72 6.95 16.73 11 27.04 12.15-2.72 8.04-6.19 16.3-10.41 24.77zM119.22 31.83c0-7.72 2.77-15.05 8.31-21.99 5.54-6.94 12.51-11.4 20.91-13.38.76 1.3 1.14 2.83 1.14 4.57 0 7.61-2.94 14.94-8.81 21.99-5.87 7.05-13 11.39-21.4 13.02-.11-1.41-.15-2.81-.15-4.21z'/%3E%3C/svg%3E",
     tagline: "Official Flagship Devices & Original Tech",
     inNav: true,
     inFilter: true,
@@ -139,7 +139,7 @@ const INITIAL_BRANDS = [
     id: "anker",
     name: "Anker",
     icon: "⚡",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 40'%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='24' fill='%2300a8e8' letter-spacing='2'%3EANKER%3C/text%3E%3C/svg%3E",
     tagline: "GaN Fast Chargers & Heavy-Duty Power",
     inNav: true,
     inFilter: true,
@@ -149,7 +149,7 @@ const INITIAL_BRANDS = [
     id: "baseus",
     name: "Baseus",
     icon: "🔋",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 40'%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='24' fill='%23ffcc00' letter-spacing='1'%3EBaseus%3C/text%3E%3C/svg%3E",
     tagline: "Digital Wattage Displays & Slim Power Banks",
     inNav: true,
     inFilter: true,
@@ -159,7 +159,7 @@ const INITIAL_BRANDS = [
     id: "ugreen",
     name: "Ugreen",
     icon: "🟢",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 40'%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='22' fill='%2310b981' letter-spacing='1.5'%3EUGREEN%3C/text%3E%3C/svg%3E",
     tagline: "Nexode GaN & Pro Armor Charging Cables",
     inNav: true,
     inFilter: true,
@@ -169,7 +169,7 @@ const INITIAL_BRANDS = [
     id: "wiwu",
     name: "WiWU",
     icon: "💼",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 40'%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='24' fill='%23a855f7' letter-spacing='2'%3EWiWU%3C/text%3E%3C/svg%3E",
     tagline: "Premium Leather Cases, Stands & Wallets",
     inNav: true,
     inFilter: true,
@@ -179,7 +179,7 @@ const INITIAL_BRANDS = [
     id: "asper",
     name: "Asper",
     icon: "🛡️",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 40'%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='24' fill='%2300f2fe' letter-spacing='2'%3EASPER%3C/text%3E%3C/svg%3E",
     tagline: "AeroShock Titanium Armor & Matte Cases",
     inNav: true,
     inFilter: true,
@@ -189,7 +189,7 @@ const INITIAL_BRANDS = [
     id: "spigen",
     name: "Spigen",
     icon: "🛡️",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 40'%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='22' fill='%23ff7700' letter-spacing='1.5'%3Espigen%3C/text%3E%3C/svg%3E",
     tagline: "Military-Grade Air Cushion Protection",
     inNav: true,
     inFilter: true,
@@ -199,7 +199,7 @@ const INITIAL_BRANDS = [
     id: "esr",
     name: "ESR",
     icon: "💎",
-    logo: null,
+    logo: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 40'%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-family='system-ui,-apple-system,sans-serif' font-weight='900' font-size='26' fill='%2300e5ff' letter-spacing='3'%3EESR%3C/text%3E%3C/svg%3E",
     tagline: "Armorite Camera & Sapphire Screen Shields",
     inNav: true,
     inFilter: true,
@@ -208,6 +208,54 @@ const INITIAL_BRANDS = [
 ];
 
 const INITIAL_PRODUCTS = [
+  {
+    "id": "prod-anker-maggo-10k",
+    "name": "Anker MagGo Power Bank",
+    "title": "Anker MagGo Power Bank",
+    "slug": "anker-maggo-power-bank",
+    "category": "power-banks",
+    "mainCategory": "accessories",
+    "brand": "Anker",
+    "price": 11490,
+    "originalPrice": 13990,
+    "badge": "MagSafe Qi2",
+    "isFeatured": true,
+    "stock": 10,
+    "rating": 5,
+    "reviewsCount": 1,
+    "reviews": 1,
+    "image": "assets/hero_showcase.jpg",
+    "images": [
+      "assets/hero_showcase.jpg"
+    ],
+    "video": null,
+    "condition": "",
+    "conditionBadge": null,
+    "batteryHealth": null,
+    "storageOptions": [],
+    "colorOptions": [
+      "Black",
+      "White"
+    ],
+    "stockStatus": "available",
+    "warranty": "1 Year Store Warranty",
+    "description": "Anker MagGo 10,000mAh Ultra-Fast MagSafe Power Bank. Certified Qi2 15W wireless charging, smart digital display showing remaining battery percentage and recharge time, USB-C bi-directional 30W high-speed charging.",
+    "specs": {
+      "itemType": "accessory",
+      "mah": "10,000 mAh",
+      "wattage": "15W Wireless / 30W USB-C",
+      "ports": "1x USB-C Bi-directional",
+      "compatibility": "iPhone 12, 13, 14, 15, 16 Series & MagSafe Cases",
+      "magsafe": true,
+      "fastCharge": true,
+      "wireless": true,
+      "digitalDisplay": true,
+      "anc": false,
+      "warranty": "1 Year Store Warranty",
+      "condition": "Brand New Sealed",
+      "stockStatus": "available"
+    }
+  },
   {
     "id": "prod-1794850434081",
     "name": "iphone 14  Pro",
@@ -1160,28 +1208,48 @@ function detectProductBrand(prod) {
 
 // Initialize and sync database
 function initDatabase() {
-  // 1. Categories initialization
-  const existingCategories = localStorage.getItem("UH_CATEGORIES");
-  if (!existingCategories) {
+  // 1. Categories initialization (Self-Healing: ensures power-banks and all new categories are present)
+  try {
+    let currentCategories = JSON.parse(localStorage.getItem("UH_CATEGORIES") || "[]");
+    if (!Array.isArray(currentCategories) || currentCategories.length === 0) {
+      currentCategories = [...INITIAL_CATEGORIES];
+    } else {
+      INITIAL_CATEGORIES.forEach(cat => {
+        const exists = currentCategories.some(c => c && c.id && c.id.toLowerCase() === cat.id.toLowerCase());
+        if (!exists) {
+          currentCategories.push(cat);
+        }
+      });
+    }
+    localStorage.setItem("UH_CATEGORIES", JSON.stringify(currentCategories));
+  } catch (e) {
     localStorage.setItem("UH_CATEGORIES", JSON.stringify(INITIAL_CATEGORIES));
   }
 
-  // 2. Brands initialization (Official Accessory & Device Brands)
-  const existingBrands = localStorage.getItem("UH_BRANDS");
-  const deletedBrandIds = JSON.parse(localStorage.getItem("UH_DELETED_BRAND_IDS") || "[]");
-  if (!existingBrands) {
-    const cleanBrands = INITIAL_BRANDS.filter(b => !deletedBrandIds.includes(String(b.id)));
-    localStorage.setItem("UH_BRANDS", JSON.stringify(cleanBrands));
-  } else {
-    try {
-      let storedBrands = JSON.parse(existingBrands) || [];
-      if (deletedBrandIds.length > 0) {
-        const filtered = storedBrands.filter(b => !deletedBrandIds.includes(String(b.id)));
-        if (filtered.length !== storedBrands.length) {
-          localStorage.setItem("UH_BRANDS", JSON.stringify(filtered));
+  // 2. Brands initialization (Self-Healing: ensures all official accessory brands & logos are present)
+  try {
+    let currentBrands = JSON.parse(localStorage.getItem("UH_BRANDS") || "[]");
+    const deletedBrandIds = JSON.parse(localStorage.getItem("UH_DELETED_BRAND_IDS") || "[]");
+    if (!Array.isArray(currentBrands) || currentBrands.length === 0) {
+      currentBrands = INITIAL_BRANDS.filter(b => !deletedBrandIds.includes(String(b.id)));
+    } else {
+      INITIAL_BRANDS.forEach(b => {
+        if (!deletedBrandIds.includes(String(b.id))) {
+          const idx = currentBrands.findIndex(cb => cb && (cb.id.toLowerCase() === b.id.toLowerCase() || cb.name.toLowerCase() === b.name.toLowerCase()));
+          if (idx < 0) {
+            currentBrands.push({ ...b });
+          } else {
+            // Upgrade brand logo if current stored brand has no custom image logo
+            if (!currentBrands[idx].logo && b.logo) {
+              currentBrands[idx].logo = b.logo;
+            }
+          }
         }
-      }
-    } catch (e) { }
+      });
+    }
+    localStorage.setItem("UH_BRANDS", JSON.stringify(currentBrands));
+  } catch (e) {
+    localStorage.setItem("UH_BRANDS", JSON.stringify(INITIAL_BRANDS));
   }
 
   // 3. Products schema upgrade & initial load (permanently purge all demo products)
@@ -1219,10 +1287,19 @@ function initDatabase() {
       let prods = JSON.parse(existingProducts) || [];
       // Strictly purge ONLY obsolete sample/demo products from local cache
       const filtered = prods.filter(p => !SAMPLE_PRODUCT_IDS.includes(String(p.id)));
-      if (filtered.length !== prods.length) {
-        prods = filtered;
-        localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
-      }
+      prods = filtered;
+
+      // Self-Healing catalog upgrade: If device has fewer products than INITIAL_PRODUCTS (e.g. mobile with only 3 products), merge missing items!
+      INITIAL_PRODUCTS.forEach(ip => {
+        if (!deletedProductIds.includes(String(ip.id)) && !SAMPLE_PRODUCT_IDS.includes(String(ip.id))) {
+          const exists = prods.some(p => String(p.id) === String(ip.id) || (p.name && ip.name && p.name.trim().toLowerCase() === ip.name.trim().toLowerCase()));
+          if (!exists) {
+            prods.push(ip);
+          }
+        }
+      });
+
+      localStorage.setItem("UH_PRODUCTS", JSON.stringify(prods));
     } catch (e) { }
   }
 

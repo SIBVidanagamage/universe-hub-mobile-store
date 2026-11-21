@@ -942,8 +942,9 @@ const AdminController = {
     let brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
 
     let existing = brands.find(b => b.name.toLowerCase() === name.toLowerCase() || b.id.toLowerCase() === slug);
+    let savedBrandObj = null;
     if (!existing) {
-      const newBrand = {
+      savedBrandObj = {
         id: slug,
         name,
         icon,
@@ -953,13 +954,21 @@ const AdminController = {
         inFilter,
         order: brands.length + 1
       };
-      brands.push(newBrand);
+      brands.push(savedBrandObj);
       localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
     } else {
       if (logo) existing.logo = logo;
       existing.icon = icon;
       existing.tagline = tagline;
+      existing.inNav = inNav;
+      existing.inFilter = inFilter;
+      savedBrandObj = existing;
       localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
+    }
+
+    // Sync Brand to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveBrand === "function") {
+      window.SupabaseSync.saveBrand(savedBrandObj);
     }
 
     this.populateBrandDropdowns();
@@ -976,17 +985,18 @@ const AdminController = {
     this.closeQuickAddBrandModal();
 
     if (window.App) {
-      App.renderNavbar();
-      App.renderBrandFilterBar();
-      App.renderBrandsSection();
-      App.renderCatalog();
+      if (typeof App.renderNavbar === "function") App.renderNavbar();
+      if (typeof App.renderBrandFilterBar === "function") App.renderBrandFilterBar();
+      if (typeof App.renderBrandsSection === "function") App.renderBrandsSection();
+      if (typeof App.renderCatalogTabs === "function") App.renderCatalogTabs();
+      if (typeof App.renderCatalog === "function") App.renderCatalog();
     }
 
     if (this.activeTab === "brands") {
       this.renderBrandsManager();
     }
 
-    showToast(`Brand "${name}" added to system and selected!`);
+    showToast(`Brand "${name}" added & synced live across all devices!`);
   },
 
   // 2. Brands & Accessories Management Tab
@@ -1086,6 +1096,11 @@ const AdminController = {
     brands.push(newBrand);
     localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
 
+    // Sync Brand to Supabase Cloud Database
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveBrand === "function") {
+      window.SupabaseSync.saveBrand(newBrand);
+    }
+
     document.getElementById("admin-add-brand-form").reset();
     document.getElementById("adm-brand-icon").value = "🏷️";
     document.getElementById("adm-brand-in-nav").checked = true;
@@ -1096,10 +1111,11 @@ const AdminController = {
     this.renderBrandsManager();
 
     if (window.App) {
-      App.renderNavbar();
-      App.renderBrandFilterBar();
-      App.renderBrandsSection();
-      App.renderCatalog();
+      if (typeof App.renderNavbar === "function") App.renderNavbar();
+      if (typeof App.renderBrandFilterBar === "function") App.renderBrandFilterBar();
+      if (typeof App.renderBrandsSection === "function") App.renderBrandsSection();
+      if (typeof App.renderCatalogTabs === "function") App.renderCatalogTabs();
+      if (typeof App.renderCatalog === "function") App.renderCatalog();
     }
 
     showToast(`Brand "${name}" added to Universe Hub and synced live!`);
@@ -1529,6 +1545,35 @@ const AdminController = {
         }
       }
 
+      // Persist to dual-tier storage & in-memory cache immediately
+      if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = products;
+      if (window.UHStorage && typeof window.UHStorage.saveProducts === "function") {
+        window.UHStorage.saveProducts(products);
+      }
+
+      // Auto-register brand if not yet present in UH_BRANDS
+      try {
+        let curBrands = JSON.parse(localStorage.getItem("UH_BRANDS") || "[]");
+        const bSlug = (brand || "Apple").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        if (!curBrands.some(b => b && (b.id.toLowerCase() === bSlug || b.name.toLowerCase() === brand.toLowerCase()))) {
+          const autoBrand = {
+            id: bSlug,
+            name: brand,
+            icon: "🏷️",
+            logo: null,
+            tagline: `${brand} Official Accessories`,
+            inNav: true,
+            inFilter: true,
+            order: curBrands.length + 1
+          };
+          curBrands.push(autoBrand);
+          localStorage.setItem("UH_BRANDS", JSON.stringify(curBrands));
+          if (window.SupabaseSync && typeof window.SupabaseSync.saveBrand === "function") {
+            window.SupabaseSync.saveBrand(autoBrand);
+          }
+        }
+      } catch (e) { }
+
       // 2. Sync to Supabase Cloud Database
       let cloudOk = false;
       if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
@@ -1570,11 +1615,14 @@ const AdminController = {
       if (typeof this.renderInventoryFilterBar === "function") this.renderInventoryFilterBar();
       if (typeof this.renderStats === "function") this.renderStats();
 
-      // Trigger re-render of storefront catalog if open
-      if (window.App && typeof App.renderCatalog === "function") {
-        App.renderCatalog();
-        App.renderCategories();
-        App.renderBrandsSection();
+      // Trigger full re-render of storefront catalog, navbar & filters
+      if (window.App) {
+        if (typeof App.renderNavbar === "function") App.renderNavbar();
+        if (typeof App.renderCatalogTabs === "function") App.renderCatalogTabs();
+        if (typeof App.renderBrandFilterBar === "function") App.renderBrandFilterBar();
+        if (typeof App.renderCategories === "function") App.renderCategories();
+        if (typeof App.renderBrandsSection === "function") App.renderBrandsSection();
+        if (typeof App.renderCatalog === "function") App.renderCatalog();
       }
     } catch (criticalErr) {
       console.error("Critical error in handleAddProduct:", criticalErr);
@@ -1766,6 +1814,10 @@ const AdminController = {
     }
 
     localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+    if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = products;
+    if (window.UHStorage && typeof window.UHStorage.saveProducts === "function") {
+      window.UHStorage.saveProducts(products);
+    }
 
     // Sync to Supabase Cloud Database
     let cloudOk = false;
@@ -1792,9 +1844,13 @@ const AdminController = {
       }
     }
 
-    if (window.App && typeof App.renderCatalog === "function") {
-      App.renderCatalog();
-      App.renderCategories();
+    if (window.App) {
+      if (typeof App.renderNavbar === "function") App.renderNavbar();
+      if (typeof App.renderCatalogTabs === "function") App.renderCatalogTabs();
+      if (typeof App.renderBrandFilterBar === "function") App.renderBrandFilterBar();
+      if (typeof App.renderCategories === "function") App.renderCategories();
+      if (typeof App.renderBrandsSection === "function") App.renderBrandsSection();
+      if (typeof App.renderCatalog === "function") App.renderCatalog();
     }
   },
 

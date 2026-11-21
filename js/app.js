@@ -41,13 +41,13 @@ const App = {
     // 2. Check stored products in localStorage
     try {
       const storedVer = localStorage.getItem("UH_CATALOG_VERSION");
-      // If client has stale legacy cache (< 95), auto-upgrade to INITIAL_PRODUCTS
-      if (storedVer !== "95") {
+      // If client has stale legacy cache (< 115), auto-upgrade to INITIAL_PRODUCTS
+      if (storedVer !== "115") {
         if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
           if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
           try {
             localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS));
-            localStorage.setItem("UH_CATALOG_VERSION", "95");
+            localStorage.setItem("UH_CATALOG_VERSION", "115");
           } catch (e) { }
           return INITIAL_PRODUCTS;
         }
@@ -55,6 +55,18 @@ const App = {
 
       const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
       if (Array.isArray(stored) && stored.length > 0) {
+        // Self-healing: if stored catalog has fewer than 13 items (e.g. mobile with only 3 items), merge missing INITIAL_PRODUCTS
+        if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && stored.length < INITIAL_PRODUCTS.length) {
+          INITIAL_PRODUCTS.forEach(ip => {
+            if (!stored.some(p => String(p.id) === String(ip.id) || (p.name && ip.name && p.name.trim().toLowerCase() === ip.name.trim().toLowerCase()))) {
+              stored.push(ip);
+            }
+          });
+          try {
+            localStorage.setItem("UH_PRODUCTS", JSON.stringify(stored));
+            localStorage.setItem("UH_CATALOG_VERSION", "115");
+          } catch (e) { }
+        }
         if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = stored;
         return stored;
       }
@@ -69,6 +81,100 @@ const App = {
     return [];
   },
 
+  getBrands() {
+    let storedBrands = [];
+    try {
+      storedBrands = JSON.parse(localStorage.getItem("UH_BRANDS")) || [];
+    } catch (e) { storedBrands = []; }
+
+    const initial = (typeof INITIAL_BRANDS !== "undefined" && Array.isArray(INITIAL_BRANDS)) ? INITIAL_BRANDS : [];
+    const deletedBrandIds = JSON.parse(localStorage.getItem("UH_DELETED_BRAND_IDS") || "[]");
+
+    const map = new Map();
+    // 1. Master initial brands
+    initial.forEach(b => {
+      if (!deletedBrandIds.includes(String(b.id))) {
+        map.set(b.id.toLowerCase(), { ...b });
+      }
+    });
+
+    // 2. Overlay stored brands (preserves user custom uploaded logos, taglines, toggles)
+    storedBrands.forEach(b => {
+      if (b && b.id && !deletedBrandIds.includes(String(b.id))) {
+        const k = b.id.toLowerCase();
+        if (map.has(k)) {
+          map.set(k, { ...map.get(k), ...b });
+        } else {
+          map.set(k, { ...b });
+        }
+      }
+    });
+
+    // 3. Dynamic Discovery: If ANY product in the catalog has brand "Anker", Anker is guaranteed to appear!
+    const products = this.getProducts();
+    products.forEach(p => {
+      if (p.brand && typeof p.brand === "string" && p.brand.trim().length > 0) {
+        const bName = p.brand.trim();
+        const bId = bName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        if (!map.has(bId) && !map.has(bName.toLowerCase())) {
+          map.set(bId, {
+            id: bId,
+            name: bName,
+            icon: "🏷️",
+            logo: null,
+            tagline: `${bName} Official Accessories`,
+            inNav: true,
+            inFilter: true,
+            order: map.size + 1
+          });
+        }
+      }
+    });
+
+    return Array.from(map.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+  },
+
+  getCategories() {
+    let storedCategories = [];
+    try {
+      storedCategories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || [];
+    } catch (e) { storedCategories = []; }
+
+    const initial = (typeof INITIAL_CATEGORIES !== "undefined" && Array.isArray(INITIAL_CATEGORIES)) ? INITIAL_CATEGORIES : [];
+    const deletedCategoryIds = JSON.parse(localStorage.getItem("UH_DELETED_CATEGORY_IDS") || "[]");
+
+    const map = new Map();
+    initial.forEach(c => {
+      if (!deletedCategoryIds.includes(String(c.id))) {
+        map.set(c.id.toLowerCase(), { ...c });
+      }
+    });
+    storedCategories.forEach(c => {
+      if (c && c.id && !deletedCategoryIds.includes(String(c.id))) {
+        map.set(c.id.toLowerCase(), { ...(map.get(c.id.toLowerCase()) || {}), ...c });
+      }
+    });
+
+    // Dynamic Discovery: If any product has category 'power-banks', ensure it exists!
+    const products = this.getProducts();
+    products.forEach(p => {
+      if (p.category && typeof p.category === "string" && !map.has(p.category.toLowerCase())) {
+        const catId = p.category.toLowerCase();
+        map.set(catId, {
+          id: catId,
+          name: catId.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+          group: "accessories",
+          icon: "⚡",
+          inFilter: true,
+          inNav: true,
+          order: map.size + 1
+        });
+      }
+    });
+
+    return Array.from(map.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+  },
+
   init() {
     this.loadUserSession();
     this.applyStoreSettings();
@@ -78,6 +184,7 @@ const App = {
       window.UHStorage.loadProducts().then(prods => {
         if (Array.isArray(prods) && prods.length > 0) {
           window.UH_PRODUCTS_CACHE = prods;
+          this.renderNavbar();
           this.renderCatalogTabs();
           this.renderBrandFilterBar();
           this.renderCategories();
@@ -99,12 +206,16 @@ const App = {
     this.bindEvents();
     this.setupRepairEstimator();
 
-    // Fetch fresh cloud products & settings if Supabase is connected
+    // Fetch fresh cloud products, brands & settings if Supabase is connected
+    if (window.SupabaseSync && typeof window.SupabaseSync.fetchBrands === "function") {
+      window.SupabaseSync.fetchBrands();
+    }
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchProducts === "function") {
       window.SupabaseSync.fetchProducts().then((prods) => {
         if (Array.isArray(prods) && prods.length > 0) {
           window.UH_PRODUCTS_CACHE = prods;
         }
+        this.renderNavbar();
         this.renderCatalogTabs();
         this.renderBrandFilterBar();
         this.renderCategories();
@@ -130,7 +241,7 @@ const App = {
       if (localDel && localDel.length > 0 && window.SupabaseSync && typeof window.SupabaseSync.syncLocalCatalogToCloud === "function") {
         window.SupabaseSync.syncLocalCatalogToCloud();
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // Check if URL has admin hash
     if (window.location.hash === "#admin") {
@@ -161,8 +272,8 @@ const App = {
     }
 
     // 2. Official Logo across site
-    const activeLogo = (settings && settings.logoImg && settings.logoImg.includes("universe_hub_logo")) 
-      ? settings.logoImg 
+    const activeLogo = (settings && settings.logoImg && settings.logoImg.includes("universe_hub_logo"))
+      ? settings.logoImg
       : "assets/universe_hub_logo.png?v=10";
     document.querySelectorAll(".site-main-logo").forEach(el => {
       el.src = activeLogo;
@@ -437,22 +548,22 @@ const App = {
     }
 
     // 1. Check if Admin credentials are provided in standard login form
-    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined' 
-      ? DEFAULT_ADMIN_CONFIG 
+    let adminCfg = typeof DEFAULT_ADMIN_CONFIG !== 'undefined'
+      ? DEFAULT_ADMIN_CONFIG
       : { email: "shashikaisuranga143@gmail.com", password: "Kumudinikumari@0709", name: "Store Administrator" };
     try {
       const savedAdmin = localStorage.getItem("UH_ADMIN_CONFIG");
       if (savedAdmin) adminCfg = { ...adminCfg, ...JSON.parse(savedAdmin) };
-    } catch (e) {}
+    } catch (e) { }
 
     // Strictly block generic demo emails and passwords so nobody can guess them
     const blockedEmails = ["admin@universehub.store", "admin@universehub.lk", "admin"];
     const blockedPasswords = ["admin", "admin123"];
 
-    const isAuthorizedAdminEmail = !blockedEmails.includes(email) && 
+    const isAuthorizedAdminEmail = !blockedEmails.includes(email) &&
       (email === "shashikaisuranga143@gmail.com" || email === (adminCfg.email || "").toLowerCase());
 
-    const isAuthorizedAdminPassword = !blockedPasswords.includes(password) && 
+    const isAuthorizedAdminPassword = !blockedPasswords.includes(password) &&
       (password === "Kumudinikumari@0709" || password === adminCfg.password);
 
     if (isAuthorizedAdminEmail && isAuthorizedAdminPassword) {
@@ -749,8 +860,8 @@ const App = {
     const navUl = document.getElementById("sub-navbar-links");
     if (!navUl) return;
 
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
-    const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
+    const categories = this.getCategories();
+    const brands = this.getBrands();
     const products = this.getProducts();
 
     // Filter active brands for Navbar
@@ -879,22 +990,22 @@ const App = {
           <div class="dropdown-header">OFFICIAL ACCESSORY BRANDS</div>
           <div class="dropdown-grid-brands">
             ${navBrands.map(b => {
-              const count = getBrandCount(b.name, b.id);
-              const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
-              return `
+      const count = getBrandCount(b.name, b.id);
+      const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
+      return `
                 <a href="#catalog-section" class="dropdown-brand-card" onclick="App.filterByBrand('${b.id}')">
                   <div class="brand-card-top">
-                    ${hasLogo 
-                      ? `<img src="${b.logo}" alt="${b.name}" class="dropdown-brand-logo" style="width:24px; height:24px; object-fit:contain; border-radius:4px;">` 
-                      : `<span class="brand-emoji">${b.icon || '🏷️'}</span>`
-                    }
+                    ${hasLogo
+          ? `<img src="${b.logo}" alt="${b.name}" class="dropdown-brand-logo" style="width:24px; height:24px; object-fit:contain; border-radius:4px;">`
+          : `<span class="brand-emoji">${b.icon || '🏷️'}</span>`
+        }
                     <span class="brand-name-tag">${b.name}</span>
                   </div>
                   <div class="brand-tagline-text">${b.tagline || 'Original Tech'}</div>
                   <div class="brand-stock-pill">${count} Item${count !== 1 ? 's' : ''}</div>
                 </a>
               `;
-            }).join('')}
+    }).join('')}
           </div>
           <div class="dropdown-divider"></div>
           <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 14px;">
@@ -920,7 +1031,7 @@ const App = {
     const tabsBar = document.getElementById("catalog-tabs-bar");
     if (!tabsBar) return;
 
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
+    const categories = this.getCategories();
     const filterCategories = categories.filter(c => c.inFilter !== false);
 
     let html = `<button class="tab-btn ${this.activeCategory === 'all' ? 'active' : ''}" data-cat="all" onclick="App.filterByCategory('all')">🌟 All Categories</button>`;
@@ -939,7 +1050,7 @@ const App = {
     const bar = document.getElementById("catalog-brand-filter-bar");
     if (!bar) return;
 
-    const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
+    const brands = this.getBrands();
     const filterBrands = brands.filter(b => b.inFilter !== false);
     const products = this.getProducts();
 
@@ -957,20 +1068,20 @@ const App = {
           <span>🌟 All Brands</span>
         </button>
         ${filterBrands.map(b => {
-          const isSel = this.activeBrand.toLowerCase() === b.id.toLowerCase() || this.activeBrand.toLowerCase() === b.name.toLowerCase();
-          const count = getCount(b.name, b.id);
-          const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
-          return `
+      const isSel = this.activeBrand.toLowerCase() === b.id.toLowerCase() || this.activeBrand.toLowerCase() === b.name.toLowerCase();
+      const count = getCount(b.name, b.id);
+      const hasLogo = b.logo && typeof b.logo === 'string' && (b.logo.startsWith('http') || b.logo.startsWith('data:') || b.logo.startsWith('assets/'));
+      return `
             <button class="brand-filter-pill ${isSel ? 'active' : ''}" onclick="App.filterByBrand('${b.id}')">
-              ${hasLogo 
-                ? `<img src="${b.logo}" alt="${b.name}" style="width:16px; height:16px; object-fit:contain; border-radius:3px; vertical-align:middle; margin-right:5px;">` 
-                : `<span style="margin-right:4px;">${b.icon || '🏷️'}</span>`
-              }
+              ${hasLogo
+          ? `<img src="${b.logo}" alt="${b.name}" style="width:16px; height:16px; object-fit:contain; border-radius:3px; vertical-align:middle; margin-right:5px;">`
+          : `<span style="margin-right:4px;">${b.icon || '🏷️'}</span>`
+        }
               <span>${b.name}</span>
               <span class="brand-pill-count">${count}</span>
             </button>
           `;
-        }).join('')}
+    }).join('')}
       </div>
     `;
 
@@ -982,7 +1093,7 @@ const App = {
     const container = document.getElementById("category-grid-container");
     if (!container) return;
 
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
+    const categories = this.getCategories();
     const products = this.getProducts();
 
     container.innerHTML = categories.map(cat => {
@@ -1027,7 +1138,7 @@ const App = {
     const container = document.getElementById("homepage-brands-grid");
     if (!container) return;
 
-    const brands = JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS;
+    const brands = this.getBrands();
     const products = this.getProducts();
 
     container.innerHTML = brands.map(b => {
@@ -1041,10 +1152,10 @@ const App = {
       return `
         <div class="brand-feature-card" onclick="App.filterByBrand('${b.id}')">
           <div class="brand-feat-icon-box">
-            ${hasLogo 
-              ? `<img src="${b.logo}" alt="${b.name}" style="width:36px; height:36px; object-fit:contain;">` 
-              : (b.icon || '🏷️')
-            }
+            ${hasLogo
+          ? `<img src="${b.logo}" alt="${b.name}" style="width:36px; height:36px; object-fit:contain;">`
+          : (b.icon || '🏷️')
+        }
           </div>
           <div class="brand-feat-content">
             <div class="brand-feat-title">${b.name}</div>
@@ -1160,7 +1271,7 @@ const App = {
     }
 
     const wishlist = JSON.parse(localStorage.getItem("UH_WISHLIST")) || [];
-    const allBrands = JSON.parse(localStorage.getItem("UH_BRANDS")) || (typeof INITIAL_BRANDS !== 'undefined' ? INITIAL_BRANDS : []);
+    const allBrands = this.getBrands();
 
     container.innerHTML = filtered.map(prod => {
       const isWishlisted = wishlist.includes(prod.id);
@@ -1185,10 +1296,10 @@ const App = {
         <div class="product-card" data-id="${prod.id}">
           <div class="card-top-badges">
             <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
-              ${brandLogo 
-                ? `<img src="${brandLogo}" alt="${prodBrand}" style="width:13px; height:13px; object-fit:contain; vertical-align:middle; margin-right:4px;">` 
-                : (matchedBrand && matchedBrand.icon ? `${matchedBrand.icon} ` : '🏷️ ')
-              }${prodBrand}
+              ${brandLogo
+          ? `<img src="${brandLogo}" alt="${prodBrand}" style="width:13px; height:13px; object-fit:contain; vertical-align:middle; margin-right:4px;">`
+          : (matchedBrand && matchedBrand.icon ? `${matchedBrand.icon} ` : '🏷️ ')
+        }${prodBrand}
             </span>
             ${prod.batteryHealth ? `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>` : ''}
             ${prod.specs?.mah ? `<span class="badge-pill" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#10b981;">🔋 ${prod.specs.mah}</span>` : ''}
@@ -1251,8 +1362,8 @@ const App = {
     }
 
     const products = this.getProducts();
-    const matches = products.filter(p => 
-      p.name.toLowerCase().includes(query) || 
+    const matches = products.filter(p =>
+      p.name.toLowerCase().includes(query) ||
       p.category.toLowerCase().includes(query) ||
       (p.tags && p.tags.some(t => t.toLowerCase().includes(query)))
     ).slice(0, 5);
@@ -1345,9 +1456,9 @@ const App = {
     if (!prod) return;
 
     this.executeAddToCart(
-      prod, 
-      this.quickViewSelectedStorage, 
-      this.quickViewSelectedColor, 
+      prod,
+      this.quickViewSelectedStorage,
+      this.quickViewSelectedColor,
       this.quickViewSelectedPrice
     );
   },
@@ -1359,14 +1470,14 @@ const App = {
 
     // Use active Quick View selection if inquiring from the open modal, otherwise product defaults
     const isCurrentModal = String(this.quickViewCurrentProdId) === String(prodId);
-    const storage = (isCurrentModal && this.quickViewSelectedStorage) 
-      ? this.quickViewSelectedStorage 
+    const storage = (isCurrentModal && this.quickViewSelectedStorage)
+      ? this.quickViewSelectedStorage
       : ((Array.isArray(prod.storageOptions) && prod.storageOptions[0]?.capacity) || "");
-    const color = (isCurrentModal && this.quickViewSelectedColor) 
-      ? this.quickViewSelectedColor 
+    const color = (isCurrentModal && this.quickViewSelectedColor)
+      ? this.quickViewSelectedColor
       : ((Array.isArray(prod.colorOptions) && prod.colorOptions[0]) || "");
-    const price = (isCurrentModal && this.quickViewSelectedPrice) 
-      ? this.quickViewSelectedPrice 
+    const price = (isCurrentModal && this.quickViewSelectedPrice)
+      ? this.quickViewSelectedPrice
       : prod.price;
 
     let details = [];
@@ -1553,10 +1664,10 @@ const App = {
           <div class="gallery-thumbnails-strip" id="gallery-thumbnails-strip">
             ${mediaList.map((item, idx) => `
               <div class="gallery-thumb-item ${idx === 0 ? 'active' : ''}" data-idx="${idx}" onclick="App.setQuickViewMedia(${idx})">
-                ${item.type === 'video' 
-                  ? `<div class="gallery-thumb-video-badge">▶<span>VIDEO</span></div>`
-                  : `<img src="${item.url}" alt="" onerror="this.src='assets/hero_showcase.jpg'">`
-                }
+                ${item.type === 'video'
+        ? `<div class="gallery-thumb-video-badge">▶<span>VIDEO</span></div>`
+        : `<img src="${item.url}" alt="" onerror="this.src='assets/hero_showcase.jpg'">`
+      }
               </div>
             `).join("")}
           </div>
@@ -1676,12 +1787,12 @@ const App = {
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="color:var(--text-muted);">Stock Availability:</span>
               ${prod.stockStatus === 'on-request'
-                ? `<span style="color:#f59e0b; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#f59e0b; box-shadow:0 0 8px #f59e0b;"></span> ⚡ Available on Request (Fast Sourcing)</span>`
-                : (prod.stockStatus === 'inquire'
-                    ? `<span style="color:#25d366; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#25d366; box-shadow:0 0 8px #25d366;"></span> 💬 Inquire via WhatsApp</span>`
-                    : `<span style="color:#10b981; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span> 🟢 In Stock &amp; Ready to Order</span>`
-                  )
-              }
+        ? `<span style="color:#f59e0b; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#f59e0b; box-shadow:0 0 8px #f59e0b;"></span> ⚡ Available on Request (Fast Sourcing)</span>`
+        : (prod.stockStatus === 'inquire'
+          ? `<span style="color:#25d366; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#25d366; box-shadow:0 0 8px #25d366;"></span> 💬 Inquire via WhatsApp</span>`
+          : `<span style="color:#10b981; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:5px;"><span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span> 🟢 In Stock &amp; Ready to Order</span>`
+        )
+      }
             </div>
             <div style="display:flex; justify-content:space-between;">
               <span style="color:var(--text-muted);">Store Pickup &amp; Delivery:</span>
@@ -1781,7 +1892,7 @@ const App = {
 
     // If product has options and none are selected yet, launch quickview modal
     const hasVariants = (Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0) ||
-                        (Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0);
+      (Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0);
     if (hasVariants && !selectedStorage && !selectedColor) {
       this.openQuickView(prodId);
       return;
@@ -1796,7 +1907,7 @@ const App = {
     const effectivePrice = (customPrice !== null && customPrice > 0) ? customPrice : Number(prod.price);
     const cartItemId = `${prod.id}${storage ? '-' + storage : ''}${color ? '-' + String(color).replace(/\s+/g, '') : ''}`;
 
-    const existing = cart.find(item => (item.cartItemId && item.cartItemId === cartItemId) || 
+    const existing = cart.find(item => (item.cartItemId && item.cartItemId === cartItemId) ||
       (item.id === prod.id && item.storage === storage && item.color === color));
 
     if (existing) {
@@ -1974,12 +2085,12 @@ const App = {
       summaryElem.innerHTML = `
         <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:12px; margin-bottom:16px;">
           ${cart.map(i => {
-            const variant = [i.storage, i.color].filter(Boolean).join(" • ");
-            return `<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+        const variant = [i.storage, i.color].filter(Boolean).join(" • ");
+        return `<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
               <span>${i.name} ${variant ? `<span style="color:var(--neon-cyan); font-size:11.5px; font-weight:600;">(${variant})</span> ` : ''}× ${i.qty}</span>
               <span style="color:var(--neon-cyan); font-weight:700;">Rs. ${(i.price * i.qty).toLocaleString()}</span>
             </div>`;
-          }).join("")}
+      }).join("")}
           <div style="border-top:1px solid rgba(255,255,255,0.1); margin-top:8px; padding-top:8px; display:flex; justify-content:space-between; font-weight:800; font-size:15px; color:#fff;">
             <span>Total Payable:</span>
             <span style="color:var(--neon-cyan);">Rs. ${subtotal.toLocaleString()}</span>
@@ -2018,12 +2129,12 @@ const App = {
     const phone = document.getElementById("checkout-phone").value.trim();
     const address = document.getElementById("checkout-address").value.trim();
     const deliveryMethod = document.getElementById("checkout-delivery-method").value;
-    
+
     // Detect payment method from radio selector or fallback select
-    const methodVal = (document.getElementById("checkout-payment-method-val")?.value || 
-                       (typeof PaymentGateway !== 'undefined' ? PaymentGateway.selectedMethod : null) || 
-                       (document.getElementById("checkout-payment-method")?.value) || 
-                       'payhere').toLowerCase();
+    const methodVal = (document.getElementById("checkout-payment-method-val")?.value ||
+      (typeof PaymentGateway !== 'undefined' ? PaymentGateway.selectedMethod : null) ||
+      (document.getElementById("checkout-payment-method")?.value) ||
+      'payhere').toLowerCase();
 
     let displayPaymentName = "Cash on Delivery / Store Pickup";
     if (methodVal.includes("payhere")) displayPaymentName = "PayHere Sri Lanka";
@@ -2209,7 +2320,7 @@ const App = {
     }
 
     this.closeModal("repair-booking-modal");
-    
+
     // Auto populate tracking input with new code
     const trackInp = document.getElementById("track-repair-input");
     if (trackInp) {
@@ -2238,17 +2349,17 @@ const App = {
     if (!code || !card) return;
 
     let repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
-    let record = repairs.find(r => 
-      (r.trackingCode || '').toUpperCase() === code || 
-      (r.ticketNumber || '').toUpperCase() === code || 
+    let record = repairs.find(r =>
+      (r.trackingCode || '').toUpperCase() === code ||
+      (r.ticketNumber || '').toUpperCase() === code ||
       (r.id || '').toUpperCase() === code
     );
 
     // Fallback to DEMO_REPAIR_ORDERS if not found in custom repairs
     if (!record && typeof DEMO_REPAIR_ORDERS !== 'undefined' && Array.isArray(DEMO_REPAIR_ORDERS)) {
-      record = DEMO_REPAIR_ORDERS.find(r => 
-        (r.trackingCode || '').toUpperCase() === code || 
-        (r.ticketNumber || '').toUpperCase() === code || 
+      record = DEMO_REPAIR_ORDERS.find(r =>
+        (r.trackingCode || '').toUpperCase() === code ||
+        (r.ticketNumber || '').toUpperCase() === code ||
         (r.id || '').toUpperCase() === code
       );
     }
@@ -2277,7 +2388,7 @@ const App = {
             notes: row.notes || "Synced from Universe Hub Cloud Lab."
           };
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (!record) {
@@ -2397,16 +2508,16 @@ const App = {
 
       <div class="status-timeline">
         ${steps.map(s => {
-          let statusClass = "";
-          if (s.num < currentStep) statusClass = "completed";
-          else if (s.num === currentStep) statusClass = "active";
-          return `
+      let statusClass = "";
+      if (s.num < currentStep) statusClass = "completed";
+      else if (s.num === currentStep) statusClass = "active";
+      return `
             <div class="status-node ${statusClass}">
               <div class="node-icon">${s.num < currentStep ? '✓' : s.num}</div>
               <div class="node-label">${s.label}</div>
             </div>
           `;
-        }).join("")}
+    }).join("")}
       </div>
 
       ${statusBannerHtml}

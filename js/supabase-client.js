@@ -66,7 +66,7 @@
       // 3. Persist to LocalStorage with progressive quota-saving fallbacks
       try {
         localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
-        localStorage.setItem("UH_CATALOG_VERSION", "95");
+        localStorage.setItem("UH_CATALOG_VERSION", "115");
       } catch (quotaErr) {
         console.warn("[UHStorage] LocalStorage full. Optimizing catalog for LocalStorage quota...");
         try {
@@ -76,7 +76,7 @@
             images: [p.image || (p.images && p.images[0]) || "assets/hero_showcase.jpg"]
           }));
           localStorage.setItem("UH_PRODUCTS", JSON.stringify(optimized));
-          localStorage.setItem("UH_CATALOG_VERSION", "95");
+          localStorage.setItem("UH_CATALOG_VERSION", "115");
         } catch (err2) {
           try {
             // Keep minimal product metadata
@@ -97,7 +97,7 @@
               specs: p.specs
             }));
             localStorage.setItem("UH_PRODUCTS", JSON.stringify(minimal));
-            localStorage.setItem("UH_CATALOG_VERSION", "95");
+            localStorage.setItem("UH_CATALOG_VERSION", "115");
           } catch (err3) {
             console.warn("[UHStorage] LocalStorage quota completely full. Active in IndexedDB & Memory.");
           }
@@ -114,12 +114,12 @@
       // Check legacy version
       try {
         const storedVer = localStorage.getItem("UH_CATALOG_VERSION");
-        if (storedVer !== "95") {
+        if (storedVer !== "115") {
           if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
             if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
             try {
               localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS));
-              localStorage.setItem("UH_CATALOG_VERSION", "95");
+              localStorage.setItem("UH_CATALOG_VERSION", "115");
             } catch (e) { }
             return INITIAL_PRODUCTS;
           }
@@ -278,10 +278,11 @@
         this.updateStatusBadge(true);
         console.log("⚡ [Supabase] Cloud database verified live and synchronized.");
 
-        // Automatically fetch latest catalog, settings and orders to guarantee real-time cross-device sync (e.g. laptop <-> mobile)
+        // Automatically fetch latest catalog, settings, brands and orders to guarantee real-time cross-device sync (e.g. laptop <-> mobile)
         this.fetchProducts().then(prods => {
           if (prods && prods.length > 0 && typeof window !== "undefined" && window.App) {
             window.UH_PRODUCTS_CACHE = prods;
+            if (typeof window.App.renderNavbar === "function") window.App.renderNavbar();
             if (typeof window.App.renderCatalogTabs === "function") window.App.renderCatalogTabs();
             if (typeof window.App.renderBrandFilterBar === "function") window.App.renderBrandFilterBar();
             if (typeof window.App.renderCategories === "function") window.App.renderCategories();
@@ -289,6 +290,7 @@
             if (typeof window.App.renderCatalog === "function") window.App.renderCatalog();
           }
         });
+        this.fetchBrands();
         this.fetchStoreSettings().then(st => {
           if (st && typeof window !== "undefined" && window.App && typeof window.App.applyStoreSettings === "function") {
             window.App.applyStoreSettings();
@@ -550,11 +552,23 @@
                 };
               });
 
+            // Non-Destructive Additive Merge: preserve any user-added local products not yet uploaded
+            let localProds = [];
+            try {
+              localProds = JSON.parse(localStorage.getItem("UH_PRODUCTS") || "[]");
+            } catch (e) { localProds = []; }
+
+            const cloudIds = new Set(mapped.map(m => String(m.id)));
+            const localOnly = (Array.isArray(localProds) ? localProds : []).filter(lp => lp && lp.id && !SAMPLE_PRODUCT_IDS.includes(String(lp.id)) && !cloudIds.has(String(lp.id)));
+
+            const merged = [...mapped, ...localOnly];
+
             // Persist to Memory, IndexedDB and LocalStorage
-            await UHStorage.saveProducts(mapped);
+            await UHStorage.saveProducts(merged);
 
             // Notify storefront to immediately re-render all sections with full catalog
             if (typeof window !== "undefined" && window.App) {
+              if (typeof window.App.renderNavbar === "function") window.App.renderNavbar();
               if (typeof window.App.renderCatalogTabs === "function") window.App.renderCatalogTabs();
               if (typeof window.App.renderBrandFilterBar === "function") window.App.renderBrandFilterBar();
               if (typeof window.App.renderCategories === "function") window.App.renderCategories();
@@ -562,7 +576,15 @@
               if (typeof window.App.renderCatalog === "function") window.App.renderCatalog();
             }
 
-            return mapped;
+            // Background push localOnly items to Cloud so all other devices receive them
+            if (localOnly.length > 0) {
+              console.log(`☁️ [Supabase] Discovered ${localOnly.length} local-only items, auto-syncing to cloud...`);
+              for (const lp of localOnly) {
+                this.saveProduct(lp).catch(() => {});
+              }
+            }
+
+            return merged;
           }
         } catch (e) {
           console.warn("[Supabase] Cloud fetch notice, reading from storage engine:", e);
@@ -571,7 +593,6 @@
 
       // 2. Storage Engine Fallback (Memory -> IndexedDB -> LocalStorage)
       return await UHStorage.loadProducts();
-    },
     },
 
     async syncProductsToLocal() {
@@ -912,6 +933,113 @@
       } else {
         this.enqueueSync("delete_product", strId);
       }
+    },
+
+    async saveBrand(brand) {
+      if (!brand || !brand.id) return false;
+      const strId = String(brand.id).toLowerCase();
+
+      // 1. Update in-memory & LocalStorage
+      let brands = [];
+      try {
+        brands = JSON.parse(localStorage.getItem("UH_BRANDS") || "[]");
+      } catch (e) { brands = []; }
+
+      const idx = brands.findIndex(b => b.id.toLowerCase() === strId);
+      if (idx >= 0) {
+        brands[idx] = { ...brands[idx], ...brand };
+      } else {
+        brands.push(brand);
+      }
+      try {
+        localStorage.setItem("UH_BRANDS", JSON.stringify(brands));
+      } catch (e) { }
+
+      // 2. Dispatch to Supabase Cloud brands table & store_settings backup
+      if (this.client) {
+        try {
+          await this.client.from("brands").upsert({
+            id: strId,
+            name: brand.name,
+            icon: brand.icon || "🏷️",
+            badge: brand.badge || null,
+            order: brand.order || 99
+          });
+          await this.client.from("store_settings").upsert({
+            key: "brands",
+            value: brands,
+            updated_at: new Date().toISOString()
+          });
+          console.log("⚡ [Supabase] Brand synced to Cloud:", brand.name);
+          return true;
+        } catch (e) {
+          console.warn("[Supabase] Brand sync notice:", e);
+        }
+      }
+      return false;
+    },
+
+    async fetchBrands() {
+      let cloudBrands = null;
+      if (this.client && (typeof navigator === "undefined" || navigator.onLine !== false)) {
+        try {
+          // 1. Check store_settings key "brands" (full rich array with logo data URIs)
+          const { data: stData } = await this.client
+            .from("store_settings")
+            .select("value")
+            .eq("key", "brands")
+            .single();
+
+          if (stData && Array.isArray(stData.value) && stData.value.length > 0) {
+            cloudBrands = stData.value;
+          } else {
+            // 2. Check brands table
+            const { data: bTable } = await this.client.from("brands").select("*").order("order", { ascending: true });
+            if (Array.isArray(bTable) && bTable.length > 0) {
+              cloudBrands = bTable;
+            }
+          }
+        } catch (e) { }
+      }
+
+      const initial = (typeof INITIAL_BRANDS !== "undefined" && Array.isArray(INITIAL_BRANDS)) ? INITIAL_BRANDS : [];
+      const deletedBrandIds = JSON.parse(localStorage.getItem("UH_DELETED_BRAND_IDS") || "[]");
+      let localBrands = [];
+      try {
+        localBrands = JSON.parse(localStorage.getItem("UH_BRANDS") || "[]");
+      } catch (e) { localBrands = []; }
+
+      // Merge: initial + local + cloud
+      const map = new Map();
+      initial.forEach(b => {
+        if (!deletedBrandIds.includes(String(b.id))) map.set(b.id.toLowerCase(), { ...b });
+      });
+      localBrands.forEach(b => {
+        if (b && b.id && !deletedBrandIds.includes(String(b.id))) {
+          const k = b.id.toLowerCase();
+          map.set(k, { ...(map.get(k) || {}), ...b });
+        }
+      });
+      if (Array.isArray(cloudBrands)) {
+        cloudBrands.forEach(b => {
+          if (b && b.id && !deletedBrandIds.includes(String(b.id))) {
+            const k = b.id.toLowerCase();
+            map.set(k, { ...(map.get(k) || {}), ...b });
+          }
+        });
+      }
+
+      const merged = Array.from(map.values()).sort((a, b) => (a.order || 99) - (b.order || 99));
+      try {
+        localStorage.setItem("UH_BRANDS", JSON.stringify(merged));
+      } catch (e) { }
+
+      if (typeof window !== "undefined" && window.App) {
+        if (typeof window.App.renderNavbar === "function") window.App.renderNavbar();
+        if (typeof window.App.renderBrandFilterBar === "function") window.App.renderBrandFilterBar();
+        if (typeof window.App.renderBrandsSection === "function") window.App.renderBrandsSection();
+      }
+      return merged;
     },
 
     async deleteBrand(brandId) {
