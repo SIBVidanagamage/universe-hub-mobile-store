@@ -749,6 +749,20 @@ const AdminController = {
     const optionsHtml = buildOptions();
     if (addSelect) addSelect.innerHTML = optionsHtml;
     if (editSelect) editSelect.innerHTML = optionsHtml;
+
+    // Populate category slider select dropdown if present
+    const catSliderSelect = document.getElementById("admin-cat-slider-select");
+    if (catSliderSelect) {
+      const curVal = catSliderSelect.value;
+      catSliderSelect.innerHTML = cleanCategories.map(cat => `
+        <option value="${cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
+      `).join("");
+      if (curVal && cleanCategories.some(c => c.id === curVal)) {
+        catSliderSelect.value = curVal;
+      } else if (cleanCategories.length > 0) {
+        catSliderSelect.value = cleanCategories[0].id;
+      }
+    }
   },
 
   // Populate brand dropdowns for Add and Edit product forms
@@ -2492,6 +2506,9 @@ const AdminController = {
       bannerUrlInput.value = settings.heroBannerImg || "";
     }
 
+    const videoUrlInput = document.getElementById("admin-hero-video-url-input");
+    const videoPreview = document.getElementById("admin-hero-video-preview");
+
     const cleanVideoUrl = (settings.heroVideoUrl && !settings.heroVideoUrl.startsWith("blob:")) ? settings.heroVideoUrl.trim() : "assets/universe_hub_hero_cinematic.mp4";
     if (videoUrlInput) {
       videoUrlInput.value = cleanVideoUrl;
@@ -2505,21 +2522,21 @@ const AdminController = {
           if (activeLabel) activeLabel.textContent = "Live Poster Fallback";
         }
       };
-    }
-    if (videoPreview && cleanVideoUrl) {
-      videoPreview.src = cleanVideoUrl;
-      videoPreview.style.display = "block";
-      videoPreview.muted = true;
-      try { videoPreview.load(); videoPreview.play().catch(() => {}); } catch(e) {}
-      if (bannerPreview) bannerPreview.style.display = "none";
-      const activeLabel = document.getElementById("admin-preview-active-label");
-      if (activeLabel) activeLabel.textContent = "Live Video Active";
-    } else if (videoPreview) {
-      videoPreview.removeAttribute("src");
-      videoPreview.style.display = "none";
-      if (bannerPreview) bannerPreview.style.display = "block";
-      const activeLabel = document.getElementById("admin-preview-active-label");
-      if (activeLabel) activeLabel.textContent = "Live Poster Active";
+      if (cleanVideoUrl) {
+        videoPreview.src = cleanVideoUrl;
+        videoPreview.style.display = "block";
+        videoPreview.muted = true;
+        try { videoPreview.load(); videoPreview.play().catch(() => {}); } catch(e) {}
+        if (bannerPreview) bannerPreview.style.display = "none";
+        const activeLabel = document.getElementById("admin-preview-active-label");
+        if (activeLabel) activeLabel.textContent = "Live Video Active";
+      } else {
+        videoPreview.removeAttribute("src");
+        videoPreview.style.display = "none";
+        if (bannerPreview) bannerPreview.style.display = "block";
+        const activeLabel = document.getElementById("admin-preview-active-label");
+        if (activeLabel) activeLabel.textContent = "Live Poster Active";
+      }
     }
 
     // Hero Live Copy Inputs
@@ -3649,18 +3666,30 @@ const AdminController = {
 
     let categories = [];
     try {
-      categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []);
+      categories = (window.App && typeof App.getCategories === 'function')
+        ? App.getCategories()
+        : (JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []));
     } catch(e) {
       categories = typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : [];
     }
 
-    const currentVal = select.value;
-    select.innerHTML = categories.map(cat => `
-      <option value="${cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
-    `).join("");
+    if (!Array.isArray(categories) || categories.length === 0) {
+      if (typeof INITIAL_CATEGORIES !== 'undefined' && Array.isArray(INITIAL_CATEGORIES)) {
+        categories = INITIAL_CATEGORIES;
+      }
+    }
 
-    if (currentVal && categories.some(c => c.id === currentVal)) {
-      select.value = currentVal;
+    const currentVal = select.value;
+    if (categories && categories.length > 0) {
+      select.innerHTML = categories.map(cat => `
+        <option value="${cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
+      `).join("");
+
+      if (currentVal && categories.some(c => c.id === currentVal)) {
+        select.value = currentVal;
+      } else {
+        select.value = categories[0].id;
+      }
     }
 
     this.handleCatSliderSelectChange();
