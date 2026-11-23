@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=125">
+  <link rel="stylesheet" href="css/style.css?v=126">
   <link rel="stylesheet" href="css/invoice.css?v=110">
   <link rel="stylesheet" href="css/payment.css?v=110">
   <style>
@@ -1413,10 +1413,16 @@
                   </div>
 
                   <div style="display:flex; gap:8px;">
-                    <input type="text" id="admin-hero-video-url-input" placeholder="assets/universe_hub_hero_cinematic.mp4 or /uploads/..." style="flex:1; font-size:12.5px;">
+                    <input type="text" id="admin-hero-video-url-input" placeholder="assets/universe_hub_hero_cinematic.mp4 or direct video URL..." style="flex:1; font-size:12.5px;">
                     <button type="button" class="btn-glass" onclick="AdminController.previewHeroVideoFromUrl()" style="white-space:nowrap; padding:0 12px; font-size:11.5px;">
                       Test Video
                     </button>
+                    <button type="button" class="btn-glass" onclick="AdminController.clearHeroVideo()" style="white-space:nowrap; padding:0 10px; font-size:11.5px; border-color:rgba(239,68,68,0.4); color:#ef4444;" title="Remove video and use poster image">
+                      ✕ Clear
+                    </button>
+                  </div>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">
+                    💡 <em>Tip: For smooth 10s video, paste a direct .mp4 URL (from Supabase/Cloudflare/CDN) or place file in <code>assets/</code>. If empty, the high-res poster below is shown.</em>
                   </div>
                 </div>
 
@@ -3616,7 +3622,7 @@
   <script src="js/uploader.js?v=130"></script>
   <script src="js/bulk-uploader.js?v=130"></script>
   <script src="js/payment-gateway.js?v=130"></script>
-  <script src="js/admin.js?v=160"></script>
-  <script src="js/app.js?v=195"></script>
+  <script src="js/admin.js?v=161"></script>
+  <script src="js/app.js?v=196"></script>
 </body>
 </html>

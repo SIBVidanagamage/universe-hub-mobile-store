@@ -638,8 +638,16 @@ const App = {
       if (settings.heroBannerImg) {
         bgVideo.poster = settings.heroBannerImg;
       }
-      if (settings.heroVideoUrl && settings.heroVideoUrl.trim()) {
-        const vUrl = settings.heroVideoUrl.trim();
+      bgVideo.onerror = () => {
+        console.warn("Hero video failed to load, falling back to static poster image.");
+        bgVideo.style.display = "none";
+        if (heroImg) heroImg.style.display = "block";
+      };
+
+      const rawUrl = settings.heroVideoUrl ? String(settings.heroVideoUrl).trim() : "";
+      const vUrl = (rawUrl && !rawUrl.startsWith("blob:")) ? rawUrl : "";
+
+      if (vUrl) {
         const mainSrc = document.getElementById("hero-video-source-main");
         const altSrc = document.getElementById("hero-video-source-alt");
         if (mainSrc) {
@@ -659,6 +667,9 @@ const App = {
           bgVideo.load();
           bgVideo.play().catch(() => {});
         } catch (e) {}
+      } else {
+        bgVideo.style.display = "none";
+        if (heroImg) heroImg.style.display = "block";
       }
     }
 
@@ -1496,9 +1507,7 @@ const App = {
       settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
     } catch (e) { }
 
-    if (settings.categorySliderImages && settings.categorySliderImages[catId]) {
-      return settings.categorySliderImages[catId];
-    }
+    const val = (settings.categorySliderImages && settings.categorySliderImages[catId]) ? settings.categorySliderImages[catId] : "";
 
     const defaultImages = {
       "brand-new-iphones": "assets/custom_hero_banner.png",
@@ -1511,6 +1520,11 @@ const App = {
       "tempered-glass": "assets/cases_banner.jpg",
       "camera-protectors": "assets/cases_banner.jpg"
     };
+
+    if (val && !val.startsWith("/uploads/") && !val.startsWith("blob:") && (val.length < 500000)) {
+      return val;
+    }
+
     return defaultImages[catId] || "assets/cases_banner.jpg";
   },
 

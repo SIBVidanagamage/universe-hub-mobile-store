@@ -2492,18 +2492,26 @@ const AdminController = {
       bannerUrlInput.value = settings.heroBannerImg || "";
     }
 
-    const videoPreview = document.getElementById("admin-hero-video-preview");
-    const videoUrlInput = document.getElementById("admin-hero-video-url-input");
+    const cleanVideoUrl = (settings.heroVideoUrl && !settings.heroVideoUrl.startsWith("blob:")) ? settings.heroVideoUrl.trim() : "";
     if (videoUrlInput) {
-      videoUrlInput.value = settings.heroVideoUrl || "";
+      videoUrlInput.value = cleanVideoUrl;
     }
-    if (videoPreview && settings.heroVideoUrl && settings.heroVideoUrl.trim()) {
-      videoPreview.src = settings.heroVideoUrl.trim();
+    if (videoPreview) {
+      videoPreview.onerror = () => {
+        videoPreview.style.display = "none";
+        if (bannerPreview) bannerPreview.style.display = "block";
+        const activeLabel = document.getElementById("admin-preview-active-label");
+        if (activeLabel) activeLabel.textContent = "Live Poster Fallback";
+      };
+    }
+    if (videoPreview && cleanVideoUrl) {
+      videoPreview.src = cleanVideoUrl;
       videoPreview.style.display = "block";
       if (bannerPreview) bannerPreview.style.display = "none";
       const activeLabel = document.getElementById("admin-preview-active-label");
       if (activeLabel) activeLabel.textContent = "Live Video Active";
     } else if (videoPreview) {
+      videoPreview.removeAttribute("src");
       videoPreview.style.display = "none";
       if (bannerPreview) bannerPreview.style.display = "block";
       const activeLabel = document.getElementById("admin-preview-active-label");
@@ -3035,44 +3043,54 @@ const AdminController = {
     const statusText = document.getElementById("admin-banner-status-text");
     const activeLabel = document.getElementById("admin-preview-active-label");
 
-    const tempUrl = URL.createObjectURL(file);
-    if (preview) {
-      preview.src = tempUrl;
-      preview.style.display = "block";
-      if (poster) poster.style.display = "none";
-    }
-    if (activeLabel) activeLabel.textContent = "Live Video Active";
-    if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">⏳ Uploading video: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)...</span>`;
+    const sizeMb = file.size / (1024 * 1024);
 
-    let finalUrl = tempUrl;
-    try {
-      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        headers: { "Content-Type": file.type || "video/mp4" },
-        body: file
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
-        finalUrl = data.url;
+    if (sizeMb > 3.5) {
+      showToast(`⚠️ Video file is ${sizeMb.toFixed(1)}MB. Direct browser storage is limited to 3.5MB.`);
+      if (statusText) {
+        statusText.innerHTML = `<span style="color:#ef4444;">⚠️ Video is ${sizeMb.toFixed(1)}MB (exceeds 3.5MB limit). Please upload your video file into the assets/ folder or paste a direct video URL below.</span>`;
       }
+      return;
+    }
+
+    if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">⏳ Processing &amp; encoding video: ${file.name} (${sizeMb.toFixed(1)} MB)...</span>`;
+
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (e) => reject(e);
+        reader.readAsDataURL(file);
+      });
+
+      if (preview) {
+        preview.src = dataUrl;
+        preview.style.display = "block";
+        if (poster) poster.style.display = "none";
+      }
+      if (urlInput) urlInput.value = dataUrl;
+      if (activeLabel) activeLabel.textContent = "Live Video Active";
+      if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Video Ready to Save: ${file.name} (${sizeMb.toFixed(1)} MB)</span>`;
+
+      let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
+      settings.heroVideoUrl = dataUrl;
+      try {
+        localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+      } catch (quotaErr) {
+        console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+      }
+
+      if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+        window.SupabaseSync.saveStoreSettings(settings);
+      }
+      if (window.App && typeof App.applyStoreSettings === "function") {
+        App.applyStoreSettings(settings);
+      }
+      showToast("🎬 Hero Video updated and synced live! Click Save Settings to persist.");
     } catch (err) {
-      console.warn("Video direct upload warning, using local blob:", err);
+      console.warn("Video read error:", err);
+      showToast("Could not process video file. Please paste a direct video URL instead.");
     }
-
-    if (urlInput) urlInput.value = finalUrl;
-    if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Video Loaded: ${file.name}</span>`;
-
-    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
-    settings.heroVideoUrl = finalUrl;
-    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
-
-    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
-      window.SupabaseSync.saveStoreSettings(settings);
-    }
-    if (window.App && typeof App.applyStoreSettings === "function") {
-      App.applyStoreSettings();
-    }
-    showToast("🎬 Hero Video updated! Storefront hero is playing your video.");
   },
 
   previewHeroVideoFromUrl() {
@@ -3095,6 +3113,24 @@ const AdminController = {
     if (activeLabel) activeLabel.textContent = "Live Video Active";
     if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">Video preview loaded. Click 'Save & Apply Hero Settings' to publish.</span>`;
     showToast("Video preview loaded. Click 'Save & Apply Hero Settings' to save.");
+  },
+
+  clearHeroVideo() {
+    const videoInput = document.getElementById("admin-hero-video-url-input");
+    const videoPreview = document.getElementById("admin-hero-video-preview");
+    const posterPreview = document.getElementById("admin-hero-banner-preview");
+    const activeLabel = document.getElementById("admin-preview-active-label");
+    const statusText = document.getElementById("admin-banner-status-text");
+
+    if (videoInput) videoInput.value = "";
+    if (videoPreview) {
+      videoPreview.removeAttribute("src");
+      videoPreview.style.display = "none";
+    }
+    if (posterPreview) posterPreview.style.display = "block";
+    if (activeLabel) activeLabel.textContent = "Live Poster Active";
+    if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">Video cleared. Using static poster fallback. Click 'Save & Apply Hero Settings' to save.</span>`;
+    showToast("Hero video cleared. Click 'Save & Apply Hero Settings' to save.");
   },
 
   async handleLogoFile(file) {
@@ -3430,9 +3466,15 @@ const AdminController = {
     const btn2Input = document.getElementById("admin-hero-btn2-input");
 
     const bannerUrl = (posterInput && posterInput.value.trim()) || (posterPreview && posterPreview.src) || "assets/custom_hero_banner.png?v=1";
-    const videoUrl = (videoInput && videoInput.value.trim()) || "";
+    let videoUrl = (videoInput && videoInput.value.trim()) || "";
 
-    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
+    if (videoUrl.startsWith("blob:")) {
+      showToast("⚠️ Temporary local blob URLs cannot be shared online. Please enter a direct .mp4 video URL or file path.");
+      videoUrl = "";
+      if (videoInput) videoInput.value = "";
+    }
+
+    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {});
     settings.heroBannerImg = bannerUrl;
     settings.heroVideoUrl = videoUrl;
 
@@ -3443,7 +3485,11 @@ const AdminController = {
     if (btn1Input && btn1Input.value.trim()) settings.heroBtnPrimaryText = btn1Input.value.trim();
     if (btn2Input && btn2Input.value.trim()) settings.heroBtnSecondaryText = btn2Input.value.trim();
 
-    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    try {
+      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    } catch (quotaErr) {
+      console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+    }
 
     // Sync to Supabase Cloud Database
     if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
@@ -3451,7 +3497,7 @@ const AdminController = {
     }
 
     if (window.App && typeof App.applyStoreSettings === "function") {
-      App.applyStoreSettings();
+      App.applyStoreSettings(settings);
     }
 
     showToast("🎉 Hero Video, Banner & Copy saved and applied live!");
@@ -3631,30 +3677,33 @@ const AdminController = {
       this.attachDimensionWatcher(preview, dimsBadge);
     }
 
-    showToast(`⏳ Uploading banner image for "${catId}"...`);
-    let savedUrl = tempUrl;
+    showToast(`⏳ Optimizing & saving banner for "${catId}"...`);
+    let savedUrl = "";
 
     try {
-      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        headers: { "Content-Type": file.type || "image/png" },
-        body: file
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
-        savedUrl = data.url;
+      if (window.MediaUploader && typeof window.MediaUploader.compressImageToDataUrl === "function") {
+        savedUrl = await window.MediaUploader.compressImageToDataUrl(file, 1400, 800, 0.85);
+      } else {
+        savedUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (re) => resolve(re.target.result);
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(file);
+        });
       }
-    } catch(err) {
+    } catch (err) {
       console.warn("Direct upload error, falling back to base64:", err);
-      savedUrl = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (re) => resolve(re.target.result);
-        reader.onerror = () => resolve(tempUrl);
-        reader.readAsDataURL(file);
-      });
     }
 
-    if (preview) preview.src = savedUrl;
+    if (!savedUrl) {
+      showToast("Could not process image file.");
+      return;
+    }
+
+    if (preview) {
+      preview.src = savedUrl;
+      this.attachDimensionWatcher(preview, dimsBadge);
+    }
     if (urlInput) urlInput.value = savedUrl;
     if (label) label.textContent = "Custom Image Live";
 
@@ -3662,7 +3711,12 @@ const AdminController = {
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
     if (!settings.categorySliderImages) settings.categorySliderImages = {};
     settings.categorySliderImages[catId] = savedUrl;
-    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    try {
+      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    } catch (quotaErr) {
+      console.warn("localStorage quota exceeded for categorySliderImages:", quotaErr);
+    }
 
     if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
       window.SupabaseSync.saveStoreSettings(settings);
@@ -3670,8 +3724,7 @@ const AdminController = {
     if (window.App && typeof window.App.renderCategories === "function") {
       window.App.renderCategories();
     }
-
-    showToast(`🎉 Slider image for "${catId}" updated and applied live!`);
+    showToast(`🎉 Category Banner for "${catId}" updated and synced live!`);
   },
 
   saveCatSliderImage() {
@@ -3694,7 +3747,11 @@ const AdminController = {
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
     if (!settings.categorySliderImages) settings.categorySliderImages = {};
     settings.categorySliderImages[catId] = finalUrl;
-    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    try {
+      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    } catch (quotaErr) {
+      console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+    }
 
     if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
       window.SupabaseSync.saveStoreSettings(settings);
@@ -3715,7 +3772,11 @@ const AdminController = {
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
     if (settings.categorySliderImages && settings.categorySliderImages[catId]) {
       delete settings.categorySliderImages[catId];
-      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+      try {
+        localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+      } catch (quotaErr) {
+        console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+      }
 
       if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
         window.SupabaseSync.saveStoreSettings(settings);
