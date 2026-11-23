@@ -410,8 +410,9 @@ const App = {
       this.openStoreReviewsModal();
     }
 
-    // Initialize Cinematic Scroll Reveal Observer
+    // Initialize Cinematic Scroll Reveal Observer & Interactive Motion Engine
     this.setupScrollObserver();
+    this.initInteractiveEffects();
   },
 
   setupScrollObserver() {
@@ -432,13 +433,15 @@ const App = {
     });
 
     const targetSelectors = [
-      '.hero-content',
-      '.hero-visual-card',
-      '.category-grid',
-      '.brands-grid',
+      '.hero-narrative-col',
+      '.hero-stage-podium',
+      '.hero-telemetry-bar',
+      '#category-grid-container',
+      '#homepage-brands-grid',
+      '#catalog-section',
+      '#products-catalog-container',
       '.promo-banners-grid',
-      '#products-container',
-      '.repair-split-grid',
+      '#repair-center',
       '.store-trust-strip-section',
       '.store-location-grid',
       '.trust-footer-bar'
@@ -453,6 +456,111 @@ const App = {
     });
 
     document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+  },
+
+  // dbrand-Inspired Tactile Motion & 3D Interactive Engine
+  initInteractiveEffects() {
+    // 1. Interactive 3D Perspective Tilt & Specular Spotlight Glare on Cards
+    const tiltTargets = document.querySelectorAll(
+      '.product-card:not([data-tilt-active]), .category-card:not([data-tilt-active]), .brand-feature-card:not([data-tilt-active]), .promo-card:not([data-tilt-active])'
+    );
+    
+    tiltTargets.forEach(card => {
+      card.setAttribute('data-tilt-active', 'true');
+      
+      let isHovered = false;
+      let rafId = null;
+      let targetX = 0;
+      let targetY = 0;
+      let currX = 0;
+      let currY = 0;
+
+      const animate = () => {
+        if (!isHovered) return;
+        currX += (targetX - currX) * 0.18;
+        currY += (targetY - currY) * 0.18;
+        card.style.transform = `perspective(1000px) rotateX(${currX.toFixed(2)}deg) rotateY(${currY.toFixed(2)}deg) translateY(-6px) scale3d(1.025, 1.025, 1.025)`;
+        rafId = requestAnimationFrame(animate);
+      };
+
+      card.addEventListener('mouseenter', () => {
+        isHovered = true;
+        card.style.setProperty('--glare-opacity', '1');
+        rafId = requestAnimationFrame(animate);
+      });
+
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        targetX = ((y - centerY) / centerY) * -8.5; // Rotate on X
+        targetY = ((x - centerX) / centerX) * 8.5;  // Rotate on Y
+
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        isHovered = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px) scale3d(1, 1, 1)';
+        card.style.setProperty('--glare-opacity', '0');
+        setTimeout(() => {
+          if (!isHovered) card.style.transform = '';
+        }, 220);
+      });
+    });
+
+    // 2. Interactive Parallax Tilt on Hero Stage Podium
+    const heroPodium = document.querySelector('.hero-stage-podium:not([data-tilt-active])');
+    if (heroPodium) {
+      heroPodium.setAttribute('data-tilt-active', 'true');
+      const heroStage = document.querySelector('.cinematic-hero-stage') || heroPodium;
+
+      heroStage.addEventListener('mousemove', (e) => {
+        const rect = heroPodium.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const tiltX = Math.max(-5.5, Math.min(5.5, ((y - centerY) / centerY) * -5));
+        const tiltY = Math.max(-5.5, Math.min(5.5, ((x - centerX) / centerX) * 5));
+
+        heroPodium.style.transform = `perspective(1200px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-4px)`;
+        
+        const radialLight = heroPodium.querySelector('.stage-radial-light');
+        if (radialLight) {
+          radialLight.style.transform = `translate(${(-tiltY * 3.5).toFixed(1)}px, ${(-tiltX * 3.5).toFixed(1)}px)`;
+        }
+      });
+
+      heroStage.addEventListener('mouseleave', () => {
+        heroPodium.style.transform = '';
+        const radialLight = heroPodium.querySelector('.stage-radial-light');
+        if (radialLight) radialLight.style.transform = '';
+      });
+    }
+
+    // 3. Tactile Magnetic Micro-Interactions on Action Buttons
+    const magneticBtns = document.querySelectorAll('.btn-hero-dbrand, .btn-hero-glass-dbrand, .add-to-cart-btn, .promo-btn, .btn-primary-glow');
+    magneticBtns.forEach(btn => {
+      if (btn.hasAttribute('data-magnetic-active')) return;
+      btn.setAttribute('data-magnetic-active', 'true');
+
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate3d(${(x * 0.22).toFixed(1)}px, ${(y * 0.22).toFixed(1)}px, 0) scale(1.03)`;
+      });
+
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    });
   },
 
   applyStoreSettings(overrideSettings = null) {
@@ -1293,6 +1401,7 @@ const App = {
         </div>
       `;
     }).join("");
+    this.initInteractiveEffects();
   },
 
   // Helper for safe icon
@@ -1342,6 +1451,7 @@ const App = {
         </div>
       `;
     }).join("");
+    this.initInteractiveEffects();
   },
 
   // Filter actions
@@ -1537,6 +1647,7 @@ const App = {
         </div>
       `;
     }).join("");
+    this.initInteractiveEffects();
   },
 
   // 3. Search Suggestions
