@@ -2677,8 +2677,8 @@ const AdminController = {
         bannerDropzone.addEventListener(eventName, (e) => {
           e.preventDefault();
           e.stopPropagation();
-          bannerDropzone.style.borderColor = "var(--neon-purple)";
-          bannerDropzone.style.background = "rgba(157,78,221,0.1)";
+          bannerDropzone.style.borderColor = "#EEBD43";
+          bannerDropzone.style.background = "rgba(238,189,67,0.12)";
         });
       });
 
@@ -2686,23 +2686,28 @@ const AdminController = {
         bannerDropzone.addEventListener(eventName, (e) => {
           e.preventDefault();
           e.stopPropagation();
-          bannerDropzone.style.borderColor = "var(--neon-cyan)";
-          bannerDropzone.style.background = "rgba(0,210,255,0.03)";
+          bannerDropzone.style.borderColor = "rgba(255,255,255,0.3)";
+          bannerDropzone.style.background = "rgba(255,255,255,0.02)";
         });
       });
 
       bannerDropzone.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        bannerDropzone.style.borderColor = "var(--neon-cyan)";
-        bannerDropzone.style.background = "rgba(0,210,255,0.03)";
+        bannerDropzone.style.borderColor = "rgba(255,255,255,0.3)";
+        bannerDropzone.style.background = "rgba(255,255,255,0.02)";
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          this.handleHeroBannerFile(e.dataTransfer.files[0]);
+          const file = e.dataTransfer.files[0];
+          if (file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name)) {
+            this.handleHeroVideoFile(file);
+          } else {
+            this.handleHeroBannerFile(file);
+          }
         }
       });
     }
 
-    // 1b. Hero 10-Second Video Dropzone & File Input
+    // 1b. Hero 10-Second Video Dropzone & File Input (Accepts Video OR Image!)
     const videoDropzone = document.getElementById("admin-hero-video-dropzone");
     const videoInput = document.getElementById("admin-hero-video-file-input");
 
@@ -2744,7 +2749,49 @@ const AdminController = {
         videoDropzone.style.borderColor = "rgba(238,189,67,0.6)";
         videoDropzone.style.background = "rgba(238,189,67,0.03)";
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          this.handleHeroVideoFile(e.dataTransfer.files[0]);
+          const file = e.dataTransfer.files[0];
+          if (file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name)) {
+            this.handleHeroVideoFile(file);
+          } else {
+            this.handleHeroBannerFile(file);
+          }
+        }
+      });
+    }
+
+    // 1c. Hero Preview Stage Dropzone (Directly drop media onto the large preview screen)
+    const stageDropzone = document.getElementById("admin-hero-preview-wrapper");
+    if (stageDropzone) {
+      ["dragenter", "dragover"].forEach(eventName => {
+        stageDropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          stageDropzone.style.borderColor = "#EEBD43";
+          stageDropzone.style.boxShadow = "0 0 30px rgba(238, 189, 67, 0.4)";
+        });
+      });
+
+      ["dragleave", "dragend"].forEach(eventName => {
+        stageDropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          stageDropzone.style.borderColor = "rgba(238,189,67,0.5)";
+          stageDropzone.style.boxShadow = "";
+        });
+      });
+
+      stageDropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        stageDropzone.style.borderColor = "rgba(238,189,67,0.5)";
+        stageDropzone.style.boxShadow = "";
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const file = e.dataTransfer.files[0];
+          if (file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name)) {
+            this.handleHeroVideoFile(file);
+          } else {
+            this.handleHeroBannerFile(file);
+          }
         }
       });
     }
@@ -2953,20 +3000,32 @@ const AdminController = {
   },
 
   async handleHeroBannerFile(file) {
-    if (!file.type.startsWith("image/") && !/\.(png|jpe?g|webp)$/i.test(file.name)) {
+    if (!file) return;
+    if (!file.type.startsWith("image/") && !/\.(png|jpe?g|webp|gif|svg)$/i.test(file.name)) {
       showToast("Please drop or choose a valid PNG, JPG, or WebP image.");
       return;
     }
 
     const preview = document.getElementById("admin-hero-banner-preview");
+    const videoPreview = document.getElementById("admin-hero-video-preview");
     const statusText = document.getElementById("admin-banner-status-text");
     const urlInput = document.getElementById("admin-banner-url-input");
     const badge = document.getElementById("admin-hero-dims-badge");
+    const activeLabel = document.getElementById("admin-preview-active-label");
 
     // Local instant preview
     const tempUrl = URL.createObjectURL(file);
-    if (preview) preview.src = tempUrl;
-    if (statusText) statusText.innerHTML = `<span style="color:#e056fd;">⏳ Uploading ${file.name}...</span>`;
+    if (preview) {
+      preview.src = tempUrl;
+      preview.style.display = "block";
+    }
+    // Switch preview from video to image immediately
+    if (videoPreview) {
+      videoPreview.style.display = "none";
+      try { videoPreview.pause(); } catch(e) {}
+    }
+    if (activeLabel) activeLabel.textContent = "Live Poster Active";
+    if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">⏳ Optimizing &amp; applying ${file.name}...</span>`;
 
     // Detect file resolution immediately
     const probe = new Image();
@@ -2975,48 +3034,37 @@ const AdminController = {
     };
     probe.src = tempUrl;
 
-    let finalUrl = tempUrl;
-
+    let finalUrl = "";
     try {
-      // Direct stream upload to Node server
-      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        headers: { "Content-Type": file.type || "image/png" },
-        body: file
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
-        finalUrl = data.url;
-      } else {
-        throw new Error(data.error || "Upload response error");
-      }
-    } catch (err) {
-      console.warn("Direct upload error, compressing image client-side:", err);
       if (window.MediaUploader && typeof window.MediaUploader.compressImageToDataUrl === "function") {
-        try {
-          finalUrl = await window.MediaUploader.compressImageToDataUrl(file, 1600, 900, 0.85);
-        } catch (compErr) {
-          console.warn("MediaUploader compression fallback:", compErr);
-        }
-      }
-      if (!finalUrl || finalUrl === tempUrl) {
+        finalUrl = await window.MediaUploader.compressImageToDataUrl(file, 1400, 788, 0.82);
+      } else {
         finalUrl = await new Promise((resolve) => {
           const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
+          reader.onload = (e) => resolve(e.target.result);
           reader.onerror = () => resolve(tempUrl);
           reader.readAsDataURL(file);
         });
       }
+    } catch (err) {
+      console.warn("Client compression notice:", err);
+      finalUrl = tempUrl;
     }
+
+    if (!finalUrl) finalUrl = tempUrl;
 
     if (preview) preview.src = finalUrl;
     if (urlInput) urlInput.value = finalUrl;
-    if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Loaded: ${file.name}</span>`;
+    if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Hero Banner Updated: ${file.name}</span>`;
 
     // Save directly into store settings
-    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
+    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {});
     settings.heroBannerImg = finalUrl;
-    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    try {
+      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    } catch (quotaErr) {
+      console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+    }
 
     // Sync to Supabase Cloud Database
     if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
@@ -3025,15 +3073,23 @@ const AdminController = {
 
     // Instantly update storefront
     if (window.App && typeof App.applyStoreSettings === "function") {
-      App.applyStoreSettings();
+      App.applyStoreSettings(settings);
     }
 
-    showToast("🎉 Hero Banner updated successfully! Check your storefront.");
+    showToast(`🎉 Hero Banner updated to "${file.name}" & synced live!`);
   },
 
   async handleHeroVideoFile(file) {
-    if (!file.type.startsWith("video/") && !/\.(mp4|webm|ogg|mov)$/i.test(file.name)) {
-      showToast("Please select a valid video file (.mp4, .webm).");
+    if (!file) return;
+
+    // Seamless routing: if an image was dropped into the media area, handle as Hero Banner!
+    if (file.type.startsWith("image/") || /\.(png|jpe?g|webp|gif|svg)$/i.test(file.name)) {
+      console.log("Image file dropped on hero media dropzone -> applying as Hero Banner:", file.name);
+      return this.handleHeroBannerFile(file);
+    }
+
+    if (!file.type.startsWith("video/") && !/\.(mp4|webm|ogg|mov|m4v)$/i.test(file.name)) {
+      showToast("⚠️ Please drop an MP4 or WebM video, or PNG/JPG image.");
       return;
     }
 
@@ -3045,51 +3101,60 @@ const AdminController = {
 
     const sizeMb = file.size / (1024 * 1024);
 
-    if (sizeMb > 3.5) {
-      showToast(`⚠️ Video file is ${sizeMb.toFixed(1)}MB. Direct browser storage is limited to 3.5MB.`);
-      if (statusText) {
-        statusText.innerHTML = `<span style="color:#ef4444;">⚠️ Video is ${sizeMb.toFixed(1)}MB (exceeds 3.5MB limit). Please upload your video file into the assets/ folder or paste a direct video URL below.</span>`;
-      }
-      return;
-    }
-
-    if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">⏳ Processing &amp; encoding video: ${file.name} (${sizeMb.toFixed(1)} MB)...</span>`;
-
-    try {
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (e) => reject(e);
-        reader.readAsDataURL(file);
-      });
-
-      if (preview) {
-        preview.src = dataUrl;
-        preview.style.display = "block";
-        if (poster) poster.style.display = "none";
-      }
-      if (urlInput) urlInput.value = dataUrl;
-      if (activeLabel) activeLabel.textContent = "Live Video Active";
-      if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Video Ready to Save: ${file.name} (${sizeMb.toFixed(1)} MB)</span>`;
-
-      let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
-      settings.heroVideoUrl = dataUrl;
+    // 1. Instant local playback in Admin preview so user SEES it working right away!
+    const localBlobUrl = URL.createObjectURL(file);
+    if (preview) {
+      preview.src = localBlobUrl;
+      preview.style.display = "block";
       try {
-        localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
-      } catch (quotaErr) {
-        console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
-      }
+        preview.load();
+        preview.play().catch(() => {});
+      } catch (e) {}
+      if (poster) poster.style.display = "none";
+    }
+    if (activeLabel) activeLabel.textContent = "Live Video Active";
 
-      if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
-        window.SupabaseSync.saveStoreSettings(settings);
+    if (sizeMb <= 3.5) {
+      if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">⏳ Processing &amp; encoding video: ${file.name} (${sizeMb.toFixed(1)} MB)...</span>`;
+
+      try {
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (e) => reject(e);
+          reader.readAsDataURL(file);
+        });
+
+        if (urlInput) urlInput.value = dataUrl;
+        if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Video Ready to Save: ${file.name} (${sizeMb.toFixed(1)} MB)</span>`;
+
+        let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {});
+        settings.heroVideoUrl = dataUrl;
+        try {
+          localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+        } catch (quotaErr) {
+          console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
+        }
+
+        if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+          window.SupabaseSync.saveStoreSettings(settings);
+        }
+        if (window.App && typeof App.applyStoreSettings === "function") {
+          App.applyStoreSettings(settings);
+        }
+        showToast(`🎬 Video "${file.name}" loaded & synced live!`);
+      } catch (err) {
+        console.warn("Video read notice:", err);
+        showToast("Video playing in preview. Click 'Save & Apply Hero Settings' to persist.");
       }
-      if (window.App && typeof App.applyStoreSettings === "function") {
-        App.applyStoreSettings(settings);
+    } else {
+      // Large video (> 3.5MB)
+      const assetPath = `assets/${file.name}`;
+      if (urlInput) urlInput.value = assetPath;
+      if (statusText) {
+        statusText.innerHTML = `<span style="color:#EEBD43;">🎬 Video playing in preview (${sizeMb.toFixed(1)} MB)! Since browser database limit is 3.5MB, please copy <strong>${file.name}</strong> into your project's <strong>assets/</strong> folder or paste an online video link.</span>`;
       }
-      showToast("🎬 Hero Video updated and synced live! Click Save Settings to persist.");
-    } catch (err) {
-      console.warn("Video read error:", err);
-      showToast("Could not process video file. Please paste a direct video URL instead.");
+      showToast(`🎬 Video playing in preview (${sizeMb.toFixed(1)}MB)! For online sharing, copy to assets/ or paste video URL.`);
     }
   },
 

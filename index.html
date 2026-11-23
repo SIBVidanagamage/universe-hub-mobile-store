@@ -1372,8 +1372,8 @@
                   <span id="admin-hero-media-badge" class="dimension-detected-badge" style="background:rgba(238,189,67,0.15); color:#EEBD43; border-color:rgba(238,189,67,0.3);">Video / Poster Live</span>
                 </div>
                 
-                <!-- Preview stage container -->
-                <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:2px solid rgba(238,189,67,0.4); background:#0b0f19; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+                <!-- Preview stage container (Interactive Dropzone) -->
+                <div id="admin-hero-preview-wrapper" class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:2px dashed rgba(238,189,67,0.5); background:#0b0f19; box-shadow:0 8px 32px rgba(0,0,0,0.5); cursor:pointer; transition:all 0.25s ease;" title="Drag & Drop Video (.mp4) or Banner Image (.png/.jpg) directly here">
                   <!-- Video element if video is set -->
                   <video id="admin-hero-video-preview" autoplay muted loop playsinline controls style="width:100%; height:100%; object-fit:cover; display:none;"></video>
                   <!-- Poster image element -->
@@ -1382,6 +1382,9 @@
                   <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); padding:4px 12px; border-radius:20px; border:1px solid rgba(238,189,67,0.4); font-size:11px; color:#fff; display:flex; align-items:center; gap:6px;">
                     <span style="width:7px; height:7px; border-radius:50%; background:#EEBD43; display:inline-block;"></span>
                     <span id="admin-preview-active-label">Live Background Media</span>
+                  </div>
+                  <div style="position:absolute; bottom:10px; left:12px; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); padding:3px 10px; border-radius:8px; font-size:10.5px; color:rgba(255,255,255,0.75); pointer-events:none;">
+                    💡 Drag &amp; Drop Media Here to Update
                   </div>
                 </div>
                 
@@ -1430,13 +1433,21 @@
                 <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px;">
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <label style="font-size:12.5px; color:#fff; font-weight:700;">
-                      🖼️ Static Poster / Fallback Image (PNG / JPG):
+                      🖼️ Static Poster / Fallback Image (PNG / JPG / WebP):
                     </label>
-                    <button type="button" class="btn-glass" style="font-size:11px; padding:2px 10px;" onclick="document.getElementById('admin-banner-file-input').click();">
-                      Browse Image
+                    <span style="font-size:11px; color:#EEBD43;">16:9 Banner</span>
+                  </div>
+
+                  <div id="admin-banner-dropzone" class="media-dropzone" style="min-height:85px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:12px; border:1.5px dashed rgba(255,255,255,0.3); border-radius:10px; background:rgba(255,255,255,0.02); cursor:pointer; transition:all 0.25s ease; margin-bottom:10px;">
+                    <div style="font-size:18px; margin-bottom:4px;">🖼️</div>
+                    <div style="font-size:12px; font-weight:700; color:#fff;">Drag &amp; Drop Hero Banner Image Here</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">or click to browse (.png, .jpg, .webp)</div>
+                    <button type="button" class="btn-glass" style="font-size:11px; padding:3px 12px; border-color:#fff; color:#fff;" onclick="event.stopPropagation(); document.getElementById('admin-banner-file-input').click();">
+                      📁 Select Banner Image
                     </button>
                     <input type="file" id="admin-banner-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
                   </div>
+
                   <div style="display:flex; gap:8px;">
                     <input type="text" id="admin-banner-url-input" placeholder="assets/custom_hero_banner.png" style="flex:1; font-size:12.5px;">
                     <button type="button" class="btn-glass" onclick="AdminController.previewBannerFromUrl()" style="white-space:nowrap; padding:0 12px; font-size:11.5px;">
@@ -3622,7 +3633,7 @@
   <script src="js/uploader.js?v=130"></script>
   <script src="js/bulk-uploader.js?v=130"></script>
   <script src="js/payment-gateway.js?v=130"></script>
-  <script src="js/admin.js?v=161"></script>
+  <script src="js/admin.js?v=162"></script>
   <script src="js/app.js?v=196"></script>
 </body>
 </html>
