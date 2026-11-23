@@ -13,6 +13,7 @@ const AdminController = {
     this.populateCategoryDropdowns();
     this.populateBrandDropdowns();
     this.initStorageAndColorVariants();
+    try { this.renderCatSliderSettings(); } catch(e) {}
     this.renderCurrentTab();
     if (typeof BulkUploader !== 'undefined') {
       BulkUploader.init();
@@ -687,11 +688,50 @@ const AdminController = {
     }).join("");
   },
 
+  getSafeCategories() {
+    let list = [];
+    try {
+      if (window.App && typeof App.getCategories === 'function') {
+        const appCats = App.getCategories();
+        if (Array.isArray(appCats) && appCats.length > 0) list = appCats;
+      }
+    } catch(e) {}
+
+    if (!Array.isArray(list) || list.length === 0) {
+      try {
+        const stored = localStorage.getItem("UH_CATEGORIES");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) list = parsed;
+        }
+      } catch(e) {}
+    }
+
+    if (!Array.isArray(list) || list.length === 0) {
+      if (typeof INITIAL_CATEGORIES !== 'undefined' && Array.isArray(INITIAL_CATEGORIES) && INITIAL_CATEGORIES.length > 0) {
+        list = INITIAL_CATEGORIES;
+      }
+    }
+
+    if (!Array.isArray(list) || list.length === 0) {
+      list = [
+        { id: "brand-new-iphones", name: "Brand New iPhones", icon: "📱", group: "iphones", order: 1 },
+        { id: "used-iphones", name: "Certified Used iPhones", icon: "📦", group: "iphones", order: 2 },
+        { id: "power-banks", name: "Power Banks & MagSafe Battery", icon: "🔋", group: "accessories", order: 3 },
+        { id: "chargers", name: "Fast Chargers & GaN", icon: "⚡", group: "accessories", order: 4 },
+        { id: "cables", name: "Fast Charging & Data Cables", icon: "🔌", group: "accessories", order: 5 },
+        { id: "back-covers", name: "Premium Protective Cases & Covers", icon: "🛡️", group: "accessories", order: 6 },
+        { id: "tempered-glass", name: "9H Tempered Glass Screen Protectors", icon: "✨", group: "accessories", order: 7 },
+        { id: "camera-protectors", name: "Camera Lens Protectors", icon: "📸", group: "accessories", order: 8 },
+        { id: "audio", name: "AirPods & Audio Gear", icon: "🎧", group: "accessories", order: 9 }
+      ];
+    }
+    return list;
+  },
+
   // Populate dynamic grouped options for Add and Edit product dropdowns
   populateCategoryDropdowns() {
-    let categories = (window.App && typeof App.getCategories === 'function')
-      ? App.getCategories()
-      : (JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []));
+    let categories = this.getSafeCategories();
 
     // Deduplicate any redundant slug variants (e.g. powerbanks vs power-banks)
     const cleanMap = new Map();
@@ -752,14 +792,14 @@ const AdminController = {
 
     // Populate category slider select dropdown if present
     const catSliderSelect = document.getElementById("admin-cat-slider-select");
-    if (catSliderSelect) {
+    if (catSliderSelect && cleanCategories && cleanCategories.length > 0) {
       const curVal = catSliderSelect.value;
       catSliderSelect.innerHTML = cleanCategories.map(cat => `
-        <option value="${cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
+        <option value="${cat.id}" style="background:#111; color:#fff;">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
       `).join("");
       if (curVal && cleanCategories.some(c => c.id === curVal)) {
         catSliderSelect.value = curVal;
-      } else if (cleanCategories.length > 0) {
+      } else {
         catSliderSelect.value = cleanCategories[0].id;
       }
     }
@@ -3664,25 +3704,11 @@ const AdminController = {
     const select = document.getElementById("admin-cat-slider-select");
     if (!select) return;
 
-    let categories = [];
-    try {
-      categories = (window.App && typeof App.getCategories === 'function')
-        ? App.getCategories()
-        : (JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []));
-    } catch(e) {
-      categories = typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : [];
-    }
-
-    if (!Array.isArray(categories) || categories.length === 0) {
-      if (typeof INITIAL_CATEGORIES !== 'undefined' && Array.isArray(INITIAL_CATEGORIES)) {
-        categories = INITIAL_CATEGORIES;
-      }
-    }
-
+    const categories = this.getSafeCategories();
     const currentVal = select.value;
     if (categories && categories.length > 0) {
       select.innerHTML = categories.map(cat => `
-        <option value="${cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
+        <option value="${cat.id}" style="background:#111; color:#fff;">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
       `).join("");
 
       if (currentVal && categories.some(c => c.id === currentVal)) {
@@ -3703,7 +3729,10 @@ const AdminController = {
     const dimsBadge = document.getElementById("admin-cat-slider-dims-badge");
 
     if (!select) return;
-    const catId = select.value;
+    if (!select.value && select.options && select.options.length > 0) {
+      select.value = select.options[0].value;
+    }
+    const catId = select.value || "brand-new-iphones";
 
     let settings = {};
     try {
