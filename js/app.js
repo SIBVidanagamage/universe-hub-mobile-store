@@ -645,27 +645,26 @@ const App = {
       };
 
       const rawUrl = settings.heroVideoUrl ? String(settings.heroVideoUrl).trim() : "";
-      const vUrl = (rawUrl && !rawUrl.startsWith("blob:")) ? rawUrl : "";
+      const vUrl = (rawUrl && !rawUrl.startsWith("blob:")) ? rawUrl : "assets/universe_hub_hero_cinematic.mp4";
 
       if (vUrl) {
+        bgVideo.src = vUrl;
         const mainSrc = document.getElementById("hero-video-source-main");
         const altSrc = document.getElementById("hero-video-source-alt");
-        if (mainSrc) {
-          mainSrc.src = vUrl;
-          if (vUrl.endsWith(".webm")) mainSrc.type = "video/webm";
-          else if (vUrl.endsWith(".mp4")) mainSrc.type = "video/mp4";
-        }
-        if (altSrc) {
-          altSrc.src = vUrl;
-          altSrc.type = "video/mp4";
-        }
-        if (!mainSrc && !altSrc) {
-          bgVideo.src = vUrl;
-        }
+        if (mainSrc) mainSrc.src = vUrl;
+        if (altSrc) altSrc.src = vUrl;
+
         bgVideo.style.display = "block";
+        bgVideo.muted = true;
         try {
           bgVideo.load();
-          bgVideo.play().catch(() => {});
+          const playPromise = bgVideo.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              bgVideo.muted = true;
+              bgVideo.play().catch(() => {});
+            });
+          }
         } catch (e) {}
       } else {
         bgVideo.style.display = "none";

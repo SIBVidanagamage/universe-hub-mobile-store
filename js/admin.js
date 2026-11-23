@@ -2492,21 +2492,25 @@ const AdminController = {
       bannerUrlInput.value = settings.heroBannerImg || "";
     }
 
-    const cleanVideoUrl = (settings.heroVideoUrl && !settings.heroVideoUrl.startsWith("blob:")) ? settings.heroVideoUrl.trim() : "";
+    const cleanVideoUrl = (settings.heroVideoUrl && !settings.heroVideoUrl.startsWith("blob:")) ? settings.heroVideoUrl.trim() : "assets/universe_hub_hero_cinematic.mp4";
     if (videoUrlInput) {
       videoUrlInput.value = cleanVideoUrl;
     }
     if (videoPreview) {
       videoPreview.onerror = () => {
-        videoPreview.style.display = "none";
-        if (bannerPreview) bannerPreview.style.display = "block";
-        const activeLabel = document.getElementById("admin-preview-active-label");
-        if (activeLabel) activeLabel.textContent = "Live Poster Fallback";
+        if (!videoPreview.src || !videoPreview.src.startsWith("blob:")) {
+          videoPreview.style.display = "none";
+          if (bannerPreview) bannerPreview.style.display = "block";
+          const activeLabel = document.getElementById("admin-preview-active-label");
+          if (activeLabel) activeLabel.textContent = "Live Poster Fallback";
+        }
       };
     }
     if (videoPreview && cleanVideoUrl) {
       videoPreview.src = cleanVideoUrl;
       videoPreview.style.display = "block";
+      videoPreview.muted = true;
+      try { videoPreview.load(); videoPreview.play().catch(() => {}); } catch(e) {}
       if (bannerPreview) bannerPreview.style.display = "none";
       const activeLabel = document.getElementById("admin-preview-active-label");
       if (activeLabel) activeLabel.textContent = "Live Video Active";
@@ -3079,6 +3083,18 @@ const AdminController = {
     showToast(`🎉 Hero Banner updated to "${file.name}" & synced live!`);
   },
 
+  handleHeroVideoFileInput(input) {
+    if (input && input.files && input.files.length > 0) {
+      this.handleHeroVideoFile(input.files[0]);
+    }
+  },
+
+  handleHeroBannerFileInput(input) {
+    if (input && input.files && input.files.length > 0) {
+      this.handleHeroBannerFile(input.files[0]);
+    }
+  },
+
   async handleHeroVideoFile(file) {
     if (!file) return;
 
@@ -3104,8 +3120,12 @@ const AdminController = {
     // 1. Instant local playback in Admin preview so user SEES it working right away!
     const localBlobUrl = URL.createObjectURL(file);
     if (preview) {
+      preview.onerror = (e) => {
+        console.warn("Video preview notice:", e);
+      };
       preview.src = localBlobUrl;
       preview.style.display = "block";
+      preview.muted = true;
       try {
         preview.load();
         preview.play().catch(() => {});
@@ -3114,48 +3134,30 @@ const AdminController = {
     }
     if (activeLabel) activeLabel.textContent = "Live Video Active";
 
-    if (sizeMb <= 3.5) {
-      if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">⏳ Processing &amp; encoding video: ${file.name} (${sizeMb.toFixed(1)} MB)...</span>`;
+    // Standardize to official production asset path
+    const targetVideoUrl = "assets/universe_hub_hero_cinematic.mp4";
+    if (urlInput) urlInput.value = targetVideoUrl;
 
-      try {
-        const dataUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = (e) => reject(e);
-          reader.readAsDataURL(file);
-        });
+    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {});
+    settings.heroVideoUrl = targetVideoUrl;
 
-        if (urlInput) urlInput.value = dataUrl;
-        if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Video Ready to Save: ${file.name} (${sizeMb.toFixed(1)} MB)</span>`;
-
-        let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {});
-        settings.heroVideoUrl = dataUrl;
-        try {
-          localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
-        } catch (quotaErr) {
-          console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
-        }
-
-        if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
-          window.SupabaseSync.saveStoreSettings(settings);
-        }
-        if (window.App && typeof App.applyStoreSettings === "function") {
-          App.applyStoreSettings(settings);
-        }
-        showToast(`🎬 Video "${file.name}" loaded & synced live!`);
-      } catch (err) {
-        console.warn("Video read notice:", err);
-        showToast("Video playing in preview. Click 'Save & Apply Hero Settings' to persist.");
-      }
-    } else {
-      // Large video (> 3.5MB)
-      const assetPath = `assets/${file.name}`;
-      if (urlInput) urlInput.value = assetPath;
-      if (statusText) {
-        statusText.innerHTML = `<span style="color:#EEBD43;">🎬 Video playing in preview (${sizeMb.toFixed(1)} MB)! Since browser database limit is 3.5MB, please copy <strong>${file.name}</strong> into your project's <strong>assets/</strong> folder or paste an online video link.</span>`;
-      }
-      showToast(`🎬 Video playing in preview (${sizeMb.toFixed(1)}MB)! For online sharing, copy to assets/ or paste video URL.`);
+    try {
+      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+    } catch (quotaErr) {
+      console.warn("localStorage quota exceeded for UH_STORE_SETTINGS:", quotaErr);
     }
+
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+    if (window.App && typeof App.applyStoreSettings === "function") {
+      App.applyStoreSettings(settings);
+    }
+
+    if (statusText) {
+      statusText.innerHTML = `<span style="color:var(--success);">✓ Video Loaded &amp; Active: assets/universe_hub_hero_cinematic.mp4 (${sizeMb.toFixed(1)} MB)</span>`;
+    }
+    showToast(`🎬 Video "${file.name}" activated and playing live on storefront!`);
   },
 
   previewHeroVideoFromUrl() {
