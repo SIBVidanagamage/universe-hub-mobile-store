@@ -31,6 +31,9 @@ const App = {
   searchQuery: "",
   currentUser: null,
   pendingCartProdId: null,
+  catalogCurrentPage: 0,
+  catalogViewMode: "slider",
+  catalogResizeTimer: null,
 
   getProducts() {
     // 1. In-Memory cache is instant priority
@@ -413,6 +416,16 @@ const App = {
     // Initialize Cinematic Scroll Reveal Observer & Interactive Motion Engine
     this.setupScrollObserver();
     this.initInteractiveEffects();
+    this.initNavbarScrollEffect();
+    this.initHeroScrollIndicator();
+
+    // Responsive recalibration for 5-Item Catalog Slider
+    window.addEventListener("resize", () => {
+      if (this.catalogResizeTimer) clearTimeout(this.catalogResizeTimer);
+      this.catalogResizeTimer = setTimeout(() => {
+        this.updateCatalogSliderPosition();
+      }, 120);
+    });
   },
 
   setupScrollObserver() {
@@ -433,6 +446,10 @@ const App = {
     });
 
     const targetSelectors = [
+      '.apple-hero-narrative',
+      '.hero-portal-theater',
+      '.hero-center-narrative',
+      '.hero-portal-display-podium',
       '.hero-narrative-col',
       '.hero-stage-podium',
       '.hero-telemetry-bar',
@@ -458,11 +475,42 @@ const App = {
     document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
   },
 
+  initNavbarScrollEffect() {
+    const navbar = document.querySelector('.main-navbar');
+    if (!navbar) return;
+
+    const updateNav = () => {
+      if (window.scrollY > 40) {
+        navbar.classList.add('nav-scrolled');
+        navbar.classList.remove('nav-transparent-top');
+      } else {
+        navbar.classList.remove('nav-scrolled');
+        navbar.classList.add('nav-transparent-top');
+      }
+    };
+
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
+  },
+
+  initHeroScrollIndicator() {
+    const indicator = document.querySelector('.hero-scroll-indicator');
+    if (!indicator) return;
+
+    indicator.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector('.category-carousel-section') || document.querySelector('#category-grid-container') || document.querySelector('#catalog-section');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  },
+
   // dbrand-Inspired Tactile Motion & 3D Interactive Engine
   initInteractiveEffects() {
     // 1. Interactive 3D Perspective Tilt & Specular Spotlight Glare on Cards
     const tiltTargets = document.querySelectorAll(
-      '.product-card:not([data-tilt-active]), .category-card:not([data-tilt-active]), .brand-feature-card:not([data-tilt-active]), .promo-card:not([data-tilt-active])'
+      '.product-card:not([data-tilt-active]), .category-bento-tile:not([data-tilt-active]), .category-card:not([data-tilt-active]), .brand-feature-card:not([data-tilt-active]), .promo-card:not([data-tilt-active]), .repair-cap-card:not([data-tilt-active])'
     );
     
     tiltTargets.forEach(card => {
@@ -515,10 +563,11 @@ const App = {
     });
 
     // 2. Interactive Parallax Tilt on Hero Stage Podium
-    const heroPodium = document.querySelector('.hero-stage-podium:not([data-tilt-active])');
+    const heroPodium = document.querySelector('.hero-portal-display-podium:not([data-tilt-active]), .hero-stage-podium:not([data-tilt-active])');
     if (heroPodium) {
       heroPodium.setAttribute('data-tilt-active', 'true');
       const heroStage = document.querySelector('.cinematic-hero-stage') || heroPodium;
+      const portalAura = document.querySelector('.portal-backlight-aura');
 
       heroStage.addEventListener('mousemove', (e) => {
         const rect = heroPodium.getBoundingClientRect();
@@ -535,17 +584,21 @@ const App = {
         if (radialLight) {
           radialLight.style.transform = `translate(${(-tiltY * 3.5).toFixed(1)}px, ${(-tiltX * 3.5).toFixed(1)}px)`;
         }
+        if (portalAura) {
+          portalAura.style.transform = `translate(calc(-50% + ${(tiltY * 2).toFixed(1)}px), calc(-50% + ${(tiltX * 2).toFixed(1)}px))`;
+        }
       });
 
       heroStage.addEventListener('mouseleave', () => {
         heroPodium.style.transform = '';
         const radialLight = heroPodium.querySelector('.stage-radial-light');
         if (radialLight) radialLight.style.transform = '';
+        if (portalAura) portalAura.style.transform = 'translate(-50%, -50%)';
       });
     }
 
     // 3. Tactile Magnetic Micro-Interactions on Action Buttons
-    const magneticBtns = document.querySelectorAll('.btn-hero-dbrand, .btn-hero-glass-dbrand, .add-to-cart-btn, .promo-btn, .btn-primary-glow');
+    const magneticBtns = document.querySelectorAll('.btn-apple-primary, .btn-apple-glass, .btn-hero-dbrand, .btn-hero-glass-dbrand, .btn-hero-portal-primary, .btn-hero-portal-glass, .btn-dbrand-shop-now, .add-to-cart-btn, .promo-btn, .btn-primary-glow');
     magneticBtns.forEach(btn => {
       if (btn.hasAttribute('data-magnetic-active')) return;
       btn.setAttribute('data-magnetic-active', 'true');
@@ -575,10 +628,64 @@ const App = {
       settings = { ...settings, ...overrideSettings };
     }
 
-    // 1. Hero Showcase Image (Banner)
+    // 1. Hero Showcase Image & Video Background
     const heroImg = document.getElementById("hero-showcase-img");
     if (heroImg && settings.heroBannerImg) {
       heroImg.src = settings.heroBannerImg;
+    }
+    const bgVideo = document.getElementById("hero-cinematic-video-element") || document.querySelector(".hero-cinematic-bg-video");
+    if (bgVideo) {
+      if (settings.heroBannerImg) {
+        bgVideo.poster = settings.heroBannerImg;
+      }
+      if (settings.heroVideoUrl && settings.heroVideoUrl.trim()) {
+        const vUrl = settings.heroVideoUrl.trim();
+        const mainSrc = document.getElementById("hero-video-source-main");
+        const altSrc = document.getElementById("hero-video-source-alt");
+        if (mainSrc) {
+          mainSrc.src = vUrl;
+          if (vUrl.endsWith(".webm")) mainSrc.type = "video/webm";
+          else if (vUrl.endsWith(".mp4")) mainSrc.type = "video/mp4";
+        }
+        if (altSrc) {
+          altSrc.src = vUrl;
+          altSrc.type = "video/mp4";
+        }
+        if (!mainSrc && !altSrc) {
+          bgVideo.src = vUrl;
+        }
+        bgVideo.style.display = "block";
+        try {
+          bgVideo.load();
+          bgVideo.play().catch(() => {});
+        } catch (e) {}
+      }
+    }
+
+    // Hero Live Copy, Headlines & Description Customization
+    const heroEyebrow = document.getElementById("hero-eyebrow-text");
+    if (heroEyebrow && settings.heroEyebrow) {
+      heroEyebrow.textContent = settings.heroEyebrow;
+    }
+    const heroTitle1 = document.getElementById("hero-title-line1");
+    if (heroTitle1 && settings.heroTitle1) {
+      heroTitle1.textContent = settings.heroTitle1;
+    }
+    const heroTitle2 = document.getElementById("hero-title-line2");
+    if (heroTitle2 && settings.heroTitle2) {
+      heroTitle2.textContent = settings.heroTitle2;
+    }
+    const heroDesc = document.getElementById("hero-desc-text");
+    if (heroDesc && settings.heroDesc) {
+      heroDesc.textContent = settings.heroDesc;
+    }
+    const heroBtn1 = document.getElementById("hero-btn-primary-text");
+    if (heroBtn1 && settings.heroBtnPrimaryText) {
+      heroBtn1.textContent = settings.heroBtnPrimaryText;
+    }
+    const heroBtn2 = document.getElementById("hero-btn-secondary-text");
+    if (heroBtn2 && settings.heroBtnSecondaryText) {
+      heroBtn2.textContent = settings.heroBtnSecondaryText;
     }
 
     // 2. Official Logo across site
@@ -1379,7 +1486,34 @@ const App = {
     bar.innerHTML = html;
   },
 
-  // 4. Categories Grid on Homepage (with safe icon fallback)
+  // 4. Categories Showcase on Homepage (Full-Width dbrand Style Auto-Slider)
+  currentCatSlide: 0,
+  catSlideTimer: null,
+
+  getCategorySliderImage(catId) {
+    let settings = {};
+    try {
+      settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    } catch (e) { }
+
+    if (settings.categorySliderImages && settings.categorySliderImages[catId]) {
+      return settings.categorySliderImages[catId];
+    }
+
+    const defaultImages = {
+      "brand-new-iphones": "assets/custom_hero_banner.png",
+      "used-iphones": "assets/iphone_showcase_banner.jpg",
+      "power-banks": "assets/chargers_banner.jpg",
+      "chargers": "assets/chargers_banner.jpg",
+      "back-covers": "assets/cases_banner.jpg",
+      "cables": "assets/chargers_banner.jpg",
+      "audio": "assets/chargers_banner.jpg",
+      "tempered-glass": "assets/cases_banner.jpg",
+      "camera-protectors": "assets/cases_banner.jpg"
+    };
+    return defaultImages[catId] || "assets/cases_banner.jpg";
+  },
+
   renderCategories() {
     const container = document.getElementById("category-grid-container");
     if (!container) return;
@@ -1387,21 +1521,165 @@ const App = {
     const categories = this.getCategories();
     const products = this.getProducts();
 
-    container.innerHTML = categories.map(cat => {
+    const editorialMeta = {
+      "brand-new-iphones": {
+        badge: "OFFICIAL FLAGSHIP TECH // SEALED BOX",
+        title: "Brand New Apple iPhones",
+        desc: "Experience official Apple Care sealed devices with authentic titanium design, Dynamic Island, cutting-edge A-series silicon, and physical store warranty."
+      },
+      "used-iphones": {
+        badge: "100% TESTED & VERIFIED // GRADE A+",
+        title: "Certified Pre-Owned iPhones",
+        desc: "Thoroughly tested Grade-A+ pre-owned iPhones with verified 3uTools diagnostics, 100% genuine parts, full battery guarantee, and physical store warranty."
+      },
+      "power-banks": {
+        badge: "HIGH-DENSITY QI2 WIRELESS // ANKER & MAGSAFE",
+        title: "Power Banks & MagSafe Battery",
+        desc: "Certified Qi2 15W wireless charging, digital LED percentage readouts, and up to 20,000mAh bi-directional ultra-fast charging on the go."
+      },
+      "chargers": {
+        badge: "65W–100W GaN FAST CHARGING // DUAL USB-C",
+        title: "Fast Chargers & GaN Power Adapters",
+        desc: "Next-gen Gallium Nitride (GaN) fast wall adapters from Anker, Ugreen & Baseus. Compact footprint, zero overheating, and maximum wattage delivery."
+      },
+      "back-covers": {
+        badge: "AEROSPACE CARBON & SPIGEN PROTECTION",
+        title: "Back Covers & MagSafe Armor",
+        desc: "Engineered shockproof drop protection with integrated high-force neodymium MagSafe magnetic arrays and scratch-resistant matte finishes."
+      },
+      "cables": {
+        badge: "240W ULTRA-DURABLE BRAIDED // TYPE-C & LIGHTNING",
+        title: "Heavy-Duty Fast Charging Cables",
+        desc: "High-speed data transfer and 240W power delivery cables with reinforced Kevlar braided jackets for long-lasting durability."
+      },
+      "audio": {
+        badge: "ACTIVE NOISE CANCELLING // AIRPODS & HI-FI",
+        title: "Audio & Original AirPods Pro",
+        desc: "Immersive spatial audio, industry-leading active noise cancellation, and crystal-clear acoustic fidelity for seamless everyday listening."
+      },
+      "tempered-glass": {
+        badge: "9H SAPPHIRE GLASS & PRIVACY SHIELDS",
+        title: "Tempered Glass & Protectors",
+        desc: "Diamond-hard 9H scratch resistance, oleophobic anti-fingerprint coatings, and edge-to-edge full screen coverage."
+      },
+      "camera-protectors": {
+        badge: "TITANIUM INDIVIDUAL LENS RINGS",
+        title: "Camera Lens Protectors",
+        desc: "Precision-engineered titanium alloy protective lens rings with AR sapphire glass for crystal-clear mobile photography."
+      }
+    };
+
+    container.innerHTML = categories.map((cat, idx) => {
       const count = products.filter(p => this.isProductInCategory(p, cat.id)).length;
-      const safeIcon = this.getSafeCategoryIcon(cat);
+      const sliderImg = this.getCategorySliderImage(cat.id);
+      const meta = editorialMeta[cat.id] || {
+        badge: `${cat.name.toUpperCase()} // OFFICIAL TECH`,
+        title: cat.name,
+        desc: cat.tagline || `Discover our wide range of authentic ${cat.name} with certified store warranty and island-wide fast delivery.`
+      };
 
       return `
-        <div class="category-card" onclick="App.filterByCategory('${cat.id}')">
-          <div class="cat-icon-frame">
-            <span style="font-size:26px;">${safeIcon}</span>
+        <div class="dbrand-carousel-slide" data-idx="${idx}" data-id="${cat.id}">
+          <div class="dbrand-slide-media-stage" onclick="App.filterByCategory('${cat.id}')" style="cursor:pointer;" title="Click to browse ${cat.name}">
+            <img src="${sliderImg}" alt="${cat.name}" class="dbrand-slide-img" onerror="this.src='assets/cases_banner.jpg'">
+            <span class="dbrand-slide-count-badge">${count} In Stock</span>
           </div>
-          <div class="cat-name">${cat.name}</div>
-          <div class="cat-count">${count} Products</div>
+
+          <div class="dbrand-slide-content">
+            <div class="dbrand-slide-badge">${meta.badge}</div>
+            <h3 class="dbrand-slide-title" onclick="App.filterByCategory('${cat.id}')" style="cursor:pointer;">${cat.name}</h3>
+            <p class="dbrand-slide-desc">${meta.desc}</p>
+            <div class="dbrand-slide-action-row">
+              <button type="button" class="btn-dbrand-shop-now" onclick="App.filterByCategory('${cat.id}')">
+                <span>SHOP NOW</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
         </div>
       `;
     }).join("");
-    this.initInteractiveEffects();
+
+    // Populate Dynamic Dots Indicator
+    const dotsContainer = document.getElementById("category-slider-dots");
+    if (dotsContainer) {
+      dotsContainer.innerHTML = categories.map((_, idx) => `
+        <button type="button" class="category-dot ${idx === 0 ? 'active' : ''}" data-idx="${idx}" aria-label="Go to slide ${idx + 1}" onclick="App.goToCategorySlide(${idx})"></button>
+      `).join("");
+    }
+
+    this.currentCatSlide = 0;
+    this.goToCategorySlide(0);
+    this.startCategoryAutoSlider(categories.length);
+  },
+
+  goToCategorySlide(idx) {
+    const track = document.getElementById("category-grid-container");
+    const dots = document.querySelectorAll("#category-slider-dots .category-dot");
+    if (!track) return;
+
+    const total = track.querySelectorAll(".dbrand-carousel-slide").length;
+    if (total === 0) return;
+
+    this.currentCatSlide = (idx + total) % total;
+    track.style.transform = `translateX(-${this.currentCatSlide * 100}%)`;
+
+    dots.forEach((dot, dIdx) => {
+      dot.classList.toggle("active", dIdx === this.currentCatSlide);
+    });
+  },
+
+  nextCategorySlide() {
+    this.goToCategorySlide(this.currentCatSlide + 1);
+  },
+
+  prevCategorySlide() {
+    this.goToCategorySlide(this.currentCatSlide - 1);
+  },
+
+  startCategoryAutoSlider(totalSlides = 0) {
+    clearInterval(this.catSlideTimer);
+    const container = document.getElementById("category-showcase-container");
+    if (!container) return;
+
+    // Auto-slide every 4.5 seconds
+    this.catSlideTimer = setInterval(() => {
+      this.nextCategorySlide();
+    }, 4500);
+
+    if (!container._autoSlideBound) {
+      container._autoSlideBound = true;
+
+      // Pause on mouse hover / resume on leave
+      container.addEventListener("mouseenter", () => clearInterval(this.catSlideTimer));
+      container.addEventListener("mouseleave", () => {
+        clearInterval(this.catSlideTimer);
+        this.catSlideTimer = setInterval(() => this.nextCategorySlide(), 4500);
+      });
+
+      // Mobile Touch Swipe
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      container.addEventListener("touchstart", (e) => {
+        clearInterval(this.catSlideTimer);
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      container.addEventListener("touchend", (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 45) {
+          if (diff > 0) {
+            this.nextCategorySlide();
+          } else {
+            this.prevCategorySlide();
+          }
+        }
+        clearInterval(this.catSlideTimer);
+        this.catSlideTimer = setInterval(() => this.nextCategorySlide(), 4500);
+      }, { passive: true });
+    }
   },
 
   // Helper for safe icon
@@ -1463,6 +1741,7 @@ const App = {
     }
 
     this.activeCategory = catId;
+    this.catalogCurrentPage = 0;
     if (resetBrand) {
       this.activeBrand = "all";
     }
@@ -1472,17 +1751,26 @@ const App = {
     this.renderCatalog();
 
     const catalogSec = document.getElementById("catalog-section");
-    if (catalogSec) catalogSec.scrollIntoView({ behavior: "smooth" });
+    if (catalogSec) {
+      const navH = 80;
+      const top = catalogSec.getBoundingClientRect().top + window.pageYOffset - navH;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
   },
 
   filterByBrand(brandId) {
     this.activeBrand = brandId;
+    this.catalogCurrentPage = 0;
     this.renderNavbar();
     this.renderBrandFilterBar();
     this.renderCatalog();
 
     const catalogSec = document.getElementById("catalog-section");
-    if (catalogSec) catalogSec.scrollIntoView({ behavior: "smooth" });
+    if (catalogSec) {
+      const navH = 80;
+      const top = catalogSec.getBoundingClientRect().top + window.pageYOffset - navH;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
   },
 
   // 6. Product Catalog Rendering (Filters by BOTH Category & Brand)
@@ -1517,6 +1805,12 @@ const App = {
     });
 
     if (filtered.length === 0) {
+      const headerControls = document.getElementById("catalog-slider-header-controls");
+      if (headerControls) headerControls.style.display = "none";
+      const paginationBar = document.getElementById("catalog-pagination-bar");
+      if (paginationBar) paginationBar.style.display = "none";
+      container.style.transform = "none";
+
       if (products.length === 0) {
         container.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 70px 20px;">
@@ -1527,6 +1821,25 @@ const App = {
               <a href="https://wa.me/94740219239?text=Hi%20Universe%20Hub,%20I%20want%20to%20inquire%20about%20available%20stock" target="_blank" class="btn-primary-glow" style="display:inline-flex; align-items:center; gap:8px;">
                 <span>💬 Inquire on WhatsApp (074-0219239)</span>
               </a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      if (this.activeCategory === 'brand-new-iphones') {
+        const usedCount = products.filter(p => this.isProductInCategory(p, 'used-iphones')).length;
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+            <div style="font-size:36px; margin-bottom:10px;">🍏</div>
+            <h3 style="color:#fff; font-size:18px; font-weight:700; margin-bottom:6px;">Brand New iPhones Stock Updating</h3>
+            <p style="color:var(--text-secondary); font-size:14px; max-width:480px; margin:0 auto 16px;">
+              We currently have <strong>${usedCount} Certified Pre-Owned iPhones</strong> with 100% battery guarantee &amp; physical store warranty ready for dispatch!
+            </p>
+            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+              <button class="btn-primary-glow" onclick="App.filterByCategory('used-iphones')" style="padding:10px 22px; font-size:13px; font-weight:700;">
+                Browse Certified Used iPhones (${usedCount}) →
+              </button>
+              <button class="btn-glass" onclick="App.filterByCategory('all'); App.filterByBrand('all');">View All Products</button>
             </div>
           </div>
         `;
@@ -1647,7 +1960,211 @@ const App = {
         </div>
       `;
     }).join("");
+
+    if (this.catalogViewMode === "grid") {
+      container.classList.remove("catalog-slider-track");
+      container.classList.add("products-grid");
+      container.style.transform = "none";
+    } else {
+      container.classList.remove("products-grid");
+      container.classList.add("catalog-slider-track");
+    }
+
+    const headerControls = document.getElementById("catalog-slider-header-controls");
+    if (headerControls) headerControls.style.display = "flex";
+
     this.initInteractiveEffects();
+    this.updateCatalogSliderPosition();
+    this.setupCatalogSliderSwipe();
+  },
+
+  // 6b. 5-Item Catalog Slider & Pagination Engine
+  getCatalogItemsPerPage() {
+    if (this.catalogViewMode === "grid") return 999;
+    const w = window.innerWidth;
+    if (w >= 1200) return 5;
+    if (w >= 992) return 4;
+    if (w >= 680) return 3;
+    return 2;
+  },
+
+  nextCatalogPage() {
+    const itemsPerPage = this.getCatalogItemsPerPage();
+    const container = document.getElementById("products-catalog-container");
+    if (!container) return;
+    const cards = container.querySelectorAll(".product-card");
+    const totalPages = Math.ceil(cards.length / itemsPerPage);
+    if (this.catalogCurrentPage < totalPages - 1) {
+      this.catalogCurrentPage++;
+      this.updateCatalogSliderPosition();
+    }
+  },
+
+  prevCatalogPage() {
+    if (this.catalogCurrentPage > 0) {
+      this.catalogCurrentPage--;
+      this.updateCatalogSliderPosition();
+    }
+  },
+
+  goToCatalogPage(pageIdx) {
+    this.catalogCurrentPage = pageIdx;
+    this.updateCatalogSliderPosition();
+  },
+
+  toggleCatalogViewMode() {
+    this.catalogViewMode = this.catalogViewMode === "slider" ? "grid" : "slider";
+    const container = document.getElementById("products-catalog-container");
+    const toggleBtn = document.getElementById("catalog-view-toggle-btn");
+    const headerArrows = document.querySelector(".catalog-slider-nav-arrows");
+    const paginationBar = document.getElementById("catalog-pagination-bar");
+    const counterEl = document.getElementById("catalog-slider-counter");
+
+    if (this.catalogViewMode === "grid") {
+      if (container) {
+        container.classList.remove("catalog-slider-track");
+        container.classList.add("products-grid");
+        container.style.transform = "none";
+      }
+      if (toggleBtn) toggleBtn.textContent = "🎬 5-Card Slider";
+      if (headerArrows) headerArrows.style.display = "none";
+      if (paginationBar) paginationBar.style.display = "none";
+      if (counterEl) {
+        const cardsCount = container ? container.querySelectorAll(".product-card").length : 0;
+        counterEl.textContent = `All ${cardsCount} Products`;
+      }
+    } else {
+      if (container) {
+        container.classList.remove("products-grid");
+        container.classList.add("catalog-slider-track");
+      }
+      if (toggleBtn) toggleBtn.textContent = "⊞ View All Grid";
+      if (headerArrows) headerArrows.style.display = "flex";
+      this.catalogCurrentPage = 0;
+      this.updateCatalogSliderPosition();
+    }
+  },
+
+  updateCatalogSliderPosition() {
+    const container = document.getElementById("products-catalog-container");
+    const viewport = document.getElementById("catalog-slider-viewport");
+    if (!container) return;
+
+    if (this.catalogViewMode === "grid") {
+      container.style.transform = "none";
+      return;
+    }
+
+    const cards = container.querySelectorAll(".product-card");
+    if (cards.length === 0) return;
+
+    const itemsPerPage = this.getCatalogItemsPerPage();
+    const totalPages = Math.max(1, Math.ceil(cards.length / itemsPerPage));
+
+    // Clamp page index
+    if (this.catalogCurrentPage >= totalPages) {
+      this.catalogCurrentPage = Math.max(0, totalPages - 1);
+    }
+    if (this.catalogCurrentPage < 0) this.catalogCurrentPage = 0;
+
+    // Calculate smooth slide offset
+    const targetIndex = Math.min(this.catalogCurrentPage * itemsPerPage, cards.length - 1);
+    const targetCard = cards[targetIndex];
+    const maxShift = viewport ? Math.max(0, container.scrollWidth - viewport.clientWidth) : 0;
+
+    let shift = 0;
+    if (targetCard && maxShift > 0) {
+      if (this.catalogCurrentPage === totalPages - 1) {
+        shift = maxShift;
+      } else {
+        shift = Math.min(targetCard.offsetLeft, maxShift);
+      }
+    }
+
+    container.style.transform = `translateX(-${shift}px)`;
+
+    // Update Header Counter & Arrows
+    const counterEl = document.getElementById("catalog-slider-counter");
+    if (counterEl) {
+      counterEl.textContent = `Page ${this.catalogCurrentPage + 1} / ${totalPages} (${cards.length} Products)`;
+    }
+
+    const prevBtn = document.getElementById("catalog-prev-btn");
+    const nextBtn = document.getElementById("catalog-next-btn");
+    if (prevBtn) prevBtn.disabled = this.catalogCurrentPage === 0;
+    if (nextBtn) nextBtn.disabled = this.catalogCurrentPage >= totalPages - 1;
+
+    // Render Bottom Pagination
+    this.renderCatalogPagination(totalPages);
+  },
+
+  renderCatalogPagination(totalPages) {
+    const bar = document.getElementById("catalog-pagination-bar");
+    if (!bar) return;
+
+    if (this.catalogViewMode === "grid" || totalPages <= 1) {
+      bar.innerHTML = "";
+      bar.style.display = "none";
+      return;
+    }
+
+    bar.style.display = "flex";
+
+    let html = `
+      <button type="button" class="catalog-page-btn" onclick="App.prevCatalogPage()" ${this.catalogCurrentPage === 0 ? 'disabled' : ''}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <span>Previous</span>
+      </button>
+      <div class="catalog-page-dots">
+    `;
+
+    for (let i = 0; i < totalPages; i++) {
+      const isActive = i === this.catalogCurrentPage;
+      html += `
+        <button type="button" class="catalog-page-btn ${isActive ? 'active' : ''}" onclick="App.goToCatalogPage(${i})" title="Page ${i + 1}">
+          ${i + 1}
+        </button>
+      `;
+    }
+
+    html += `
+      </div>
+      <button type="button" class="catalog-page-btn" onclick="App.nextCatalogPage()" ${this.catalogCurrentPage >= totalPages - 1 ? 'disabled' : ''}>
+        <span>Next</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    `;
+
+    bar.innerHTML = html;
+  },
+
+  setupCatalogSliderSwipe() {
+    const viewport = document.getElementById("catalog-slider-viewport");
+    if (!viewport || viewport.hasAttribute("data-swipe-bound")) return;
+    viewport.setAttribute("data-swipe-bound", "true");
+
+    let startX = 0;
+    let endX = 0;
+
+    viewport.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+      endX = startX;
+    }, { passive: true });
+
+    viewport.addEventListener("touchmove", (e) => {
+      endX = e.touches[0].clientX;
+    }, { passive: true });
+
+    viewport.addEventListener("touchend", () => {
+      const diff = startX - endX;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) {
+          this.nextCatalogPage();
+        } else {
+          this.prevCatalogPage();
+        }
+      }
+    });
   },
 
   // 3. Search Suggestions
@@ -1982,7 +2499,7 @@ const App = {
 
           <!-- Dynamic Live Price Row -->
           <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:14px;">
-            <span id="qv-price-display" style="font-size:24px; font-weight:900; color:var(--neon-cyan);">Rs. ${this.quickViewSelectedPrice.toLocaleString()}</span>
+            <span id="qv-price-display" style="font-size:24px; font-weight:900; color:var(--accent-gold);">Rs. ${this.quickViewSelectedPrice.toLocaleString()}</span>
             <span id="qv-origprice-display" style="font-size:14px; text-decoration:line-through; color:var(--text-muted); ${this.quickViewSelectedOrigPrice > this.quickViewSelectedPrice ? '' : 'display:none;'}">Rs. ${this.quickViewSelectedOrigPrice.toLocaleString()}</span>
           </div>
 
@@ -2031,7 +2548,7 @@ const App = {
           ${(prod.specs && (prod.specs.mah || prod.specs.wattage || prod.specs.ports || prod.specs.cableLength || prod.specs.compatibility || prod.specs.magsafe || prod.specs.fastCharge || prod.specs.wireless || prod.specs.digitalDisplay || prod.specs.anc)) ? `
             <!-- Accessory Technical Specifications Box -->
             <div class="acc-spec-highlight-box">
-              <div style="font-size:12px; font-weight:700; color:var(--neon-cyan); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+              <div style="font-size:12px; font-weight:700; color:var(--accent-gold); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
                 <span>⚡ Technical Specifications</span>
               </div>
               <div class="acc-spec-grid">
@@ -2062,7 +2579,7 @@ const App = {
                 ${prod.specs.compatibility ? `
                   <div class="acc-spec-item" style="grid-column: 1 / -1;">
                     <span class="acc-spec-label">Compatible Devices</span>
-                    <span class="acc-spec-val" style="color:var(--neon-cyan);">📱 ${prod.specs.compatibility}</span>
+                    <span class="acc-spec-val" style="color:var(--accent-gold);">📱 ${prod.specs.compatibility}</span>
                   </div>
                 ` : ''}
               </div>
@@ -2093,7 +2610,7 @@ const App = {
             </div>
             <div style="display:flex; justify-content:space-between;">
               <span style="color:var(--text-muted);">Store Pickup &amp; Delivery:</span>
-              <span style="color:var(--neon-cyan); font-weight:600;">Maharagama Flagship &amp; Island-wide</span>
+              <span style="color:var(--accent-gold); font-weight:600;">Maharagama Flagship &amp; Island-wide</span>
             </div>
           </div>
 
@@ -2542,6 +3059,18 @@ const App = {
     }, 400);
   },
 
+  openRepairTrackingModal(trackingCode = "") {
+    const modal = document.getElementById("repair-tracking-modal");
+    if (!modal) return;
+    const input = document.getElementById("track-repair-input");
+    if (input && trackingCode) {
+      input.value = trackingCode;
+      this.handleTrackRepair();
+    }
+    this.openModal("repair-tracking-modal");
+    if (input) setTimeout(() => input.focus(), 100);
+  },
+
   openWhatsAppRepairQuote() {
     const devEl = document.getElementById("estimator-device");
     const srvEl = document.getElementById("estimator-service");
@@ -2643,7 +3172,22 @@ const App = {
     const input = document.getElementById("track-repair-input");
     const code = input ? input.value.trim().toUpperCase() : "";
     const card = document.getElementById("track-result-container");
-    if (!code || !card) return;
+    if (!card) return;
+
+    const modal = document.getElementById("repair-tracking-modal");
+    if (modal && !modal.classList.contains("active")) {
+      this.openModal("repair-tracking-modal");
+    }
+
+    if (!code) {
+      card.innerHTML = `
+        <div style="padding:18px; text-align:center; color:var(--text-muted); font-size:13.5px;">
+          Please enter your Job Tracking ID (e.g. UH-8821) from your receipt or booking confirmation.
+        </div>
+      `;
+      card.classList.add("active");
+      return;
+    }
 
     let repairs = JSON.parse(localStorage.getItem("UH_REPAIRS")) || [];
     let record = repairs.find(r =>
@@ -2691,10 +3235,10 @@ const App = {
     if (!record) {
       card.innerHTML = `
         <div style="padding:18px; text-align:center; color:#f87171; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:10px;">
-          <div style="font-size:22px; margin-bottom:6px;">❌</div>
+          <div style="font-size:22px; margin-bottom:6px;">⚠️</div>
           <div style="font-weight:700; margin-bottom:4px;">No repair record found for: <b>${code}</b></div>
-          <p style="font-size:12px; color:var(--text-secondary); margin:0;">
-            Please check the Tracking Code on your store receipt, or click sample codes above to preview: <b>UH-8821</b> or <b>UH-8902</b>.
+          <p style="font-size:12.5px; color:var(--text-secondary); margin:0;">
+            Please verify the Tracking Code on your physical store receipt or booking confirmation, or contact our Maharagama desk directly on WhatsApp.
           </p>
         </div>
       `;

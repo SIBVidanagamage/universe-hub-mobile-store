@@ -12,9 +12,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=80">
-  <link rel="stylesheet" href="css/invoice.css?v=80">
-  <link rel="stylesheet" href="css/payment.css?v=80">
+  <link rel="stylesheet" href="css/style.css?v=125">
+  <link rel="stylesheet" href="css/invoice.css?v=110">
+  <link rel="stylesheet" href="css/payment.css?v=110">
   <style>
     .site-main-logo, #admin-logo-preview {
       background: transparent !important;
@@ -127,105 +127,113 @@
       </div>
     </nav>
 
-    <!-- Hero Section (dbrand Inspired Cinematic Showcase) -->
-    <section class="hero-section cinematic-hero-stage">
-      <div class="hero-ambient-glow"></div>
-      <div class="container hero-container-widescreen">
-        
-        <!-- Top Editorial Telemetry & Eyebrow -->
-        <div class="hero-telemetry-header">
-          <div class="hero-tag-pill">
-            <span class="pulse-dot"></span>
-            <span>FLAGSHIP DEVICES // CERTIFIED REPAIRS</span>
-          </div>
-          <div class="hero-geo-tag">
-            <span>SRI LANKA'S PREMIER TECH DESTINATION</span>
-          </div>
-        </div>
-
-        <!-- Master Typographic Headline & Stage Grid -->
-        <div class="hero-cinematic-grid">
-          <div class="hero-narrative-col">
-            <h1 class="hero-title hero-headline-dbrand">
-              TECH WITHOUT
-              <span class="gradient-text">LIMITS.</span>
-            </h1>
-            <p class="hero-desc hero-lead-dbrand">
-              Discover official brand new Apple iPhones, certified pre-owned phones tested with 100% battery guarantee, ultra-fast 65W GaN chargers, and certified express in-store repairs.
-            </p>
-            <div class="hero-cta-group hero-cta-dbrand">
-              <a href="#catalog-section" class="btn-primary-glow btn-hero-dbrand">
-                <span>EXPLORE COLLECTION</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-              <button class="btn-glass btn-hero-glass-dbrand" onclick="App.openRepairBookingModal()">
-                <span>DIAGNOSTIC LAB ⚡</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Hero Showcase Visual (Curved Podium & Ambient Halo) -->
-          <div class="hero-stage-wrapper">
-            <div class="hero-stage-podium">
-              <div class="stage-radial-light"></div>
-              <img id="hero-showcase-img" src="assets/custom_hero_banner.png?v=65" alt="Universe Hub Latest iPhones Showcase" class="hero-visual-img hero-img-dbrand" onerror="this.src='assets/hero_showcase.jpg'">
-              
-              <div class="floating-annotation annotation-top-right hero-chip-dbrand">
-                <div class="anno-dot"></div>
-                <div class="anno-text">Next-Gen Titanium Series • 100% Original</div>
-              </div>
-              <div class="floating-annotation annotation-bottom-left hero-chip-dbrand hero-chip-battery">
-                <span style="font-size:12px;">🔋</span>
-                <div class="anno-text">100% Battery Guarantee • Zero Part Alerts</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Architectural Telemetry Specs Strip -->
-        <div class="hero-telemetry-bar">
-          <div class="telemetry-cell">
-            <span class="telemetry-index">[01]</span>
-            <div class="telemetry-info">
-              <h5>100% GENUINE APPLE</h5>
-              <p>Apple Care &amp; Store Warranty</p>
-            </div>
-          </div>
-          <div class="telemetry-cell">
-            <span class="telemetry-index">[02]</span>
-            <div class="telemetry-info">
-              <h5>ISLAND-WIDE DISPATCH</h5>
-              <p>Cash on Delivery Available</p>
-            </div>
-          </div>
-          <div class="telemetry-cell">
-            <span class="telemetry-index">[03]</span>
-            <div class="telemetry-info">
-              <h5>EXPRESS LAB REPAIRS</h5>
-              <p>Same-Day Physical Shop Care</p>
-            </div>
-          </div>
-        </div>
-
+    <!-- Apple-Inspired Cinematic Full-Screen Video Hero -->
+    <section class="apple-cinematic-hero" id="home-hero-stage">
+      <!-- Full-Bleed Video Background Stage with High-Res Fallback Poster -->
+      <div class="hero-video-media-stage">
+        <video 
+          id="hero-cinematic-video-element"
+          class="hero-cinematic-bg-video" 
+          autoplay 
+          muted 
+          loop 
+          playsinline 
+          preload="auto"
+          poster="assets/custom_hero_banner.png"
+          aria-hidden="true"
+        >
+          <source id="hero-video-source-main" src="assets/universe_hub_hero_cinematic.webm" type="video/webm">
+          <source id="hero-video-source-alt" src="assets/universe_hub_hero_cinematic.mp4" type="video/mp4">
+        </video>
+        <img 
+          id="hero-showcase-img" 
+          class="hero-video-fallback-img" 
+          src="assets/custom_hero_banner.png" 
+          alt="Universe Hub Flagship Tech & Certified Repairs"
+          onerror="this.src='assets/hero_showcase.jpg'"
+        >
+        <!-- Dark Multi-Stop Vignette & Gradient Overlay for Contrast -->
+        <div class="hero-cinematic-vignette"></div>
       </div>
+
+      <!-- Hero Content Narrative (Apple Minimalist Hierarchy) -->
+      <div class="container hero-content-container">
+        <div class="apple-hero-narrative">
+          <!-- Eyebrow Pill -->
+          <div class="apple-hero-eyebrow">
+            <span class="apple-pulse-dot"></span>
+            <span id="hero-eyebrow-text">UNIVERSE HUB — PREMIUM TECHNOLOGY</span>
+          </div>
+
+          <!-- Main Monumental Heading -->
+          <h1 class="apple-hero-headline">
+            <span class="headline-word" id="hero-title-line1">TECHNOLOGY.</span>
+            <span class="headline-word gold-shimmer-reimagined" id="hero-title-line2">REIMAGINED.</span>
+          </h1>
+
+          <!-- Editorial Description -->
+          <p class="apple-hero-description" id="hero-desc-text">
+            Premium Smartphones. Genuine Accessories. Expert Repairs.
+          </p>
+
+          <!-- Pill-Shaped CTA Action Group -->
+          <div class="apple-hero-cta-group">
+            <a href="#catalog-section" class="btn-apple-primary">
+              <span id="hero-btn-primary-text">EXPLORE PRODUCTS</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+            <a href="#repair-center" class="btn-apple-glass" onclick="App.openRepairBookingModal();">
+              <span id="hero-btn-secondary-text">REPAIR SERVICES</span>
+              <span class="btn-icon-subtle">⚡</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Minimal Animated Scroll Indicator -->
+      <a href="#category-grid-container" class="hero-scroll-indicator" aria-label="Scroll to browse categories">
+        <span class="scroll-mouse-pill">
+          <span class="scroll-wheel-dot"></span>
+        </span>
+        <span class="scroll-label">SCROLL</span>
+      </a>
     </section>
 
-    <!-- Shop by Category (Mobix Grid) -->
-    <section class="section-pad" style="padding-top:20px;">
+    <!-- Shop by Category (Full-Width dbrand Showcase Auto-Slider) -->
+    <section class="section-pad category-carousel-section" style="padding-top:20px;">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head category-section-head">
           <div class="section-title-wrap">
+            <div class="category-section-badge">⚡ EXPLORE HARDWARE &amp; ACCESSORIES</div>
             <h2>Shop by Category</h2>
             <p>Explore our wide selection of devices, accessories, and certified repair solutions.</p>
           </div>
-          <a href="#catalog-section" class="view-all-link" onclick="App.filterByCategory('all')">
-            <span>View All</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </a>
+          <div class="category-slider-actions">
+            <button type="button" class="category-nav-btn prev-btn" onclick="App.prevCategorySlide()" aria-label="Previous Slide">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button type="button" class="category-nav-btn next-btn" onclick="App.nextCategorySlide()" aria-label="Next Slide">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <a href="#catalog-section" class="view-all-link" onclick="App.filterByCategory('all')">
+              <span>View All</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </div>
         </div>
 
-        <div id="category-grid-container" class="category-grid">
-          <!-- Dynamically populated -->
+        <!-- dbrand Full-Width Showcase Carousel Container -->
+        <div class="dbrand-showcase-container" id="category-showcase-container">
+          <div class="dbrand-carousel-viewport">
+            <div id="category-grid-container" class="dbrand-carousel-track">
+              <!-- Dynamically populated dbrand-style full-width slides -->
+            </div>
+          </div>
+
+          <!-- Dynamic Dots / Progress Track -->
+          <div id="category-slider-dots" class="category-slider-dots">
+            <!-- Dynamically populated indicator dots -->
+          </div>
         </div>
       </div>
     </section>
@@ -252,10 +260,25 @@
     <!-- Featured Catalog Section -->
     <section id="catalog-section" class="section-pad">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head catalog-section-head">
           <div class="section-title-wrap">
-            <h2>Best Sellers & Featured Tech</h2>
+            <h2>Best Sellers &amp; Featured Tech</h2>
             <p>Hand-picked Apple iPhones, certified used bargains, and high-performance accessories.</p>
+          </div>
+          <!-- Slider Navigation & Counter Controls -->
+          <div class="catalog-slider-header-controls" id="catalog-slider-header-controls">
+            <span class="catalog-slider-counter" id="catalog-slider-counter">Page 1 / 3</span>
+            <div class="catalog-slider-nav-arrows">
+              <button type="button" class="catalog-nav-arrow" id="catalog-prev-btn" onclick="App.prevCatalogPage()" aria-label="Previous Page" title="Previous Page">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <button type="button" class="catalog-nav-arrow" id="catalog-next-btn" onclick="App.nextCatalogPage()" aria-label="Next Page" title="Next Page">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+            <button type="button" class="catalog-view-toggle-btn" id="catalog-view-toggle-btn" onclick="App.toggleCatalogViewMode()" title="Toggle between Slider &amp; Full Grid">
+              ⊞ View All Grid
+            </button>
           </div>
         </div>
 
@@ -269,9 +292,16 @@
           <!-- Dynamically populated with Anker, Baseus, Ugreen, WiWU, Asper, etc. -->
         </div>
 
-        <!-- Products Grid -->
-        <div id="products-catalog-container" class="products-grid">
-          <!-- Dynamically Populated -->
+        <!-- Products Slider Viewport & Track -->
+        <div class="catalog-slider-viewport" id="catalog-slider-viewport">
+          <div id="products-catalog-container" class="catalog-slider-track">
+            <!-- Dynamically Populated with 5-product smooth slider -->
+          </div>
+        </div>
+
+        <!-- Catalog Bottom Pagination Controls -->
+        <div class="catalog-pagination-bar" id="catalog-pagination-bar">
+          <!-- Dynamically populated: Prev button, Page buttons (1, 2, 3), Next button -->
         </div>
       </div>
     </section>
@@ -305,110 +335,54 @@
       </div>
     </section>
 
-    <!-- Mobile Repair Center Section -->
+    <!-- Mobile Repair Center Section (Clean Hardware Lab Showcase) -->
     <section id="repair-center" class="repair-section">
       <div class="container">
-        <div style="text-align:center; max-width:680px; margin:0 auto;">
-          <div class="repair-header-badge">⚡ UNIVERSE HUB CERTIFIED REPAIR LAB</div>
-          <h2 style="font-size:36px; font-weight:900; color:#fff; letter-spacing:-0.5px;">Express Mobile Repair Service</h2>
-          <p style="color:var(--text-secondary); font-size:15px; margin-top:10px;">
-            Screen cracked? Battery dropping fast? Visit our physical store in Maharagama (188/8c High Level Rd) for certified mobile repairs using genuine parts with full post-repair diagnostics.
+        <div class="repair-header-block">
+          <div class="repair-header-badge">⚡ UNIVERSE HUB CERTIFIED HARDWARE LAB // MAHARAGAMA</div>
+          <h2 class="repair-headline">Precision Mobile Diagnostics &amp; Rapid Repairs</h2>
+          <p class="repair-sublead">
+            Certified component diagnostics, genuine Apple OLED display replacements, and 100% battery installations with physical store warranty at our Maharagama Flagship Store (188/8c High Level Rd).
           </p>
         </div>
 
-        <div class="repair-split-grid">
-          <!-- Interactive Repair Inquiry & Quotation Card -->
-          <div class="repair-card-interactive">
-            <div class="step-indicator" style="color:var(--neon-cyan);">STEP 1 • DIRECT INQUIRY &amp; QUOTE</div>
-            <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">Inquire Repair or Reserve Desk</h3>
-            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
-              Part prices change dynamically by model and availability. Select your device below to get an exact live price quote on WhatsApp or book a free in-store diagnostic.
-            </p>
-
-            <div class="repair-form-group">
-              <label for="estimator-device" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">Phone Model / Brand (Type any model):</label>
-              <input type="text" id="estimator-device" placeholder="e.g. iPhone 14 Pro Max, Samsung S23, Pixel, Xiaomi..." value="Apple iPhone 14 Pro Max" style="width:100%; padding:10px 14px; font-size:13.5px;" list="popular-models-list">
-              <datalist id="popular-models-list">
-                <option value="Apple iPhone 16 Pro Max">
-                <option value="Apple iPhone 15 Pro Max">
-                <option value="Apple iPhone 14 Pro Max">
-                <option value="Apple iPhone 13 Pro Max">
-                <option value="Apple iPhone 12 Pro Max">
-                <option value="Apple iPhone 11">
-                <option value="Samsung Galaxy S24 Ultra">
-                <option value="Samsung Galaxy S23 Ultra">
-                <option value="Google Pixel 8 Pro">
-                <option value="Xiaomi / Redmi Note Series">
-                <option value="Vivo / Oppo / OnePlus">
-              </datalist>
-            </div>
-
-            <div class="repair-form-group">
-              <label for="estimator-service" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">Service / Fault Required (Type your issue):</label>
-              <input type="text" id="estimator-service" placeholder="e.g. Broken display, Battery drain, Charging issue, Water damaged..." value="Display / OLED Screen Replacement" style="width:100%; padding:10px 14px; font-size:13.5px;" list="common-faults-list">
-              <datalist id="common-faults-list">
-                <option value="Display / OLED Screen Replacement">
-                <option value="Battery Replacement">
-                <option value="Charging Port & Type-C Repair">
-                <option value="Laser Back Glass Replacement">
-                <option value="Camera Lens & Sensor Repair">
-                <option value="Water Damage Ultrasonic Cleaning">
-                <option value="Logic Board / Not Powering On">
-                <option value="Face ID / Touch ID Repair">
-                <option value="Speaker / Mic Issue">
-              </datalist>
-            </div>
-
-            <!-- Lab Quality Perks (Transparent & Customer-friendly) -->
-            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; margin-bottom:16px;">
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; color:#cbd5e1;">
-                <div style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#22c55e;">✓</span> <span><b>Free Diagnostic</b> at Store</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#22c55e;">✓</span> <span><b>Expert</b> Technicians</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#22c55e;">✓</span> <span><b>All Brands</b> &amp; Models</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#22c55e;">✓</span> <span><b>Genuine Parts</b> Inspected</span>
-                </div>
-              </div>
-            </div>
-
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <button class="btn-primary-glow" style="width:100%; justify-content:center; background:#25d366; box-shadow:0 0 16px rgba(37,211,102,0.35); font-weight:700;" onclick="App.openWhatsAppRepairQuote()">
-                💬 Get Live Quote on WhatsApp (074-0219239)
-              </button>
-              <button class="btn-glass" style="width:100%; justify-content:center; font-size:13px;" onclick="App.openRepairBookingModal()">
-                📅 Reserve In-Store Inspection Slot
-              </button>
-            </div>
+        <div class="repair-capabilities-grid">
+          <div class="repair-cap-card">
+            <div class="cap-index">[01]</div>
+            <div class="cap-icon-box">⚡</div>
+            <h4>45–60 Min Express Turnaround</h4>
+            <p>OLED screens, camera modules, and genuine battery installations completed in-store while you wait.</p>
+            <span class="cap-stat-badge">60-Min Express</span>
           </div>
 
-          <!-- Real-Time Repair Tracker -->
-          <div class="repair-card-tracker">
-            <div class="step-indicator" style="color:var(--neon-purple);">STEP 2 • LIVE REPAIR STATUS TRACKER</div>
-            <h3 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">Track Your Device in Our Lab</h3>
-            <p style="font-size:13px; color:var(--text-secondary);">Enter the tracking number from your physical receipt or booking confirmation.</p>
-
-            <form id="repair-track-form" class="track-input-row" onsubmit="event.preventDefault(); App.handleTrackRepair();">
-              <input type="text" id="track-repair-input" placeholder="e.g. UH-8821 or UH-8902" value="UH-8821" required>
-              <button type="submit" class="btn-glass" style="background:var(--neon-purple); border-color:var(--neon-purple); color:#fff; font-weight:700;">
-                Track Status
-              </button>
-            </form>
-
-            <div style="font-size:11.5px; color:var(--text-muted); margin-bottom:12px;">
-              💡 <b>Sample Codes to Test:</b> <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8821'; App.handleTrackRepair();" style="color:var(--neon-cyan); text-decoration:underline;">UH-8821 (⚙️ In Progress)</a> | <a href="javascript:void(0)" onclick="document.getElementById('track-repair-input').value='UH-8902'; App.handleTrackRepair();" style="color:#34d399; text-decoration:underline;">UH-8902 (✅ Ready for Pickup)</a>
-            </div>
-
-            <!-- Dynamic Track Result Card -->
-            <div id="track-result-container" class="track-res-card active">
-              <!-- Rendered via JS -->
-            </div>
+          <div class="repair-cap-card">
+            <div class="cap-index">[02]</div>
+            <div class="cap-icon-box">🛡️</div>
+            <h4>100% Genuine Apple &amp; OEM Tech</h4>
+            <p>Factory-grade parts calibrated with True Tone retention and zero unwanted non-genuine warning alerts.</p>
+            <span class="cap-stat-badge">Zero Alert Alerts</span>
           </div>
+
+          <div class="repair-cap-card">
+            <div class="cap-index">[03]</div>
+            <div class="cap-icon-box">📡</div>
+            <h4>Real-Time Status Telemetry</h4>
+            <p>Track your device live online from technician intake to diagnostics, repair, and final bench testing.</p>
+            <span class="cap-stat-badge">Live Telemetry</span>
+          </div>
+        </div>
+
+        <div class="repair-action-bar">
+          <button type="button" class="btn-primary-glow btn-repair-track-trigger" onclick="App.openRepairTrackingModal()">
+            <span>TRACK YOUR REPAIR ⚡</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button type="button" class="btn-whatsapp-repair" onclick="App.openWhatsAppRepairQuote()">
+            <span>💬 Live WhatsApp Quote (074-0219239)</span>
+          </button>
+          <button type="button" class="btn-glass" onclick="App.openRepairBookingModal()">
+            <span>📅 Reserve In-Store Visit</span>
+          </button>
         </div>
       </div>
     </section>
@@ -1158,6 +1132,20 @@
 
       <!-- TAB: CATEGORIES & NAVBAR MANAGEMENT -->
       <div id="admin-tab-categories" class="admin-tab-content" style="display:none;">
+        <!-- Quick-Link to Category Slider Banners -->
+        <div style="background:rgba(238,189,67,0.08); border:1px dashed rgba(238,189,67,0.35); border-radius:12px; padding:12px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:20px;">🖼️</span>
+            <div>
+              <strong style="color:#fff; font-size:13.5px;">Looking to change Category Slider Images (Shop by Category Auto-Slider)?</strong>
+              <p style="font-size:12px; color:var(--text-secondary); margin:2px 0 0 0;">Customize the large showcase images shown on each slide in the homepage category slider.</p>
+            </div>
+          </div>
+          <button type="button" class="btn-primary-glow" style="padding:7px 16px; font-size:12.5px; font-weight:800; background:#EEBD43; color:#050505;" onclick="AdminController.switchTab('store'); setTimeout(function(){ AdminController.scrollToSection('admin-section-cat-slider'); }, 150);">
+            🚀 Open Category Slider Banner Manager →
+          </button>
+        </div>
+
         <!-- Add Category Form Card -->
         <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px; margin-bottom:28px;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
@@ -1335,86 +1323,187 @@
 
       <!-- TAB 7: STORE IDENTITY, HERO BANNER & ABOUT US SETTINGS -->
       <div id="admin-tab-store" class="admin-tab-content" style="display:none;">
+        <!-- Quick Jump Navigation Bar -->
+        <div style="background:rgba(238,189,67,0.07); border:1px solid rgba(238,189,67,0.25); border-radius:12px; padding:12px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:16px;">⚡</span>
+            <span style="font-size:13px; font-weight:800; color:#fff;">Quick Jump to Settings:</span>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" onclick="AdminController.scrollToSection('admin-section-hero')" class="btn-glass" style="font-size:12px; padding:6px 14px; border-color:rgba(238,189,67,0.4); color:#EEBD43; font-weight:700;">🎬 Hero Video &amp; Copy (Top Banner)</button>
+            <button type="button" onclick="AdminController.scrollToSection('admin-section-cat-slider')" class="btn-glass" style="font-size:12px; padding:6px 14px; background:rgba(238,189,67,0.18); border-color:#EEBD43; color:#EEBD43; font-weight:800; box-shadow:0 0 12px rgba(238,189,67,0.25);">📂 Category Slider Images (Shop by Category)</button>
+            <button type="button" onclick="AdminController.scrollToSection('admin-section-promos')" class="btn-glass" style="font-size:12px; padding:6px 12px; border-color:rgba(157,78,221,0.4); color:#d8b4fe;">🛍️ Dual Promo Cards</button>
+            <button type="button" onclick="AdminController.scrollToSection('admin-section-logo')" class="btn-glass" style="font-size:12px; padding:6px 12px; color:#aaa;">🏷️ Store Logo</button>
+          </div>
+        </div>
+
         <div style="display:grid; grid-template-columns: 1fr; gap:24px;">
 
-          <!-- 1. HERO SHOWCASE BANNER MANAGER -->
-          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+          <!-- 1. HERO SHOWCASE VIDEO, BANNER & COPY MANAGER -->
+          <div id="admin-section-hero" class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
               <div>
                 <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
-                  <span>🖼️ Hero Showcase Banner Customizer</span>
-                  <span class="badge-pill" style="background:rgba(0,210,255,0.15); color:var(--neon-cyan); font-size:11px;">Storefront Main Header</span>
+                  <span>🎬 Hero Video, Banner &amp; Copy Manager</span>
+                  <span class="badge-pill" style="background:rgba(238,189,67,0.18); color:#EEBD43; font-size:11px;">Storefront Cinematic Header</span>
                 </h3>
                 <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">
-                  Upload your own PNG or JPG banner image here. It immediately replaces the banner shown on the storefront homepage hero card.
+                  Upload your 10-second cinematic background video, poster fallback image, headlines, description, and action buttons live on the storefront.
                 </p>
                 <div class="dimension-guide-pill" style="margin-top:6px;">
-                  📐 Recommended Size: 1376 × 768 px (16:9 Aspect Ratio • Min 1200 × 675 px • PNG / JPG / WebP)
+                  🎥 Video Format: MP4 / WebM (16:9 • 1080p • 10–15s Loop • Autoplay Muted) • Poster: PNG / JPG (16:9)
                 </div>
               </div>
-              <button type="button" class="btn-primary-glow" onclick="AdminController.applyHeroBanner()" style="padding:8px 18px; font-size:13px;">
-                ⚡ Save &amp; Apply Hero Banner
-              </button>
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn-primary-glow" onclick="AdminController.applyHeroSettings()" style="padding:10px 22px; font-size:13.5px; background:#EEBD43; color:#050505; font-weight:800;">
+                  ⚡ Save &amp; Apply Hero Settings
+                </button>
+              </div>
             </div>
 
-            <!-- Banner Live Preview & Upload Grid -->
+            <!-- Media Preview & Media Upload Grid -->
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; align-items:start;">
-              <!-- Current Banner Live Preview Card -->
+              <!-- Current Media Live Preview Card (Video + Poster) -->
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                   <label style="font-size:12px; color:var(--text-secondary); font-weight:600;">
-                    Live Storefront Banner Preview:
+                    Live Storefront Media Preview:
                   </label>
-                  <span id="admin-hero-dims-badge" class="dimension-detected-badge">Detected: 1376 × 768 px</span>
+                  <span id="admin-hero-media-badge" class="dimension-detected-badge" style="background:rgba(238,189,67,0.15); color:#EEBD43; border-color:rgba(238,189,67,0.3);">Video / Poster Live</span>
                 </div>
-                <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:2px solid rgba(0,210,255,0.3); background:#0b0f19; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+                
+                <!-- Preview stage container -->
+                <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:2px solid rgba(238,189,67,0.4); background:#0b0f19; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+                  <!-- Video element if video is set -->
+                  <video id="admin-hero-video-preview" autoplay muted loop playsinline controls style="width:100%; height:100%; object-fit:cover; display:none;"></video>
+                  <!-- Poster image element -->
                   <img id="admin-hero-banner-preview" src="assets/custom_hero_banner.png?v=60" alt="Hero Banner Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
-                  <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); padding:4px 12px; border-radius:20px; border:1px solid rgba(0,210,255,0.4); font-size:11px; color:#fff; display:flex; align-items:center; gap:6px;">
-                    <span style="width:7px; height:7px; border-radius:50%; background:var(--neon-cyan); display:inline-block;"></span>
-                    Current Live Banner
+                  
+                  <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); padding:4px 12px; border-radius:20px; border:1px solid rgba(238,189,67,0.4); font-size:11px; color:#fff; display:flex; align-items:center; gap:6px;">
+                    <span style="width:7px; height:7px; border-radius:50%; background:#EEBD43; display:inline-block;"></span>
+                    <span id="admin-preview-active-label">Live Background Media</span>
                   </div>
                 </div>
+                
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                  <span id="admin-banner-status-text" style="font-size:12px; color:var(--text-muted);">Exact Recommended: 1376 × 768 px (16:9 ratio)</span>
-                  <button type="button" class="btn-glass" onclick="AdminController.resetHeroBannerToDefault()" style="font-size:11px; padding:4px 10px;">Reset to Default</button>
+                  <span id="admin-banner-status-text" style="font-size:12px; color:var(--text-muted);">Recommended: 10s MP4/WebM Loop + 16:9 PNG Poster</span>
+                  <button type="button" class="btn-glass" onclick="AdminController.resetHeroSettingsToDefault()" style="font-size:11px; padding:4px 10px;">Reset to Default</button>
                 </div>
               </div>
 
-              <!-- Upload / Dropzone Controls -->
+              <!-- Upload / URL Inputs for Video & Image -->
               <div>
-                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:6px; font-weight:600;">
-                  Upload New PNG / JPG Banner:
-                </label>
-                <!-- Drag and Drop Zone -->
-                <div id="admin-banner-dropzone" class="media-dropzone" style="min-height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; border:2px dashed var(--neon-cyan); border-radius:14px; background:rgba(0,210,255,0.03); cursor:pointer; transition:all 0.25s ease;">
-                  <div style="font-size:32px; margin-bottom:8px;">📤</div>
-                  <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">Drag &amp; Drop PNG Banner Here</div>
-                  <div style="font-size:12px; color:var(--text-secondary); margin-bottom:4px;">or click to browse from your computer</div>
-                  <div style="font-size:11.5px; color:var(--neon-cyan); margin-bottom:12px;">Optimal Resolution: 1376W × 768H px (16:9)</div>
-                  <button type="button" class="btn-glass" style="font-size:12px; padding:6px 16px; border-color:var(--neon-cyan); color:#fff;" onclick="event.stopPropagation(); document.getElementById('admin-banner-file-input').click();">
-                    📁 Choose PNG / Image File
-                  </button>
-                  <input type="file" id="admin-banner-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
-                </div>
+                <!-- Video Section -->
+                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:14px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:12.5px; color:#fff; font-weight:700; display:flex; align-items:center; gap:6px;">
+                      <span>🎥 10-Second Background Video (MP4 / WebM):</span>
+                    </label>
+                    <span style="font-size:11px; color:#EEBD43;">Looping Video</span>
+                  </div>
+                  
+                  <div id="admin-hero-video-dropzone" class="media-dropzone" style="min-height:95px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:12px; border:1.5px dashed rgba(238,189,67,0.6); border-radius:10px; background:rgba(238,189,67,0.03); cursor:pointer; transition:all 0.25s ease; margin-bottom:10px;">
+                    <div style="font-size:20px; margin-bottom:4px;">🎬</div>
+                    <div style="font-size:12.5px; font-weight:700; color:#fff;">Drag &amp; Drop 10s Video File Here</div>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:6px;">or click to browse (.mp4, .webm)</div>
+                    <button type="button" class="btn-glass" style="font-size:11.5px; padding:4px 14px; border-color:#EEBD43; color:#EEBD43;" onclick="event.stopPropagation(); document.getElementById('admin-hero-video-file-input').click();">
+                      📁 Select Video File
+                    </button>
+                    <input type="file" id="admin-hero-video-file-input" accept="video/mp4, video/webm, video/ogg" style="display:none;">
+                  </div>
 
-                <!-- URL Alternative -->
-                <div style="margin-top:14px;">
-                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">
-                    Or enter Banner Image Path / URL:
-                  </label>
                   <div style="display:flex; gap:8px;">
-                    <input type="text" id="admin-banner-url-input" placeholder="assets/hero_showcase.jpg or /uploads/..." style="flex:1;">
-                    <button type="button" class="btn-glass" onclick="AdminController.previewBannerFromUrl()" style="white-space:nowrap; padding:0 14px; font-size:12px;">
-                      Preview
+                    <input type="text" id="admin-hero-video-url-input" placeholder="assets/universe_hub_hero_cinematic.mp4 or /uploads/..." style="flex:1; font-size:12.5px;">
+                    <button type="button" class="btn-glass" onclick="AdminController.previewHeroVideoFromUrl()" style="white-space:nowrap; padding:0 12px; font-size:11.5px;">
+                      Test Video
                     </button>
                   </div>
+                </div>
+
+                <!-- Poster Image Section -->
+                <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:12.5px; color:#fff; font-weight:700;">
+                      🖼️ Static Poster / Fallback Image (PNG / JPG):
+                    </label>
+                    <button type="button" class="btn-glass" style="font-size:11px; padding:2px 10px;" onclick="document.getElementById('admin-banner-file-input').click();">
+                      Browse Image
+                    </button>
+                    <input type="file" id="admin-banner-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
+                  </div>
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" id="admin-banner-url-input" placeholder="assets/custom_hero_banner.png" style="flex:1; font-size:12.5px;">
+                    <button type="button" class="btn-glass" onclick="AdminController.previewBannerFromUrl()" style="white-space:nowrap; padding:0 12px; font-size:11.5px;">
+                      Preview Image
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hero Text & Description Live Customizer -->
+            <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border-subtle);">
+              <h4 style="font-size:15px; font-weight:800; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                <span>✍️ Hero Headlines, Description &amp; CTA Buttons</span>
+                <span class="badge-pill" style="font-size:10px; background:rgba(255,255,255,0.06); color:#A1A1A6;">Live Storefront Copy</span>
+              </h4>
+
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                <!-- Eyebrow Pill Text -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">
+                    Top Eyebrow Badge:
+                  </label>
+                  <input type="text" id="admin-hero-eyebrow-input" placeholder="UNIVERSE HUB — PREMIUM TECHNOLOGY" style="width:100%; font-size:13px;">
+                </div>
+
+                <!-- Main Heading Line 1 -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">
+                    Headline Line 1 (White Bold):
+                  </label>
+                  <input type="text" id="admin-hero-title1-input" placeholder="TECHNOLOGY." style="width:100%; font-size:13px;">
+                </div>
+
+                <!-- Main Heading Line 2 -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">
+                    Headline Line 2 (Gold Shimmer):
+                  </label>
+                  <input type="text" id="admin-hero-title2-input" placeholder="REIMAGINED." style="width:100%; font-size:13px;">
+                </div>
+              </div>
+
+              <div style="margin-top:14px;">
+                <!-- Description Subtitle -->
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">
+                  Hero Description / Subtitle:
+                </label>
+                <textarea id="admin-hero-desc-input" rows="2" placeholder="Premium Smartphones. Genuine Accessories. Expert Repairs." style="width:100%; font-size:13px; resize:vertical; padding:10px 14px; background:rgba(18,18,18,0.7); border:1px solid var(--border-subtle); border-radius:var(--radius-md); color:#fff;"></textarea>
+              </div>
+
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-top:14px;">
+                <!-- Primary Button Text -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">
+                    Primary Button Label:
+                  </label>
+                  <input type="text" id="admin-hero-btn1-input" placeholder="EXPLORE PRODUCTS" style="width:100%; font-size:13px;">
+                </div>
+
+                <!-- Secondary Button Text -->
+                <div>
+                  <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; font-weight:600;">
+                    Secondary Button Label:
+                  </label>
+                  <input type="text" id="admin-hero-btn2-input" placeholder="REPAIR SERVICES" style="width:100%; font-size:13px;">
                 </div>
               </div>
             </div>
           </div>
 
           <!-- 2. STORE BRANDING & LOGO -->
-          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+          <div id="admin-section-logo" class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
               <div>
                 <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
@@ -1453,7 +1542,7 @@
           </div>
 
           <!-- 3. HOMEPAGE DUAL PROMO BANNERS (Cases & Chargers) -->
-          <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+          <div id="admin-section-promos" class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
               <div>
                 <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
@@ -1626,7 +1715,87 @@
             </div>
           </div>
 
-          <!-- 4. STORE CONTACT & LOCATION DETAILS -->
+          <!-- 4. CATEGORY SHOWCASE SLIDER BANNERS (Auto-Slider Images) -->
+          <div id="admin-section-cat-slider" class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+              <div>
+                <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                  <span>🎬 Category Showcase Slider Banners (Full-Width Auto-Slider)</span>
+                </h3>
+                <p style="font-size:12.5px; color:var(--text-secondary); margin-top:4px;">
+                  Select any category below to customize the showcase image displayed in the full-screen auto-slider.
+                </p>
+                <div class="dimension-guide-pill" style="margin-top:6px;">
+                  📐 Recommended Size: 1200 × 750 px (16:10 or 16:9 Aspect Ratio • High Resolution PNG / JPG)
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:24px; align-items:start;">
+              <!-- Left: Category Selection & Live Preview -->
+              <div>
+                <div style="margin-bottom:12px;">
+                  <label style="font-size:12px; color:var(--text-secondary); font-weight:600; display:block; margin-bottom:6px;">
+                    Select Category Slide to Customize:
+                  </label>
+                  <select id="admin-cat-slider-select" style="width:100%; padding:10px 14px; font-size:13px; background:#0c0c0c; border:1px solid var(--border-subtle); border-radius:8px; color:#fff;" onchange="AdminController.handleCatSliderSelectChange()">
+                    <!-- Populated dynamically via JS -->
+                  </select>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label style="font-size:11.5px; color:var(--text-secondary); font-weight:600;">Current Slide Image Preview:</label>
+                  <span id="admin-cat-slider-dims-badge" class="dimension-detected-badge">Detected: 1200 × 750 px</span>
+                </div>
+
+                <div class="admin-banner-preview-wrapper" style="position:relative; width:100%; aspect-ratio:16/10; border-radius:12px; overflow:hidden; border:2px solid rgba(238, 189, 67, 0.35); background:#0c0c0c; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+                  <img id="admin-cat-slider-preview" src="assets/custom_hero_banner.png" alt="Category Slide Preview" style="width:100%; height:100%; object-fit:cover; display:block;">
+                  <div style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); padding:4px 10px; border-radius:14px; font-size:10.5px; color:#fff; border:1px solid rgba(238, 189, 67, 0.4);">
+                    <span id="admin-cat-slider-label">Live Preview</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Upload Dropzone & URL Input -->
+              <div>
+                <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:6px; font-weight:600;">
+                  Upload New Banner Image:
+                </label>
+                <div id="admin-cat-slider-dropzone" class="media-dropzone" style="min-height:130px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:18px; border:2px dashed var(--accent-gold); border-radius:12px; background:rgba(238, 189, 67, 0.03); cursor:pointer; margin-bottom:12px; transition:all 0.25s ease;">
+                  <div style="font-size:26px; margin-bottom:4px;">📤</div>
+                  <div style="font-size:13px; font-weight:700; color:#fff;">Drag &amp; Drop Image Here</div>
+                  <div style="font-size:11.5px; color:var(--text-secondary); margin:2px 0 8px;">or click to browse from computer</div>
+                  <button type="button" class="btn-glass" style="font-size:11.5px; padding:5px 14px; border-color:var(--accent-gold); color:#fff;" onclick="event.stopPropagation(); document.getElementById('admin-cat-slider-file-input').click();">
+                    📁 Choose Image File
+                  </button>
+                  <input type="file" id="admin-cat-slider-file-input" accept="image/png, image/jpeg, image/webp" style="display:none;">
+                </div>
+
+                <div style="margin-bottom:14px;">
+                  <label style="font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:4px;">
+                    Or enter Image Path / URL:
+                  </label>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="admin-cat-slider-url-input" placeholder="assets/... or /uploads/..." style="flex:1; font-size:12px;">
+                    <button type="button" class="btn-glass" onclick="AdminController.previewCatSliderFromUrl()" style="font-size:11px; padding:0 12px; white-space:nowrap;">
+                      Preview
+                    </button>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <button type="button" class="btn-primary-glow" onclick="AdminController.saveCatSliderImage()" style="flex:1; padding:11px 18px; font-size:13px; font-weight:700; border-radius:8px;">
+                    💾 Save Image for Category
+                  </button>
+                  <button type="button" class="btn-glass" onclick="AdminController.resetCatSliderImage()" style="padding:11px 14px; font-size:12px; white-space:nowrap;">
+                    Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. STORE CONTACT & LOCATION DETAILS -->
           <div class="admin-store-card" style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:24px;">
             <h3 style="font-size:18px; font-weight:800; color:#fff; margin-bottom:16px;">
               📍 Store Contact &amp; Physical Location Details
@@ -2328,6 +2497,36 @@
             Publish Review to Storefront
           </button>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Customer Repair Tracking Modal Hub -->
+  <div id="repair-tracking-modal" class="modal-overlay">
+    <div class="modal-box tracking-modal-box" style="max-width:580px; width:92%;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">⚡</span>
+          <h3 style="font-size:18px; font-weight:800; color:#fff; margin:0;">Live Repair Status Tracker</h3>
+        </div>
+        <button class="close-modal-btn" data-close="repair-tracking-modal">✕</button>
+      </div>
+      <div class="modal-body" style="padding:24px 20px;">
+        <p style="font-size:13.5px; color:var(--text-secondary); margin-bottom:16px;">
+          Enter the tracking number from your physical store receipt or booking confirmation (e.g., <b>UH-8821</b>).
+        </p>
+
+        <form id="repair-track-form" class="track-input-row" onsubmit="event.preventDefault(); App.handleTrackRepair();" style="display:flex; gap:10px; margin-bottom:18px;">
+          <input type="text" id="track-repair-input" placeholder="Enter Repair ID (e.g. UH-8821)" required autocomplete="off" style="flex:1; padding:12px 16px; font-size:14px; background:#0c0c0c; border:1px solid var(--border-subtle); border-radius:var(--radius-full); color:#fff;">
+          <button type="submit" class="btn-primary-glow" style="padding:12px 20px; font-size:13px; font-weight:800; border-radius:var(--radius-full); white-space:nowrap;">
+            Track Status ⚡
+          </button>
+        </form>
+
+        <!-- Dynamic Track Result Card (preserves original ID) -->
+        <div id="track-result-container" class="track-res-card active">
+          <!-- Rendered dynamically by App.handleTrackRepair() -->
+        </div>
       </div>
     </div>
   </div>
@@ -3417,7 +3616,7 @@
   <script src="js/uploader.js?v=130"></script>
   <script src="js/bulk-uploader.js?v=130"></script>
   <script src="js/payment-gateway.js?v=130"></script>
-  <script src="js/admin.js?v=130"></script>
-  <script src="js/app.js?v=140"></script>
+  <script src="js/admin.js?v=160"></script>
+  <script src="js/app.js?v=195"></script>
 </body>
 </html>

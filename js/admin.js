@@ -2456,6 +2456,21 @@ const AdminController = {
   // 5. Store Identity, Hero Banner & About Us Manager
   hasBoundStoreEvents: false,
 
+  scrollToSection(sectionId) {
+    if (!sectionId) return;
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.style.transition = "box-shadow 0.4s ease, border-color 0.4s ease";
+      el.style.borderColor = "#EEBD43";
+      el.style.boxShadow = "0 0 25px rgba(238, 189, 67, 0.45)";
+      setTimeout(() => {
+        el.style.borderColor = "";
+        el.style.boxShadow = "";
+      }, 2200);
+    }
+  },
+
   renderStoreSettings() {
     let settings = typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {};
     try {
@@ -2465,7 +2480,7 @@ const AdminController = {
       // keep fallback
     }
 
-    // Hero Banner Preview
+    // Hero Banner & Video Preview
     const bannerPreview = document.getElementById("admin-hero-banner-preview");
     if (bannerPreview && settings.heroBannerImg) {
       bannerPreview.src = settings.heroBannerImg;
@@ -2476,6 +2491,43 @@ const AdminController = {
     if (bannerUrlInput) {
       bannerUrlInput.value = settings.heroBannerImg || "";
     }
+
+    const videoPreview = document.getElementById("admin-hero-video-preview");
+    const videoUrlInput = document.getElementById("admin-hero-video-url-input");
+    if (videoUrlInput) {
+      videoUrlInput.value = settings.heroVideoUrl || "";
+    }
+    if (videoPreview && settings.heroVideoUrl && settings.heroVideoUrl.trim()) {
+      videoPreview.src = settings.heroVideoUrl.trim();
+      videoPreview.style.display = "block";
+      if (bannerPreview) bannerPreview.style.display = "none";
+      const activeLabel = document.getElementById("admin-preview-active-label");
+      if (activeLabel) activeLabel.textContent = "Live Video Active";
+    } else if (videoPreview) {
+      videoPreview.style.display = "none";
+      if (bannerPreview) bannerPreview.style.display = "block";
+      const activeLabel = document.getElementById("admin-preview-active-label");
+      if (activeLabel) activeLabel.textContent = "Live Poster Active";
+    }
+
+    // Hero Live Copy Inputs
+    const eyebrowInput = document.getElementById("admin-hero-eyebrow-input");
+    if (eyebrowInput) eyebrowInput.value = settings.heroEyebrow || "UNIVERSE HUB — PREMIUM TECHNOLOGY";
+
+    const title1Input = document.getElementById("admin-hero-title1-input");
+    if (title1Input) title1Input.value = settings.heroTitle1 || "TECHNOLOGY.";
+
+    const title2Input = document.getElementById("admin-hero-title2-input");
+    if (title2Input) title2Input.value = settings.heroTitle2 || "REIMAGINED.";
+
+    const descInput = document.getElementById("admin-hero-desc-input");
+    if (descInput) descInput.value = settings.heroDesc || "Premium Smartphones. Genuine Accessories. Expert Repairs.";
+
+    const btn1Input = document.getElementById("admin-hero-btn1-input");
+    if (btn1Input) btn1Input.value = settings.heroBtnPrimaryText || "EXPLORE PRODUCTS";
+
+    const btn2Input = document.getElementById("admin-hero-btn2-input");
+    if (btn2Input) btn2Input.value = settings.heroBtnSecondaryText || "REPAIR SERVICES";
 
     // Logo Preview
     const logoPreview = document.getElementById("admin-logo-preview");
@@ -2537,6 +2589,9 @@ const AdminController = {
     if (p2PrevDesc) p2PrevDesc.textContent = settings.promoBanner2Desc || "65W GaN fast dual chargers...";
     const p2PrevBtn = document.getElementById("admin-promo2-preview-btn");
     if (p2PrevBtn) p2PrevBtn.textContent = (settings.promoBanner2BtnText || "Shop Chargers") + " →";
+
+    // Category Showcase Slider Banners
+    this.renderCatSliderSettings(settings);
 
     // Contact & Location Fields
     const nameInput = document.getElementById("admin-store-name");
@@ -2635,6 +2690,53 @@ const AdminController = {
         bannerDropzone.style.background = "rgba(0,210,255,0.03)";
         if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
           this.handleHeroBannerFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    // 1b. Hero 10-Second Video Dropzone & File Input
+    const videoDropzone = document.getElementById("admin-hero-video-dropzone");
+    const videoInput = document.getElementById("admin-hero-video-file-input");
+
+    if (videoDropzone && videoInput) {
+      videoDropzone.addEventListener("click", (e) => {
+        if (e.target.tagName !== "BUTTON" && e.target.tagName !== "INPUT") {
+          videoInput.click();
+        }
+      });
+
+      videoInput.addEventListener("change", (e) => {
+        if (videoInput.files && videoInput.files.length > 0) {
+          this.handleHeroVideoFile(videoInput.files[0]);
+          videoInput.value = "";
+        }
+      });
+
+      ["dragenter", "dragover"].forEach(eventName => {
+        videoDropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          videoDropzone.style.borderColor = "#EEBD43";
+          videoDropzone.style.background = "rgba(238,189,67,0.15)";
+        });
+      });
+
+      ["dragleave", "dragend"].forEach(eventName => {
+        videoDropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          videoDropzone.style.borderColor = "rgba(238,189,67,0.6)";
+          videoDropzone.style.background = "rgba(238,189,67,0.03)";
+        });
+      });
+
+      videoDropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        videoDropzone.style.borderColor = "rgba(238,189,67,0.6)";
+        videoDropzone.style.background = "rgba(238,189,67,0.03)";
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          this.handleHeroVideoFile(e.dataTransfer.files[0]);
         }
       });
     }
@@ -2776,6 +2878,53 @@ const AdminController = {
         }
       });
     }
+
+    // 5. Category Slider Dropzone & File Input
+    const catDropzone = document.getElementById("admin-cat-slider-dropzone");
+    const catInput = document.getElementById("admin-cat-slider-file-input");
+
+    if (catDropzone && catInput) {
+      catDropzone.addEventListener("click", (e) => {
+        if (e.target.tagName !== "BUTTON" && e.target.tagName !== "INPUT") {
+          catInput.click();
+        }
+      });
+
+      catInput.addEventListener("change", (e) => {
+        if (catInput.files && catInput.files.length > 0) {
+          this.handleCatSliderFile(catInput.files[0]);
+          catInput.value = "";
+        }
+      });
+
+      ["dragenter", "dragover"].forEach(eventName => {
+        catDropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          catDropzone.style.borderColor = "var(--accent-gold)";
+          catDropzone.style.background = "rgba(238, 189, 67, 0.12)";
+        });
+      });
+
+      ["dragleave", "dragend"].forEach(eventName => {
+        catDropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          catDropzone.style.borderColor = "var(--accent-gold)";
+          catDropzone.style.background = "rgba(238, 189, 67, 0.03)";
+        });
+      });
+
+      catDropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        catDropzone.style.borderColor = "var(--accent-gold)";
+        catDropzone.style.background = "rgba(238, 189, 67, 0.03)";
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          this.handleCatSliderFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
   },
 
   // Helper: Live Dimension Watcher
@@ -2872,6 +3021,80 @@ const AdminController = {
     }
 
     showToast("🎉 Hero Banner updated successfully! Check your storefront.");
+  },
+
+  async handleHeroVideoFile(file) {
+    if (!file.type.startsWith("video/") && !/\.(mp4|webm|ogg|mov)$/i.test(file.name)) {
+      showToast("Please select a valid video file (.mp4, .webm).");
+      return;
+    }
+
+    const preview = document.getElementById("admin-hero-video-preview");
+    const poster = document.getElementById("admin-hero-banner-preview");
+    const urlInput = document.getElementById("admin-hero-video-url-input");
+    const statusText = document.getElementById("admin-banner-status-text");
+    const activeLabel = document.getElementById("admin-preview-active-label");
+
+    const tempUrl = URL.createObjectURL(file);
+    if (preview) {
+      preview.src = tempUrl;
+      preview.style.display = "block";
+      if (poster) poster.style.display = "none";
+    }
+    if (activeLabel) activeLabel.textContent = "Live Video Active";
+    if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">⏳ Uploading video: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)...</span>`;
+
+    let finalUrl = tempUrl;
+    try {
+      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        headers: { "Content-Type": file.type || "video/mp4" },
+        body: file
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        finalUrl = data.url;
+      }
+    } catch (err) {
+      console.warn("Video direct upload warning, using local blob:", err);
+    }
+
+    if (urlInput) urlInput.value = finalUrl;
+    if (statusText) statusText.innerHTML = `<span style="color:var(--success);">✓ Video Loaded: ${file.name}</span>`;
+
+    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
+    settings.heroVideoUrl = finalUrl;
+    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+    if (window.App && typeof App.applyStoreSettings === "function") {
+      App.applyStoreSettings();
+    }
+    showToast("🎬 Hero Video updated! Storefront hero is playing your video.");
+  },
+
+  previewHeroVideoFromUrl() {
+    const input = document.getElementById("admin-hero-video-url-input");
+    const preview = document.getElementById("admin-hero-video-preview");
+    const poster = document.getElementById("admin-hero-banner-preview");
+    const activeLabel = document.getElementById("admin-preview-active-label");
+    const statusText = document.getElementById("admin-banner-status-text");
+
+    if (!input || !input.value.trim()) {
+      showToast("Please enter a valid video URL or file path.");
+      return;
+    }
+    const val = input.value.trim();
+    if (preview) {
+      preview.src = val;
+      preview.style.display = "block";
+      if (poster) poster.style.display = "none";
+    }
+    if (activeLabel) activeLabel.textContent = "Live Video Active";
+    if (statusText) statusText.innerHTML = `<span style="color:#EEBD43;">Video preview loaded. Click 'Save & Apply Hero Settings' to publish.</span>`;
+    showToast("Video preview loaded. Click 'Save & Apply Hero Settings' to save.");
   },
 
   async handleLogoFile(file) {
@@ -3194,13 +3417,32 @@ const AdminController = {
     showToast("Preview loaded. Click 'Save & Apply Hero Banner' to set it live.");
   },
 
-  applyHeroBanner() {
-    const preview = document.getElementById("admin-hero-banner-preview");
-    const input = document.getElementById("admin-banner-url-input");
-    const bannerUrl = (input && input.value.trim()) || (preview && preview.src) || "assets/hero_showcase.jpg";
+  applyHeroSettings() {
+    const posterInput = document.getElementById("admin-banner-url-input");
+    const posterPreview = document.getElementById("admin-hero-banner-preview");
+    const videoInput = document.getElementById("admin-hero-video-url-input");
+
+    const eyebrowInput = document.getElementById("admin-hero-eyebrow-input");
+    const title1Input = document.getElementById("admin-hero-title1-input");
+    const title2Input = document.getElementById("admin-hero-title2-input");
+    const descInput = document.getElementById("admin-hero-desc-input");
+    const btn1Input = document.getElementById("admin-hero-btn1-input");
+    const btn2Input = document.getElementById("admin-hero-btn2-input");
+
+    const bannerUrl = (posterInput && posterInput.value.trim()) || (posterPreview && posterPreview.src) || "assets/custom_hero_banner.png?v=1";
+    const videoUrl = (videoInput && videoInput.value.trim()) || "";
 
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
     settings.heroBannerImg = bannerUrl;
+    settings.heroVideoUrl = videoUrl;
+
+    if (eyebrowInput && eyebrowInput.value.trim()) settings.heroEyebrow = eyebrowInput.value.trim();
+    if (title1Input && title1Input.value.trim()) settings.heroTitle1 = title1Input.value.trim();
+    if (title2Input && title2Input.value.trim()) settings.heroTitle2 = title2Input.value.trim();
+    if (descInput && descInput.value.trim()) settings.heroDesc = descInput.value.trim();
+    if (btn1Input && btn1Input.value.trim()) settings.heroBtnPrimaryText = btn1Input.value.trim();
+    if (btn2Input && btn2Input.value.trim()) settings.heroBtnSecondaryText = btn2Input.value.trim();
+
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
     // Sync to Supabase Cloud Database
@@ -3212,21 +3454,63 @@ const AdminController = {
       App.applyStoreSettings();
     }
 
-    showToast("🎉 Hero Banner saved and applied to storefront!");
+    showToast("🎉 Hero Video, Banner & Copy saved and applied live!");
   },
 
-  resetHeroBannerToDefault() {
+  applyHeroBanner() {
+    this.applyHeroSettings();
+  },
+
+  resetHeroSettingsToDefault() {
     const defaultBanner = "assets/custom_hero_banner.png?v=1";
-    const preview = document.getElementById("admin-hero-banner-preview");
-    const input = document.getElementById("admin-banner-url-input");
+    const defaultEyebrow = "UNIVERSE HUB — PREMIUM TECHNOLOGY";
+    const defaultTitle1 = "TECHNOLOGY.";
+    const defaultTitle2 = "REIMAGINED.";
+    const defaultDesc = "Premium Smartphones. Genuine Accessories. Expert Repairs.";
+    const defaultBtn1 = "EXPLORE PRODUCTS";
+    const defaultBtn2 = "REPAIR SERVICES";
+
+    const posterPreview = document.getElementById("admin-hero-banner-preview");
+    const posterInput = document.getElementById("admin-banner-url-input");
+    const videoPreview = document.getElementById("admin-hero-video-preview");
+    const videoInput = document.getElementById("admin-hero-video-url-input");
     const statusText = document.getElementById("admin-banner-status-text");
 
-    if (preview) preview.src = defaultBanner;
-    if (input) input.value = defaultBanner;
-    if (statusText) statusText.textContent = "Reset to default high-res showcase banner.";
+    const eyebrowInput = document.getElementById("admin-hero-eyebrow-input");
+    const title1Input = document.getElementById("admin-hero-title1-input");
+    const title2Input = document.getElementById("admin-hero-title2-input");
+    const descInput = document.getElementById("admin-hero-desc-input");
+    const btn1Input = document.getElementById("admin-hero-btn1-input");
+    const btn2Input = document.getElementById("admin-hero-btn2-input");
+
+    if (posterPreview) {
+      posterPreview.src = defaultBanner;
+      posterPreview.style.display = "block";
+    }
+    if (posterInput) posterInput.value = defaultBanner;
+    if (videoPreview) {
+      videoPreview.src = "";
+      videoPreview.style.display = "none";
+    }
+    if (videoInput) videoInput.value = "";
+    if (statusText) statusText.textContent = "Reset to Apple Cinematic default.";
+
+    if (eyebrowInput) eyebrowInput.value = defaultEyebrow;
+    if (title1Input) title1Input.value = defaultTitle1;
+    if (title2Input) title2Input.value = defaultTitle2;
+    if (descInput) descInput.value = defaultDesc;
+    if (btn1Input) btn1Input.value = defaultBtn1;
+    if (btn2Input) btn2Input.value = defaultBtn2;
 
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || DEFAULT_STORE_SETTINGS;
     settings.heroBannerImg = defaultBanner;
+    settings.heroVideoUrl = "";
+    settings.heroEyebrow = defaultEyebrow;
+    settings.heroTitle1 = defaultTitle1;
+    settings.heroTitle2 = defaultTitle2;
+    settings.heroDesc = defaultDesc;
+    settings.heroBtnPrimaryText = defaultBtn1;
+    settings.heroBtnSecondaryText = defaultBtn2;
     localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
 
     // Sync to Supabase Cloud Database
@@ -3238,7 +3522,211 @@ const AdminController = {
       App.applyStoreSettings();
     }
 
-    showToast("Banner restored to default showcase.");
+    showToast("Hero settings restored to Apple Cinematic default.");
+  },
+
+  resetHeroBannerToDefault() {
+    this.resetHeroSettingsToDefault();
+  },
+
+  // Category Showcase Slider Images Manager
+  renderCatSliderSettings(settings) {
+    const select = document.getElementById("admin-cat-slider-select");
+    if (!select) return;
+
+    let categories = [];
+    try {
+      categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || (typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : []);
+    } catch(e) {
+      categories = typeof INITIAL_CATEGORIES !== 'undefined' ? INITIAL_CATEGORIES : [];
+    }
+
+    const currentVal = select.value;
+    select.innerHTML = categories.map(cat => `
+      <option value="${cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} (${cat.id})</option>
+    `).join("");
+
+    if (currentVal && categories.some(c => c.id === currentVal)) {
+      select.value = currentVal;
+    }
+
+    this.handleCatSliderSelectChange();
+  },
+
+  handleCatSliderSelectChange() {
+    const select = document.getElementById("admin-cat-slider-select");
+    const preview = document.getElementById("admin-cat-slider-preview");
+    const urlInput = document.getElementById("admin-cat-slider-url-input");
+    const label = document.getElementById("admin-cat-slider-label");
+    const dimsBadge = document.getElementById("admin-cat-slider-dims-badge");
+
+    if (!select) return;
+    const catId = select.value;
+
+    let settings = {};
+    try {
+      settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    } catch(e) {}
+
+    const customImg = settings.categorySliderImages && settings.categorySliderImages[catId];
+    const defaultImages = {
+      "brand-new-iphones": "assets/custom_hero_banner.png",
+      "used-iphones": "assets/iphone_showcase_banner.jpg",
+      "power-banks": "assets/chargers_banner.jpg",
+      "chargers": "assets/chargers_banner.jpg",
+      "back-covers": "assets/cases_banner.jpg",
+      "cables": "assets/chargers_banner.jpg",
+      "audio": "assets/chargers_banner.jpg",
+      "tempered-glass": "assets/cases_banner.jpg",
+      "camera-protectors": "assets/cases_banner.jpg"
+    };
+    const activeImg = customImg || defaultImages[catId] || "assets/cases_banner.jpg";
+
+    if (preview) {
+      preview.src = activeImg;
+      this.attachDimensionWatcher(preview, dimsBadge);
+    }
+    if (urlInput) urlInput.value = activeImg;
+    if (label) label.textContent = customImg ? "Custom Image Live" : "Default Image Live";
+  },
+
+  previewCatSliderFromUrl() {
+    const urlInput = document.getElementById("admin-cat-slider-url-input");
+    const preview = document.getElementById("admin-cat-slider-preview");
+    const dimsBadge = document.getElementById("admin-cat-slider-dims-badge");
+
+    if (!urlInput || !urlInput.value.trim()) {
+      showToast("Please enter an image URL or file path.");
+      return;
+    }
+    const val = urlInput.value.trim();
+    if (preview) {
+      preview.src = val;
+      this.attachDimensionWatcher(preview, dimsBadge);
+    }
+    showToast("Preview loaded. Click 'Save Image for Category' to set it live.");
+  },
+
+  async handleCatSliderFile(file) {
+    if (!file.type.startsWith("image/") && !/\.(png|jpe?g|webp)$/i.test(file.name)) {
+      showToast("Please drop or choose a valid PNG, JPG, or WebP image.");
+      return;
+    }
+
+    const select = document.getElementById("admin-cat-slider-select");
+    const preview = document.getElementById("admin-cat-slider-preview");
+    const urlInput = document.getElementById("admin-cat-slider-url-input");
+    const dimsBadge = document.getElementById("admin-cat-slider-dims-badge");
+    const label = document.getElementById("admin-cat-slider-label");
+
+    if (!select || !select.value) {
+      showToast("Please select a category first.");
+      return;
+    }
+    const catId = select.value;
+
+    const tempUrl = URL.createObjectURL(file);
+    if (preview) {
+      preview.src = tempUrl;
+      this.attachDimensionWatcher(preview, dimsBadge);
+    }
+
+    showToast(`⏳ Uploading banner image for "${catId}"...`);
+    let savedUrl = tempUrl;
+
+    try {
+      const res = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        headers: { "Content-Type": file.type || "image/png" },
+        body: file
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        savedUrl = data.url;
+      }
+    } catch(err) {
+      console.warn("Direct upload error, falling back to base64:", err);
+      savedUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (re) => resolve(re.target.result);
+        reader.onerror = () => resolve(tempUrl);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (preview) preview.src = savedUrl;
+    if (urlInput) urlInput.value = savedUrl;
+    if (label) label.textContent = "Custom Image Live";
+
+    // Auto-save immediately!
+    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    if (!settings.categorySliderImages) settings.categorySliderImages = {};
+    settings.categorySliderImages[catId] = savedUrl;
+    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+    if (window.App && typeof window.App.renderCategories === "function") {
+      window.App.renderCategories();
+    }
+
+    showToast(`🎉 Slider image for "${catId}" updated and applied live!`);
+  },
+
+  saveCatSliderImage() {
+    const select = document.getElementById("admin-cat-slider-select");
+    const preview = document.getElementById("admin-cat-slider-preview");
+    const urlInput = document.getElementById("admin-cat-slider-url-input");
+
+    if (!select || !select.value) {
+      showToast("Please select a category first.");
+      return;
+    }
+    const catId = select.value;
+    const finalUrl = (urlInput && urlInput.value.trim()) || (preview && preview.src) || "";
+
+    if (!finalUrl) {
+      showToast("Please select or upload an image!");
+      return;
+    }
+
+    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    if (!settings.categorySliderImages) settings.categorySliderImages = {};
+    settings.categorySliderImages[catId] = finalUrl;
+    localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+    if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+      window.SupabaseSync.saveStoreSettings(settings);
+    }
+
+    showToast(`🎉 Slider image for "${catId}" saved & applied to live store!`);
+    if (window.App && typeof window.App.renderCategories === "function") {
+      window.App.renderCategories();
+    }
+    this.handleCatSliderSelectChange();
+  },
+
+  resetCatSliderImage() {
+    const select = document.getElementById("admin-cat-slider-select");
+    if (!select || !select.value) return;
+    const catId = select.value;
+
+    let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    if (settings.categorySliderImages && settings.categorySliderImages[catId]) {
+      delete settings.categorySliderImages[catId];
+      localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
+
+      if (window.SupabaseSync && typeof window.SupabaseSync.saveStoreSettings === "function") {
+        window.SupabaseSync.saveStoreSettings(settings);
+      }
+    }
+
+    showToast(`Slide image for "${catId}" reset to default.`);
+    if (window.App && typeof window.App.renderCategories === "function") {
+      window.App.renderCategories();
+    }
+    this.handleCatSliderSelectChange();
   },
 
   handleSaveStoreSettings() {
