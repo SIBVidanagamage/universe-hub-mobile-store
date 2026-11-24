@@ -2615,6 +2615,13 @@ const AdminController = {
     const btn2Input = document.getElementById("admin-hero-btn2-input");
     if (btn2Input) btn2Input.value = settings.heroBtnSecondaryText || "REPAIR SERVICES";
 
+    // Dedicated Mobile Video and Poster Settings
+    const mobileVideoUrlInput = document.getElementById("admin-hero-video-mobile-url-input");
+    if (mobileVideoUrlInput) mobileVideoUrlInput.value = settings.heroVideoMobileUrl || "";
+
+    const mobileBannerUrlInput = document.getElementById("admin-hero-banner-mobile-url-input");
+    if (mobileBannerUrlInput) mobileBannerUrlInput.value = settings.heroBannerMobileImg || "";
+
     // Logo Preview
     const logoPreview = document.getElementById("admin-logo-preview");
     if (logoPreview) {
@@ -3169,6 +3176,52 @@ const AdminController = {
     }
   },
 
+  async handleMobileVideoFileInput(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const urlInput = document.getElementById("admin-hero-video-mobile-url-input");
+    if (window.Uploader && typeof window.Uploader.uploadToSupabaseStorage === 'function') {
+      showToast("⏳ Uploading mobile video to Cloud Storage...");
+      try {
+        const publicUrl = await window.Uploader.uploadToSupabaseStorage(file, 'banners');
+        if (publicUrl && !publicUrl.startsWith("blob:")) {
+          if (urlInput) urlInput.value = publicUrl;
+          showToast("✅ Mobile video uploaded to Cloud!");
+          return;
+        }
+      } catch(e) {
+        console.warn("Mobile video cloud upload error:", e);
+      }
+    }
+    if (urlInput) urlInput.value = "assets/" + file.name;
+    showToast(`Mobile video set to assets/${file.name}`);
+  },
+
+  async handleMobilePosterFileInput(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const urlInput = document.getElementById("admin-hero-banner-mobile-url-input");
+    if (window.Uploader && typeof window.Uploader.uploadToSupabaseStorage === 'function') {
+      showToast("⏳ Uploading mobile poster to Cloud Storage...");
+      try {
+        const publicUrl = await window.Uploader.uploadToSupabaseStorage(file, 'banners');
+        if (publicUrl && !publicUrl.startsWith("blob:")) {
+          if (urlInput) urlInput.value = publicUrl;
+          showToast("✅ Mobile poster uploaded to Cloud!");
+          return;
+        }
+      } catch(e) {
+        console.warn("Mobile poster cloud upload error:", e);
+      }
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (urlInput) urlInput.value = e.target.result;
+      showToast("Mobile poster loaded!");
+    };
+    reader.readAsDataURL(file);
+  },
+
   async handleHeroVideoFile(file) {
     if (!file) return;
 
@@ -3618,6 +3671,11 @@ const AdminController = {
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || (typeof DEFAULT_STORE_SETTINGS !== 'undefined' ? DEFAULT_STORE_SETTINGS : {});
     settings.heroBannerImg = bannerUrl;
     settings.heroVideoUrl = videoUrl;
+
+    const mobileVideoInput = document.getElementById("admin-hero-video-mobile-url-input");
+    const mobileBannerInput = document.getElementById("admin-hero-banner-mobile-url-input");
+    if (mobileVideoInput) settings.heroVideoMobileUrl = mobileVideoInput.value.trim();
+    if (mobileBannerInput) settings.heroBannerMobileImg = mobileBannerInput.value.trim();
 
     if (eyebrowInput && eyebrowInput.value.trim()) settings.heroEyebrow = eyebrowInput.value.trim();
     if (title1Input && title1Input.value.trim()) settings.heroTitle1 = title1Input.value.trim();

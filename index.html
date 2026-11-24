@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css?v=126">
+  <link rel="stylesheet" href="css/style.css?v=127">
   <link rel="stylesheet" href="css/invoice.css?v=110">
   <link rel="stylesheet" href="css/payment.css?v=110">
   <style>
@@ -112,20 +112,27 @@
     <nav class="sub-navbar">
       <div class="container">
         <ul class="sub-nav-links" id="sub-navbar-links">
-          <li><a href="#" class="active" onclick="App.filterByCategory('all'); return false;">Home</a></li>
-          <li><a href="#catalog-section" onclick="App.filterByCategory('brand-new-iphones');">Brand New iPhones</a></li>
-          <li><a href="#catalog-section" onclick="App.filterByCategory('used-iphones');">Certified Used Phones</a></li>
-          <li><a href="#catalog-section" onclick="App.filterByCategory('back-covers');">Cases & Covers</a></li>
-          <li><a href="#catalog-section" onclick="App.filterByCategory('chargers');">Chargers & Cables</a></li>
-          <li><a href="#catalog-section" onclick="App.filterByCategory('audio');">Audio & AirPods</a></li>
-          <li><a href="#repair-center" class="nav-pill-highlight">🔧 Mobile Repair Lab</a></li>
+          <li><a href="#" class="active" onclick="App.navigateToHome(); return false;">Home</a></li>
+          <li><a href="#shop" onclick="App.navigateToShop('all'); return false;" style="color:var(--accent-gold); font-weight:700;">🛍️ Store Catalog</a></li>
+          <li><a href="#shop" onclick="App.navigateToShop('brand-new-iphones'); return false;">Brand New iPhones</a></li>
+          <li><a href="#shop" onclick="App.navigateToShop('used-iphones'); return false;">Certified Used Phones</a></li>
+          <li><a href="#shop" onclick="App.navigateToShop('power-banks'); return false;">Power Banks</a></li>
+          <li><a href="#shop" onclick="App.navigateToShop('chargers'); return false;">Chargers &amp; Cables</a></li>
+          <li><a href="#shop" onclick="App.navigateToShop('back-covers'); return false;">Cases &amp; Covers</a></li>
+          <li><a href="#shop" onclick="App.navigateToShop('audio'); return false;">Audio &amp; AirPods</a></li>
+          <li><a href="#repair-center" class="nav-pill-highlight" onclick="App.navigateToHome(); setTimeout(() => document.getElementById('repair-center')?.scrollIntoView({behavior:'smooth'}), 120);">🔧 Mobile Repair Lab</a></li>
           <li><a href="javascript:void(0)" onclick="App.openStoreReviewsModal()">⭐ Store Reviews (4.9★)</a></li>
-          <li><a href="#store-location">📍 Physical Shop</a></li>
+          <li><a href="#store-location" onclick="App.navigateToHome(); setTimeout(() => document.getElementById('store-location')?.scrollIntoView({behavior:'smooth'}), 120);">📍 Physical Shop</a></li>
           <li><a href="javascript:void(0)" onclick="InvoiceService.showCustomerOrders()" style="color:var(--neon-cyan); font-weight:600;">🧾 Invoices &amp; Orders</a></li>
           <li><a href="javascript:void(0)" onclick="App.openAboutModal()" style="color:#d8b4fe; font-weight:600;">ℹ️ About Us</a></li>
         </ul>
       </div>
     </nav>
+
+    <!-- =========================================================================
+         HOME VIEW WRAPPER (Cinematic Hero, Category Slider, Brands, Curated Picks, Lab)
+         ========================================================================= -->
+    <div id="home-view-sections">
 
     <!-- Apple-Inspired Cinematic Full-Screen Video Hero -->
     <section class="apple-cinematic-hero" id="home-hero-stage">
@@ -149,7 +156,7 @@
           id="hero-showcase-img" 
           class="hero-video-fallback-img" 
           src="assets/custom_hero_banner.png" 
-          alt="Universe Hub Flagship Tech & Certified Repairs"
+          alt="Universe Hub Flagship Tech &amp; Certified Repairs"
           onerror="this.src='assets/hero_showcase.jpg'"
         >
         <!-- Dark Multi-Stop Vignette & Gradient Overlay for Contrast -->
@@ -178,7 +185,7 @@
 
           <!-- Pill-Shaped CTA Action Group -->
           <div class="apple-hero-cta-group">
-            <a href="#catalog-section" class="btn-apple-primary">
+            <a href="#shop" class="btn-apple-primary" onclick="App.navigateToShop('all'); return false;">
               <span id="hero-btn-primary-text">EXPLORE PRODUCTS</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </a>
@@ -215,7 +222,7 @@
             <button type="button" class="category-nav-btn next-btn" onclick="App.nextCategorySlide()" aria-label="Next Slide">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
-            <a href="#catalog-section" class="view-all-link" onclick="App.filterByCategory('all')">
+            <a href="#shop" class="view-all-link" onclick="App.navigateToShop('all'); return false;">
               <span>View All</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
@@ -257,51 +264,38 @@
       </div>
     </section>
 
-    <!-- Featured Catalog Section -->
-    <section id="catalog-section" class="section-pad">
+    <!-- Home Featured Tech & Best Sellers Preview (Curated Top Picks with Direct Store Portal CTA) -->
+    <section id="home-featured-section" class="section-pad" style="padding-top:10px;">
       <div class="container">
-        <div class="section-head catalog-section-head">
+        <div class="section-head catalog-section-head" style="margin-bottom:20px;">
           <div class="section-title-wrap">
+            <div class="category-section-badge">✨ TOP SELECTION &amp; BEST SELLERS</div>
             <h2>Best Sellers &amp; Featured Tech</h2>
             <p>Hand-picked Apple iPhones, certified used bargains, and high-performance accessories.</p>
           </div>
-          <!-- Slider Navigation & Counter Controls -->
-          <div class="catalog-slider-header-controls" id="catalog-slider-header-controls">
-            <span class="catalog-slider-counter" id="catalog-slider-counter">Page 1 / 3</span>
-            <div class="catalog-slider-nav-arrows">
-              <button type="button" class="catalog-nav-arrow" id="catalog-prev-btn" onclick="App.prevCatalogPage()" aria-label="Previous Page" title="Previous Page">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              </button>
-              <button type="button" class="catalog-nav-arrow" id="catalog-next-btn" onclick="App.nextCatalogPage()" aria-label="Next Page" title="Next Page">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </button>
-            </div>
-            <button type="button" class="catalog-view-toggle-btn" id="catalog-view-toggle-btn" onclick="App.toggleCatalogViewMode()" title="Toggle between Slider &amp; Full Grid">
-              ⊞ View All Grid
+          <button type="button" class="btn-primary-glow" onclick="App.navigateToShop('all')" style="padding:10px 22px; font-size:13px; font-weight:800; background:#EEBD43; color:#050505; display:inline-flex; align-items:center; gap:8px;">
+            <span>Browse Full Store (32+) →</span>
+          </button>
+        </div>
+
+        <!-- Curated 4 to 6 Products Grid on Home -->
+        <div id="home-featured-products-container" class="products-grid">
+          <!-- Dynamically populated with 4-6 top products by App.renderHomeFeatured() -->
+        </div>
+
+        <!-- Full Store CTA Banner Card -->
+        <div class="home-explore-store-cta" style="margin-top:24px; background:linear-gradient(135deg, rgba(238,189,67,0.12) 0%, rgba(15,23,42,0.92) 100%); border:1px solid rgba(238,189,67,0.3); border-radius:18px; padding:22px 26px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; box-shadow:0 12px 36px rgba(0,0,0,0.6);">
+          <div>
+            <div style="font-size:11px; font-weight:800; color:#EEBD43; letter-spacing:1px; margin-bottom:4px;">🛍️ UNIVERSE HUB COMPLETE INVENTORY</div>
+            <h3 style="font-size:19px; font-weight:800; color:#fff; margin:0 0 4px 0;">Looking for our complete catalog?</h3>
+            <p style="font-size:13px; color:var(--text-secondary); margin:0;">Explore all 32+ Apple iPhones, certified used bargains, GaN wall chargers, braided cables &amp; MagSafe accessories.</p>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button type="button" class="btn-primary-glow" onclick="App.navigateToShop('all')" style="padding:12px 24px; font-size:13.5px; font-weight:800; background:#EEBD43; color:#050505; box-shadow:0 0 20px rgba(238,189,67,0.4);">
+              <span>Open Online Store (32 Products)</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
           </div>
-        </div>
-
-        <!-- Catalog Filter Tabs -->
-        <div class="catalog-tabs-bar" id="catalog-tabs-bar">
-          <button class="tab-btn active" data-cat="all">🌟 All Products</button>
-        </div>
-
-        <!-- Catalog Brand Filter Pills Bar -->
-        <div class="catalog-brand-filter-bar" id="catalog-brand-filter-bar">
-          <!-- Dynamically populated with Anker, Baseus, Ugreen, WiWU, Asper, etc. -->
-        </div>
-
-        <!-- Products Slider Viewport & Track -->
-        <div class="catalog-slider-viewport" id="catalog-slider-viewport">
-          <div id="products-catalog-container" class="catalog-slider-track">
-            <!-- Dynamically Populated with 5-product smooth slider -->
-          </div>
-        </div>
-
-        <!-- Catalog Bottom Pagination Controls -->
-        <div class="catalog-pagination-bar" id="catalog-pagination-bar">
-          <!-- Dynamically populated: Prev button, Page buttons (1, 2, 3), Next button -->
         </div>
       </div>
     </section>
@@ -507,6 +501,93 @@
         </div>
       </div>
     </div>
+    </div> <!-- /#home-view-sections -->
+
+    <!-- =========================================================================
+         DEDICATED FULL STORE / PRODUCTS VIEW (#shop / #catalog)
+         ========================================================================= -->
+    <div id="dedicated-store-view" class="dedicated-store-view" style="display:none;">
+      <!-- Store Top Breadcrumb & Navigation Bar -->
+      <div class="store-top-bar-wrapper" style="background:rgba(10,12,18,0.95); border-bottom:1px solid rgba(255,255,255,0.08); position:sticky; top:70px; z-index:40; backdrop-filter:blur(16px);">
+        <div class="container store-top-bar" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; flex-wrap:wrap; gap:10px;">
+          <button type="button" class="btn-store-back-home" onclick="App.navigateToHome()" style="background:rgba(238,189,67,0.12); border:1px solid rgba(238,189,67,0.35); color:#EEBD43; border-radius:10px; padding:7px 16px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:all 0.2s ease; box-shadow:0 0 14px rgba(238,189,67,0.18);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>← Back to Home</span>
+          </button>
+          <div class="store-breadcrumb-trail" style="font-size:13px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+            <a href="#" onclick="App.navigateToHome(); return false;" style="color:#aaa; text-decoration:none;">Home</a>
+            <span style="opacity:0.4;">/</span>
+            <a href="#shop" onclick="App.navigateToShop('all'); return false;" style="color:#EEBD43; text-decoration:none;">Store</a>
+            <span style="opacity:0.4;">/</span>
+            <span class="crumb-active" id="store-crumb-active-cat" style="color:#fff; font-weight:700;">All Products</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Catalog Section (Inside Dedicated Store) -->
+      <section id="catalog-section" class="section-pad" style="padding-top:20px; padding-bottom:50px;">
+        <div class="container">
+          <!-- Store Header Banner -->
+          <div class="store-header-banner" style="margin-bottom:24px;">
+            <div class="category-section-badge" id="store-header-badge">⚡ OFFICIAL UNIVERSE HUB STORE</div>
+            <h1 class="store-header-title" id="store-header-title" style="font-size:clamp(26px, 5vw, 36px); font-weight:900; color:#fff; margin:4px 0 8px;">All Products &amp; Accessories</h1>
+            <p class="store-header-desc" id="store-header-desc" style="font-size:14px; color:var(--text-secondary); max-width:620px;">
+              Hand-picked Apple iPhones, certified used bargains, and high-performance accessories with physical store warranty.
+            </p>
+          </div>
+
+          <!-- Slider Navigation & Counter Controls -->
+          <div class="catalog-slider-header-controls" id="catalog-slider-header-controls" style="margin-bottom:14px;">
+            <span class="catalog-slider-counter" id="catalog-slider-counter">Page 1 / 3</span>
+            <div class="catalog-slider-nav-arrows">
+              <button type="button" class="catalog-nav-arrow" id="catalog-prev-btn" onclick="App.prevCatalogPage()" aria-label="Previous Page" title="Previous Page">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <button type="button" class="catalog-nav-arrow" id="catalog-next-btn" onclick="App.nextCatalogPage()" aria-label="Next Page" title="Next Page">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+            <button type="button" class="catalog-view-toggle-btn" id="catalog-view-toggle-btn" onclick="App.toggleCatalogViewMode()" title="Toggle between Slider &amp; Full Grid">
+              ⊞ View All Grid
+            </button>
+          </div>
+
+          <!-- Catalog Filter Tabs -->
+          <div class="catalog-tabs-bar" id="catalog-tabs-bar">
+            <button class="tab-btn active" data-cat="all">🌟 All Products</button>
+          </div>
+
+          <!-- Catalog Brand Filter Pills Bar -->
+          <div class="catalog-brand-filter-bar" id="catalog-brand-filter-bar">
+            <!-- Dynamically populated with Anker, Baseus, Ugreen, WiWU, Asper, etc. -->
+          </div>
+
+          <!-- Products Slider Viewport & Track -->
+          <div class="catalog-slider-viewport" id="catalog-slider-viewport">
+            <div id="products-catalog-container" class="catalog-slider-track">
+              <!-- Dynamically Populated with catalog cards -->
+            </div>
+          </div>
+
+          <!-- Catalog Bottom Pagination Controls -->
+          <div class="catalog-pagination-bar" id="catalog-pagination-bar">
+            <!-- Dynamically populated: Prev button, Page buttons (1, 2, 3), Next button -->
+          </div>
+
+          <!-- Dedicated Store Help Strip -->
+          <div style="margin-top:40px; background:rgba(15,23,42,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:20px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
+            <div>
+              <div style="font-weight:700; color:#fff; font-size:15px; margin-bottom:2px;">Need Help or Device Repair?</div>
+              <div style="font-size:12.5px; color:var(--text-secondary);">Visit our Maharagama Flagship Repair Center or message us directly on WhatsApp.</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="btn-glass" onclick="App.navigateToHome(); setTimeout(() => document.getElementById('repair-center')?.scrollIntoView({behavior:'smooth'}), 120);">🔧 Repair Lab</button>
+              <a href="https://wa.me/94740219239?text=Hi%20Universe%20Hub,%20I%20am%20browsing%20the%20store%20and%20need%20assistance" target="_blank" class="btn-whatsapp-compact" style="background:#25d366; color:#061b0f; font-weight:800; font-size:12.5px; padding:8px 16px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; text-decoration:none;">💬 WhatsApp Support</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <!-- Main Footer -->
     <footer class="site-footer">
@@ -527,11 +608,11 @@
           <div class="footer-col">
             <h4>Quick Categories</h4>
             <ul class="footer-links-list">
-              <li><a href="#catalog-section" onclick="App.filterByCategory('brand-new-iphones')">Brand New iPhones</a></li>
-              <li><a href="#catalog-section" onclick="App.filterByCategory('used-iphones')">Certified Pre-Owned</a></li>
-              <li><a href="#catalog-section" onclick="App.filterByCategory('back-covers')">MagSafe Cases & Covers</a></li>
-              <li><a href="#catalog-section" onclick="App.filterByCategory('chargers')">65W GaN Fast Chargers</a></li>
-              <li><a href="#catalog-section" onclick="App.filterByCategory('audio')">AirPods & Audio</a></li>
+              <li><a href="#shop" onclick="App.navigateToShop('brand-new-iphones'); return false;">Brand New iPhones</a></li>
+              <li><a href="#shop" onclick="App.navigateToShop('used-iphones'); return false;">Certified Pre-Owned</a></li>
+              <li><a href="#shop" onclick="App.navigateToShop('back-covers'); return false;">MagSafe Cases &amp; Covers</a></li>
+              <li><a href="#shop" onclick="App.navigateToShop('chargers'); return false;">65W GaN Fast Chargers</a></li>
+              <li><a href="#shop" onclick="App.navigateToShop('audio'); return false;">AirPods &amp; Audio</a></li>
             </ul>
           </div>
 
@@ -1455,6 +1536,39 @@
                     </button>
                   </div>
                 </div>
+
+                <!-- 3. Mobile Smartphone Dedicated Media Section (9:16 Portrait / Phone Responsive) -->
+                <div style="background:rgba(238,189,67,0.03); border:1px solid rgba(238,189,67,0.25); border-radius:12px; padding:14px; margin-top:14px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label style="font-size:12.5px; color:#EEBD43; font-weight:700; display:flex; align-items:center; gap:6px;">
+                      <span>📱 Mobile Smartphone Screen Media (9:16 Portrait):</span>
+                    </label>
+                    <span style="font-size:11px; color:#EEBD43; background:rgba(238,189,67,0.12); padding:2px 8px; border-radius:12px; border:1px solid rgba(238,189,67,0.3);">Mobile Only</span>
+                  </div>
+                  <p style="font-size:11.5px; color:var(--text-secondary); margin-bottom:10px; line-height:1.45;">
+                    Add dedicated vertical/portrait (9:16) video or banner image tailored for smartphone screens. If left empty, the desktop media above is automatically adapted.
+                  </p>
+                  
+                  <!-- Mobile Video Input -->
+                  <div style="margin-bottom:10px;">
+                    <label style="font-size:11.5px; color:rgba(255,255,255,0.85); display:block; margin-bottom:4px; font-weight:600;">Mobile Background Video (MP4 / WebM):</label>
+                    <div style="display:flex; gap:8px;">
+                      <input type="text" id="admin-hero-video-mobile-url-input" placeholder="assets/hero_mobile.mp4 or direct cloud URL..." style="flex:1; font-size:12px;">
+                      <button type="button" class="btn-glass" style="font-size:11.5px; padding:0 12px; color:#EEBD43; border-color:rgba(238,189,67,0.4);" onclick="document.getElementById('admin-hero-video-mobile-file-input').click();">📁 Browse File</button>
+                      <input type="file" id="admin-hero-video-mobile-file-input" accept="video/*, .mp4, .webm, .mov" onchange="AdminController.handleMobileVideoFileInput(this)" style="display:none;">
+                    </div>
+                  </div>
+
+                  <!-- Mobile Poster Input -->
+                  <div>
+                    <label style="font-size:11.5px; color:rgba(255,255,255,0.85); display:block; margin-bottom:4px; font-weight:600;">Mobile Fallback Poster (PNG / JPG / WebP):</label>
+                    <div style="display:flex; gap:8px;">
+                      <input type="text" id="admin-hero-banner-mobile-url-input" placeholder="assets/custom_hero_banner_mobile.png or direct URL..." style="flex:1; font-size:12px;">
+                      <button type="button" class="btn-glass" style="font-size:11.5px; padding:0 12px;" onclick="document.getElementById('admin-hero-banner-mobile-file-input').click();">📁 Browse File</button>
+                      <input type="file" id="admin-hero-banner-mobile-file-input" accept="image/*" onchange="AdminController.handleMobilePosterFileInput(this)" style="display:none;">
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -2012,9 +2126,13 @@
   <!-- Quick View Product Modal -->
   <div id="quickview-modal" class="modal-overlay">
     <div class="modal-box" style="max-width:860px; width:94%; overflow-x:hidden;">
-      <div class="modal-header">
-        <h3>Product Details</h3>
-        <button class="close-modal-btn" data-close="quickview-modal">✕</button>
+      <div class="modal-header product-modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <button type="button" class="btn-product-modal-back" onclick="App.closeQuickView()" aria-label="Back to Products" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); color:#fff; border-radius:8px; padding:6px 14px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:6px; cursor:pointer; transition:all 0.2s ease;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>Back</span>
+        </button>
+        <h3 style="margin:0; font-size:16px; font-weight:700;">Product Details</h3>
+        <button class="close-modal-btn" onclick="App.closeQuickView()" style="background:none; border:none; color:var(--text-secondary); font-size:20px; cursor:pointer;">✕</button>
       </div>
       <div id="quickview-modal-body" class="modal-body">
         <!-- Rendered via JS -->
@@ -3641,7 +3759,7 @@
   <script src="js/uploader.js?v=130"></script>
   <script src="js/bulk-uploader.js?v=130"></script>
   <script src="js/payment-gateway.js?v=130"></script>
-  <script src="js/admin.js?v=167"></script>
-  <script src="js/app.js?v=199"></script>
+  <script src="js/admin.js?v=168"></script>
+  <script src="js/app.js?v=200"></script>
 </body>
 </html>

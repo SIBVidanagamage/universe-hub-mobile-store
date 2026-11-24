@@ -163,19 +163,19 @@ const App = {
     // 2. Brand New iPhones
     if (target === 'brand-new-iphones' || target === 'brand-new') {
       const isBrandNewCond = prod.condition && prod.condition.toLowerCase().includes('brand new');
-      return pCat === 'brand-new-iphones' || 
-             (pMain === 'iphones' && isBrandNewCond) || 
-             (pCat.includes('iphone') && isBrandNewCond) ||
-             (pCat === 'iphones' && isBrandNewCond);
+      return pCat === 'brand-new-iphones' ||
+        (pMain === 'iphones' && isBrandNewCond) ||
+        (pCat.includes('iphone') && isBrandNewCond) ||
+        (pCat === 'iphones' && isBrandNewCond);
     }
 
     // 3. Certified Used iPhones
     if (target === 'used-iphones' || target === 'used') {
       const isUsedCond = !prod.condition || !prod.condition.toLowerCase().includes('brand new');
-      return pCat === 'used-iphones' || 
-             (pMain === 'iphones' && isUsedCond) || 
-             (pCat.includes('iphone') && isUsedCond) ||
-             (pCat === 'iphones' && isUsedCond);
+      return pCat === 'used-iphones' ||
+        (pMain === 'iphones' && isUsedCond) ||
+        (pCat.includes('iphone') && isUsedCond) ||
+        (pCat === 'iphones' && isUsedCond);
     }
 
     // 4. All Accessories group
@@ -287,7 +287,7 @@ const App = {
       if (p.category && typeof p.category === "string") {
         const raw = p.category.toLowerCase().trim();
         const norm = (raw === 'powerbanks' || raw === 'power-bank' || raw.includes('magsafe-battery')) ? 'power-banks' :
-                     (raw === 'fast-chargers' || raw === 'fast-chargers-gan' || raw.includes('charger')) ? 'chargers' : raw;
+          (raw === 'fast-chargers' || raw === 'fast-chargers-gan' || raw.includes('charger')) ? 'chargers' : raw;
         if (!map.has(norm)) {
           const initMatch = initial.find(ic => ic.id.toLowerCase() === norm);
           map.set(norm, {
@@ -311,6 +311,8 @@ const App = {
     return result;
   },
 
+  currentView: 'home',
+
   init() {
     this.loadUserSession();
     this.applyStoreSettings();
@@ -324,7 +326,7 @@ const App = {
           localStorage.setItem("UH_PRODUCTS", JSON.stringify(cleaned));
         }
       }
-    } catch(e) {}
+    } catch (e) { }
 
     // Async pre-load from IndexedDB if memory cache isn't warm yet
     if (window.UHStorage && typeof window.UHStorage.loadProducts === "function") {
@@ -337,8 +339,8 @@ const App = {
           this.renderBrandFilterBar();
           this.renderCategories();
           this.renderBrandsSection();
+          this.renderHomeFeatured();
           this.renderCatalog();
-          this.renderBestSellers();
           if (typeof window !== "undefined" && window.AdminController) {
             if (typeof window.AdminController.renderStats === "function") window.AdminController.renderStats();
             if (typeof window.AdminController.renderInventoryFilterBar === "function") window.AdminController.renderInventoryFilterBar();
@@ -353,12 +355,14 @@ const App = {
     this.renderBrandFilterBar();
     this.renderCategories();
     this.renderBrandsSection();
+    this.renderHomeFeatured();
     this.renderCatalog();
     this.renderReviews();
     this.updateCartBadge();
     this.updateWishlistBadge();
     this.bindEvents();
     this.setupRepairEstimator();
+    this.initRouter();
 
     // Fetch fresh cloud products, brands & settings if Supabase is connected
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchBrands === "function") {
@@ -369,14 +373,14 @@ const App = {
         if (Array.isArray(prods) && prods.length > 0) {
           const clean = prods.filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
           window.UH_PRODUCTS_CACHE = clean;
-          try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(clean)); } catch(e) {}
+          try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(clean)); } catch (e) { }
           this.renderNavbar();
           this.renderCatalogTabs();
           this.renderBrandFilterBar();
           this.renderCategories();
           this.renderBrandsSection();
+          this.renderHomeFeatured();
           this.renderCatalog();
-          this.renderBestSellers();
           if (typeof window !== "undefined" && window.AdminController) {
             if (typeof window.AdminController.renderStats === "function") window.AdminController.renderStats();
             if (typeof window.AdminController.renderInventoryFilterBar === "function") window.AdminController.renderInventoryFilterBar();
@@ -523,10 +527,10 @@ const App = {
     const tiltTargets = document.querySelectorAll(
       '.product-card:not([data-tilt-active]), .category-bento-tile:not([data-tilt-active]), .category-card:not([data-tilt-active]), .brand-feature-card:not([data-tilt-active]), .promo-card:not([data-tilt-active]), .repair-cap-card:not([data-tilt-active])'
     );
-    
+
     tiltTargets.forEach(card => {
       card.setAttribute('data-tilt-active', 'true');
-      
+
       let isHovered = false;
       let rafId = null;
       let targetX = 0;
@@ -554,7 +558,7 @@ const App = {
         const y = e.clientY - rect.top;
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        
+
         targetX = ((y - centerY) / centerY) * -8.5; // Rotate on X
         targetY = ((x - centerX) / centerX) * 8.5;  // Rotate on Y
 
@@ -590,7 +594,7 @@ const App = {
         const tiltY = Math.max(-5.5, Math.min(5.5, ((x - centerX) / centerX) * 5));
 
         heroPodium.style.transform = `perspective(1200px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-4px)`;
-        
+
         const radialLight = heroPodium.querySelector('.stage-radial-light');
         if (radialLight) {
           radialLight.style.transform = `translate(${(-tiltY * 3.5).toFixed(1)}px, ${(-tiltX * 3.5).toFixed(1)}px)`;
@@ -647,23 +651,30 @@ const App = {
       if (typeof window !== "undefined") window.UH_STORE_SETTINGS_CACHE = settings;
     }
 
-    // 1. Hero Showcase Image & Video Background
+    // 1. Hero Showcase Image & Video Background (Desktop vs Smartphone Dedicated)
+    const isMobileDevice = typeof window !== "undefined" && window.innerWidth <= 768;
+    const activePoster = (isMobileDevice && settings.heroBannerMobileImg) 
+      ? settings.heroBannerMobileImg 
+      : (settings.heroBannerImg || "assets/custom_hero_banner.png");
+    const activeVideo = (isMobileDevice && settings.heroVideoMobileUrl) 
+      ? settings.heroVideoMobileUrl 
+      : (settings.heroVideoUrl || "assets/universe_hub_hero_cinematic.mp4");
+
     const heroImg = document.getElementById("hero-showcase-img");
-    if (heroImg && settings.heroBannerImg) {
-      heroImg.src = settings.heroBannerImg;
+    if (heroImg && activePoster) {
+      heroImg.src = activePoster;
     }
     const bgVideo = document.getElementById("hero-cinematic-video-element") || document.querySelector(".hero-cinematic-bg-video");
     if (bgVideo) {
-      if (settings.heroBannerImg) {
-        bgVideo.poster = settings.heroBannerImg;
+      if (activePoster) {
+        bgVideo.poster = activePoster;
       }
       bgVideo.onerror = () => {
-        console.warn("Hero video failed to load, falling back to static poster image.");
         bgVideo.style.display = "none";
         if (heroImg) heroImg.style.display = "block";
       };
 
-      const rawUrl = settings.heroVideoUrl ? String(settings.heroVideoUrl).trim() : "";
+      const rawUrl = activeVideo ? String(activeVideo).trim() : "";
       const vUrl = (rawUrl && !rawUrl.startsWith("blob:")) ? rawUrl : "assets/universe_hub_hero_cinematic.mp4";
 
       if (vUrl) {
@@ -681,10 +692,10 @@ const App = {
           if (playPromise !== undefined) {
             playPromise.catch(() => {
               bgVideo.muted = true;
-              bgVideo.play().catch(() => {});
+              bgVideo.play().catch(() => { });
             });
           }
-        } catch (e) {}
+        } catch (e) { }
       } else {
         bgVideo.style.display = "none";
         if (heroImg) heroImg.style.display = "block";
@@ -1198,9 +1209,212 @@ const App = {
         adminView.style.display = "none";
         adminView.classList.remove("active");
       }
-      window.location.hash = "";
-      this.renderCatalog();
+      if (this.currentView === 'shop') {
+        this.navigateToShop(this.activeCategory, this.activeBrand, false);
+      } else {
+        this.navigateToHome(false);
+      }
     }
+  },
+
+  navigateToShop(catId = 'all', brandId = 'all', pushHash = true) {
+    this.currentView = 'shop';
+    const homeSections = document.getElementById("home-view-sections");
+    const storeView = document.getElementById("dedicated-store-view");
+    const adminView = document.getElementById("admin-view");
+
+    if (adminView) {
+      adminView.style.display = "none";
+      adminView.classList.remove("active");
+    }
+    if (homeSections) homeSections.style.display = "none";
+    if (storeView) storeView.style.display = "block";
+
+    this.activeCategory = catId || 'all';
+    this.activeBrand = brandId || 'all';
+
+    // Update active tab in store catalog
+    document.querySelectorAll(".catalog-tabs-bar .tab-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.cat === this.activeCategory);
+    });
+
+    // Update breadcrumb and header title
+    const categories = this.getCategories();
+    const matchedCat = categories.find(c => c.id === this.activeCategory);
+    const catName = (this.activeCategory === 'all' || !matchedCat) ? 'All Products' : matchedCat.name;
+
+    const crumbEl = document.getElementById("store-crumb-active-cat");
+    if (crumbEl) crumbEl.textContent = catName;
+
+    const headerBadge = document.getElementById("store-header-badge");
+    if (headerBadge) {
+      headerBadge.textContent = this.activeCategory === 'all' ? "⚡ OFFICIAL UNIVERSE HUB STORE" : `⚡ ${catName.toUpperCase()}`;
+    }
+
+    const headerTitle = document.getElementById("store-header-title");
+    if (headerTitle) {
+      headerTitle.textContent = this.activeCategory === 'all' ? "All Products & Accessories" : catName;
+    }
+
+    const headerDesc = document.getElementById("store-header-desc");
+    if (headerDesc) {
+      if (matchedCat && matchedCat.tagline) {
+        headerDesc.textContent = matchedCat.tagline;
+      } else {
+        headerDesc.textContent = "Explore our verified collection of authentic smartphones and premium accessories with store warranty.";
+      }
+    }
+
+    this.renderCatalogTabs();
+    this.renderBrandFilterBar();
+    this.renderCatalog();
+
+    if (pushHash) {
+      const targetHash = (this.activeCategory && this.activeCategory !== 'all') ? `#shop?cat=${this.activeCategory}` : '#shop';
+      if (window.location.hash !== targetHash) {
+        try { window.history.pushState(null, '', targetHash); } catch(e) { window.location.hash = targetHash; }
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
+  navigateToHome(pushHash = true) {
+    this.currentView = 'home';
+    const homeSections = document.getElementById("home-view-sections");
+    const storeView = document.getElementById("dedicated-store-view");
+    const adminView = document.getElementById("admin-view");
+
+    if (adminView) {
+      adminView.style.display = "none";
+      adminView.classList.remove("active");
+    }
+    if (storeView) storeView.style.display = "none";
+    if (homeSections) homeSections.style.display = "block";
+
+    this.renderHomeFeatured();
+
+    if (pushHash) {
+      if (window.location.hash && window.location.hash !== '#' && window.location.hash !== '#home') {
+        try { window.history.pushState(null, '', '#home'); } catch(e) { window.location.hash = '#home'; }
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
+  initRouter() {
+    const handleRoute = () => {
+      const hash = window.location.hash || '';
+      if (hash === '#admin') {
+        this.toggleAdminView(true);
+      } else if (hash.startsWith('#shop') || hash.startsWith('#catalog')) {
+        let targetCat = 'all';
+        if (hash.includes('cat=')) {
+          const match = hash.match(/cat=([a-zA-Z0-9_-]+)/);
+          if (match && match[1]) targetCat = match[1];
+        }
+        this.navigateToShop(targetCat, 'all', false);
+      } else if (hash.includes('?prod=')) {
+        const prodMatch = hash.match(/prod=([a-zA-Z0-9_-]+)/);
+        if (prodMatch && prodMatch[1]) {
+          this.openQuickView(prodMatch[1]);
+        }
+      } else {
+        if (this.currentView !== 'home') {
+          this.navigateToHome(false);
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('popstate', (e) => {
+      const qv = document.getElementById("quickview-modal");
+      if (qv && qv.classList.contains("active")) {
+        this.closeModal("quickview-modal");
+      }
+    });
+
+    handleRoute();
+  },
+
+  renderHomeFeatured() {
+    const container = document.getElementById("home-featured-products-container");
+    if (!container) return;
+
+    const products = this.getProducts();
+    if (!Array.isArray(products) || products.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color:var(--text-secondary);">Loading featured products...</div>`;
+      return;
+    }
+
+    // Curated top 6 products
+    const featuredList = products.slice(0, 6);
+    const wishlist = JSON.parse(localStorage.getItem("UH_WISHLIST")) || [];
+
+    container.innerHTML = featuredList.map(prod => {
+      const isWishlisted = wishlist.includes(prod.id);
+      const isUsed = !!(prod.condition && !prod.condition.toLowerCase().includes("brand new"));
+      const hasStorageVariants = Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0;
+      const minPrice = hasStorageVariants ? Math.min(...prod.storageOptions.map(t => Number(t.price) || prod.price)) : prod.price;
+
+      let primaryBadge = '';
+      if (prod.discount) {
+        primaryBadge = `<span class="badge-pill badge-discount">${prod.discount}</span>`;
+      } else if (prod.batteryHealth) {
+        primaryBadge = `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}%</span>`;
+      } else if (prod.specs?.mah) {
+        primaryBadge = `<span class="badge-pill badge-tech">🔋 ${prod.specs.mah}</span>`;
+      } else if (prod.specs?.wattage) {
+        primaryBadge = `<span class="badge-pill badge-watt">⚡ ${prod.specs.wattage}</span>`;
+      } else if (isUsed) {
+        primaryBadge = `<span class="badge-pill badge-used">Grade A+</span>`;
+      }
+
+      return `
+        <div class="product-card" data-id="${prod.id}">
+          <div class="card-media" onclick="App.openQuickView('${prod.id}')" style="cursor:pointer;">
+            <div class="brand-micro-tag">
+              <span class="brand-text-only">${(prod.brand || 'Apple').toUpperCase()}</span>
+            </div>
+            ${primaryBadge}
+            <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="event.stopPropagation(); App.toggleWishlist('${prod.id}', this)" aria-label="Save to Wishlist">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="${isWishlisted ? '#ef4444' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+            <img src="${prod.image}" alt="${prod.name}" class="product-img" onerror="this.src='assets/hero_showcase.jpg'">
+            <div class="card-quick-specs">
+              <span>Quick Specs</span>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="card-rating">
+              <span class="stars">★</span>
+              <span class="rating-num">5.0</span>
+              <span class="review-count">(Verified)</span>
+            </div>
+            <h3 class="card-title" title="${prod.name}" onclick="App.openQuickView('${prod.id}')">${prod.name}</h3>
+            <div class="card-badges-row">
+              ${hasStorageVariants ? `<span class="spec-pill">💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}</span>` : ''}
+              ${!hasStorageVariants && prod.specs?.mah ? `<span class="spec-pill">🔋 ${prod.specs.mah}</span>` : ''}
+              ${!hasStorageVariants && prod.specs?.wattage ? `<span class="spec-pill">⚡ ${prod.specs.wattage}</span>` : ''}
+            </div>
+            <div class="card-price-row">
+              <div class="card-price-col">
+                <span class="current-price"><small>From </small>Rs. ${Number(minPrice).toLocaleString()}</span>
+                ${prod.originalPrice ? `<span class="orig-price">Rs. ${Number(prod.originalPrice).toLocaleString()}</span>` : ''}
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="add-to-cart-btn" style="flex:1;" onclick="App.openQuickView('${prod.id}')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+                <span>Options</span>
+              </button>
+              <button class="card-whatsapp-btn" onclick="event.stopPropagation(); App.inquireProductStockWhatsApp('${prod.id}')" title="Inquire on WhatsApp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
   },
 
   bindEvents() {
@@ -1400,11 +1614,11 @@ const App = {
           <div class="dropdown-header">BROWSE ACCESSORIES BY TYPE</div>
           <div class="dropdown-grid-2col">
             ${accessoryCategories.map(cat => {
-              const safeIcon = this.getSafeCategoryIcon(cat);
-              const count = products.filter(p => this.isProductInCategory(p, cat.id)).length;
-              const subText = cat.tagline || this.getDefaultCategoryTagline(cat.id);
-              const isCatActive = this.activeCategory.toLowerCase() === cat.id.toLowerCase();
-              return `
+      const safeIcon = this.getSafeCategoryIcon(cat);
+      const count = products.filter(p => this.isProductInCategory(p, cat.id)).length;
+      const subText = cat.tagline || this.getDefaultCategoryTagline(cat.id);
+      const isCatActive = this.activeCategory.toLowerCase() === cat.id.toLowerCase();
+      return `
                 <a href="#catalog-section" class="dropdown-link ${isCatActive ? 'active' : ''}" onclick="App.filterByCategory('${cat.id}')">
                   <span class="dropdown-link-icon">${safeIcon}</span>
                   <div class="dropdown-link-text">
@@ -1414,7 +1628,7 @@ const App = {
                   <span class="dropdown-badge-count">${count}</span>
                 </a>
               `;
-            }).join('')}
+    }).join('')}
           </div>
           <div class="dropdown-divider"></div>
           <a href="#catalog-section" class="dropdown-footer-link" onclick="App.filterByCategory('accessories')">
@@ -1553,8 +1767,8 @@ const App = {
       } catch (e) { settings = {}; }
     }
 
-    const val = (settings && settings.categorySliderImages && settings.categorySliderImages[catId]) 
-      ? settings.categorySliderImages[catId] 
+    const val = (settings && settings.categorySliderImages && settings.categorySliderImages[catId])
+      ? settings.categorySliderImages[catId]
       : "";
 
     const defaultImages = {
@@ -1642,20 +1856,28 @@ const App = {
 
       return `
         <div class="dbrand-carousel-slide" data-idx="${idx}" data-id="${cat.id}">
-          <div class="dbrand-slide-media-stage" onclick="App.filterByCategory('${cat.id}')" style="cursor:pointer;" title="Click to browse ${cat.name}">
+          <div class="dbrand-slide-media-stage" onclick="App.navigateToShop('${cat.id}')" style="cursor:pointer;" title="Click to browse ${cat.name}">
             <img src="${sliderImg}" alt="${cat.name}" class="dbrand-slide-img" onerror="this.src='assets/cases_banner.jpg'">
             <span class="dbrand-slide-count-badge">${count} In Stock</span>
           </div>
 
           <div class="dbrand-slide-content">
             <div class="dbrand-slide-badge">${meta.badge}</div>
-            <h3 class="dbrand-slide-title" onclick="App.filterByCategory('${cat.id}')" style="cursor:pointer;">${cat.name}</h3>
+            <h3 class="dbrand-slide-title" onclick="App.navigateToShop('${cat.id}')" style="cursor:pointer;">${cat.name}</h3>
             <p class="dbrand-slide-desc">${meta.desc}</p>
             <div class="dbrand-slide-action-row">
-              <button type="button" class="btn-dbrand-shop-now" onclick="App.filterByCategory('${cat.id}')">
+              <button type="button" class="btn-dbrand-shop-now" onclick="App.navigateToShop('${cat.id}')">
                 <span>SHOP NOW</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"></polyline></svg>
               </button>
+              <div class="dbrand-slide-mobile-nav">
+                <button type="button" class="category-nav-btn prev-btn" onclick="event.stopPropagation(); App.prevCategorySlide()" aria-label="Previous Slide">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <button type="button" class="category-nav-btn next-btn" onclick="event.stopPropagation(); App.nextCategorySlide()" aria-label="Next Slide">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1797,8 +2019,14 @@ const App = {
   // Filter actions
   filterByCategory(catId, resetBrand = true) {
     if (catId === "repair") {
+      this.navigateToHome(false);
       const rep = document.getElementById("repair-center");
       if (rep) rep.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    if (this.currentView !== 'shop') {
+      this.navigateToShop(catId, resetBrand ? 'all' : this.activeBrand);
       return;
     }
 
@@ -1807,32 +2035,52 @@ const App = {
     if (resetBrand) {
       this.activeBrand = "all";
     }
+
+    // Update breadcrumb and header title
+    const categories = this.getCategories();
+    const matchedCat = categories.find(c => c.id === this.activeCategory);
+    const catName = (this.activeCategory === 'all' || !matchedCat) ? 'All Products' : matchedCat.name;
+
+    const crumbEl = document.getElementById("store-crumb-active-cat");
+    if (crumbEl) crumbEl.textContent = catName;
+
+    const headerBadge = document.getElementById("store-header-badge");
+    if (headerBadge) {
+      headerBadge.textContent = this.activeCategory === 'all' ? "⚡ OFFICIAL UNIVERSE HUB STORE" : `⚡ ${catName.toUpperCase()}`;
+    }
+
+    const headerTitle = document.getElementById("store-header-title");
+    if (headerTitle) {
+      headerTitle.textContent = this.activeCategory === 'all' ? "All Products & Accessories" : catName;
+    }
+
+    const headerDesc = document.getElementById("store-header-desc");
+    if (headerDesc && matchedCat && matchedCat.tagline) {
+      headerDesc.textContent = matchedCat.tagline;
+    }
+
     this.renderNavbar();
     this.renderCatalogTabs();
     this.renderBrandFilterBar();
     this.renderCatalog();
 
-    const catalogSec = document.getElementById("catalog-section");
-    if (catalogSec) {
-      const navH = 80;
-      const top = catalogSec.getBoundingClientRect().top + window.pageYOffset - navH;
-      window.scrollTo({ top, behavior: "smooth" });
+    const targetHash = (this.activeCategory && this.activeCategory !== 'all') ? `#shop?cat=${this.activeCategory}` : '#shop';
+    if (window.location.hash !== targetHash) {
+      try { window.history.pushState(null, '', targetHash); } catch(e) { window.location.hash = targetHash; }
     }
   },
 
   filterByBrand(brandId) {
+    if (this.currentView !== 'shop') {
+      this.navigateToShop(this.activeCategory, brandId);
+      return;
+    }
+
     this.activeBrand = brandId;
     this.catalogCurrentPage = 0;
     this.renderNavbar();
     this.renderBrandFilterBar();
     this.renderCatalog();
-
-    const catalogSec = document.getElementById("catalog-section");
-    if (catalogSec) {
-      const navH = 80;
-      const top = catalogSec.getBoundingClientRect().top + window.pageYOffset - navH;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
   },
 
   // 6. Product Catalog Rendering (Filters by BOTH Category & Brand)
@@ -1865,6 +2113,11 @@ const App = {
       if (!aIsPhone && bIsPhone) return 1;
       return 0;
     });
+
+    const storeCounter = document.getElementById("store-items-counter");
+    if (storeCounter) {
+      storeCounter.textContent = `Showing ${filtered.length} Product${filtered.length === 1 ? '' : 's'}`;
+    }
 
     if (filtered.length === 0) {
       const headerControls = document.getElementById("catalog-slider-header-controls");
@@ -2686,6 +2939,10 @@ const App = {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
               <span>Check Live Stock &amp; Inquire on WhatsApp</span>
             </button>
+
+            <button type="button" class="btn-glass" style="width:100%; justify-content:center; padding:10px; font-size:12.5px; color:var(--text-secondary); margin-top:4px;" onclick="App.closeQuickView()">
+              ← Back to Store / Continue Browsing
+            </button>
           </div>
         </div>
       </div>
@@ -2693,6 +2950,21 @@ const App = {
 
     this.setQuickViewMedia(0);
     this.openModal("quickview-modal");
+
+    try {
+      const baseHash = (window.location.hash && !window.location.hash.includes('?prod=')) ? window.location.hash : (this.currentView === 'shop' ? '#shop' : '#home');
+      window.history.pushState({ modal: 'quickview', prodId }, '', baseHash + `?prod=${prodId}`);
+    } catch(e) {}
+  },
+
+  closeQuickView() {
+    this.closeModal('quickview-modal');
+    if (window.location.hash.includes('?prod=')) {
+      try {
+        const cleanHash = window.location.hash.split('?prod=')[0];
+        window.history.pushState(null, '', cleanHash || '#');
+      } catch(e) {}
+    }
   },
 
   setQuickViewMedia(index) {
