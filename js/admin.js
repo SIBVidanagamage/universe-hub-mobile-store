@@ -3735,8 +3735,15 @@ const AdminController = {
     const catId = select.value || "brand-new-iphones";
 
     let settings = {};
+    if (typeof window !== "undefined" && window.UH_STORE_SETTINGS_CACHE) {
+      settings = { ...window.UH_STORE_SETTINGS_CACHE };
+    }
+    if (window.App && window.App.storeSettings) {
+      settings = { ...settings, ...window.App.storeSettings };
+    }
     try {
-      settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+      const stored = localStorage.getItem("UH_STORE_SETTINGS");
+      if (stored) settings = { ...settings, ...JSON.parse(stored) };
     } catch(e) {}
 
     const customImg = settings.categorySliderImages && settings.categorySliderImages[catId];
@@ -3834,8 +3841,20 @@ const AdminController = {
 
     // Auto-save immediately!
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    if (typeof window !== "undefined" && window.UH_STORE_SETTINGS_CACHE) {
+      settings = { ...settings, ...window.UH_STORE_SETTINGS_CACHE };
+    }
     if (!settings.categorySliderImages) settings.categorySliderImages = {};
     settings.categorySliderImages[catId] = savedUrl;
+    if (typeof window !== "undefined") {
+      window.UH_STORE_SETTINGS_CACHE = settings;
+      if (window.App) {
+        window.App.storeSettings = settings;
+        if (typeof window.App.updateCategorySliderImages === "function") {
+          window.App.updateCategorySliderImages();
+        }
+      }
+    }
 
     try {
       localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
@@ -3870,8 +3889,20 @@ const AdminController = {
     }
 
     let settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+    if (typeof window !== "undefined" && window.UH_STORE_SETTINGS_CACHE) {
+      settings = { ...settings, ...window.UH_STORE_SETTINGS_CACHE };
+    }
     if (!settings.categorySliderImages) settings.categorySliderImages = {};
     settings.categorySliderImages[catId] = finalUrl;
+    if (typeof window !== "undefined") {
+      window.UH_STORE_SETTINGS_CACHE = settings;
+      if (window.App) {
+        window.App.storeSettings = settings;
+        if (typeof window.App.updateCategorySliderImages === "function") {
+          window.App.updateCategorySliderImages();
+        }
+      }
+    }
     try {
       localStorage.setItem("UH_STORE_SETTINGS", JSON.stringify(settings));
     } catch (quotaErr) {

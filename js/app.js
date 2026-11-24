@@ -33,6 +33,7 @@ const App = {
   pendingCartProdId: null,
   catalogCurrentPage: 0,
   catalogViewMode: "slider",
+  storeSettings: null,
   catalogResizeTimer: null,
 
   getProducts() {
@@ -381,7 +382,12 @@ const App = {
     }
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchStoreSettings === "function") {
       window.SupabaseSync.fetchStoreSettings().then((st) => {
-        this.applyStoreSettings(st);
+        if (st) {
+          this.storeSettings = st;
+          if (typeof window !== "undefined") window.UH_STORE_SETTINGS_CACHE = st;
+          this.applyStoreSettings(st);
+          this.updateCategorySliderImages();
+        }
       });
     }
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchRegisteredUsers === "function") {
@@ -624,8 +630,16 @@ const App = {
     } catch (e) {
       // keep fallback
     }
+    if (this.storeSettings && typeof this.storeSettings === "object") {
+      settings = { ...settings, ...this.storeSettings };
+    }
+    if (typeof window !== "undefined" && window.UH_STORE_SETTINGS_CACHE) {
+      settings = { ...settings, ...window.UH_STORE_SETTINGS_CACHE };
+    }
     if (overrideSettings && typeof overrideSettings === "object") {
       settings = { ...settings, ...overrideSettings };
+      this.storeSettings = settings;
+      if (typeof window !== "undefined") window.UH_STORE_SETTINGS_CACHE = settings;
     }
 
     // 1. Hero Showcase Image & Video Background
@@ -842,6 +856,27 @@ const App = {
     const promo2Btn = document.getElementById("promo-2-btn");
     if (promo2Btn && settings.promoBanner2Category) {
       promo2Btn.onclick = () => App.filterByCategory(settings.promoBanner2Category);
+    }
+
+    // 10. Live sync Category Showcase Slider images across all devices
+    this.updateCategorySliderImages();
+  },
+
+  updateCategorySliderImages() {
+    const slides = document.querySelectorAll(".dbrand-carousel-slide");
+    if (slides && slides.length > 0) {
+      slides.forEach(slide => {
+        const catId = slide.dataset.id;
+        const img = slide.querySelector(".dbrand-slide-img");
+        if (catId && img) {
+          const newImg = this.getCategorySliderImage(catId);
+          if (newImg && img.src !== newImg) {
+            img.src = newImg;
+          }
+        }
+      });
+    } else if (typeof this.renderCategories === "function") {
+      this.renderCategories();
     }
   },
 
@@ -1501,12 +1536,21 @@ const App = {
   catSlideTimer: null,
 
   getCategorySliderImage(catId) {
-    let settings = {};
-    try {
-      settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
-    } catch (e) { }
+    let settings = this.storeSettings;
+    if (!settings || !settings.categorySliderImages) {
+      if (typeof window !== "undefined" && window.UH_STORE_SETTINGS_CACHE && window.UH_STORE_SETTINGS_CACHE.categorySliderImages) {
+        settings = window.UH_STORE_SETTINGS_CACHE;
+      }
+    }
+    if (!settings || !settings.categorySliderImages) {
+      try {
+        settings = JSON.parse(localStorage.getItem("UH_STORE_SETTINGS")) || {};
+      } catch (e) { settings = {}; }
+    }
 
-    const val = (settings.categorySliderImages && settings.categorySliderImages[catId]) ? settings.categorySliderImages[catId] : "";
+    const val = (settings && settings.categorySliderImages && settings.categorySliderImages[catId]) 
+      ? settings.categorySliderImages[catId] 
+      : "";
 
     const defaultImages = {
       "brand-new-iphones": "assets/custom_hero_banner.png",
@@ -1520,7 +1564,7 @@ const App = {
       "camera-protectors": "assets/cases_banner.jpg"
     };
 
-    if (val && !val.startsWith("/uploads/") && !val.startsWith("blob:") && (val.length < 500000)) {
+    if (val && !val.startsWith("blob:")) {
       return val;
     }
 
