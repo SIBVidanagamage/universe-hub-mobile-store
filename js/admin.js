@@ -7,7 +7,50 @@ const AdminController = {
   activeTab: "products",
   inventoryFilterCat: "all",
 
+  getProducts() {
+    let prods = [];
+    if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length > 0) {
+      prods = window.UH_PRODUCTS_CACHE;
+    } else if (typeof window !== "undefined" && window.App && typeof window.App.getProducts === "function") {
+      prods = window.App.getProducts();
+    } else {
+      try {
+        const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
+        if (Array.isArray(stored)) prods = stored;
+      } catch (e) {}
+    }
+
+    return (Array.isArray(prods) ? prods : []).filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
+  },
+
+  setProducts(products) {
+    if (!Array.isArray(products)) return;
+    const clean = products.filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
+    if (typeof window !== "undefined") {
+      window.UH_PRODUCTS_CACHE = clean;
+    }
+    try {
+      localStorage.setItem("UH_PRODUCTS", JSON.stringify(clean));
+    } catch (e) {
+      console.warn("[Admin] LocalStorage quota reached for UH_PRODUCTS, saved in memory & IndexedDB");
+    }
+    if (window.UHStorage && typeof window.UHStorage.saveProducts === "function") {
+      window.UHStorage.saveProducts(clean).catch(() => {});
+    }
+  },
+
   init() {
+    // Purge sample product from local storage immediately
+    try {
+      const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS") || "[]");
+      if (Array.isArray(stored)) {
+        const cleaned = stored.filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
+        if (cleaned.length !== stored.length) {
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(cleaned));
+        }
+      }
+    } catch(e) {}
+
     this.renderStats();
     this.bindEvents();
     this.populateCategoryDropdowns();
@@ -18,13 +61,19 @@ const AdminController = {
     if (typeof BulkUploader !== 'undefined') {
       BulkUploader.init();
     }
-    // Auto-sync & upload active laptop inventory directly to Supabase Cloud on load so all devices match
-    if (window.SupabaseSync && typeof window.SupabaseSync.uploadAllLocalToCloud === 'function') {
-      window.SupabaseSync.uploadAllLocalToCloud().then(res => {
-        if (res && res.uploaded > 0) {
-          console.log(`⚡ [Supabase] Auto-synced ${res.uploaded} laptop products to Cloud!`);
+
+    // Always fetch fresh catalog from Supabase Cloud on load so all 32+ products display on every device
+    if (window.SupabaseSync && typeof window.SupabaseSync.fetchProducts === 'function') {
+      window.SupabaseSync.fetchProducts().then(prods => {
+        if (Array.isArray(prods) && prods.length > 0) {
+          const clean = prods.filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
+          window.UH_PRODUCTS_CACHE = clean;
+          try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(clean)); } catch(e) {}
+          this.renderStats();
+          this.renderInventoryFilterBar();
+          this.renderProductsTable();
         }
-      }).catch(() => {});
+      }).catch(err => console.warn("[Admin] Supabase product sync notice:", err));
     }
   },
 
@@ -454,7 +503,7 @@ const AdminController = {
 
   renderStats() {
     try {
-      const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      const products = this.getProducts();
       let orders = JSON.parse(localStorage.getItem("UH_ORDERS")) || [];
       let deletedOrderIds = [];
       try {
@@ -528,8 +577,8 @@ const AdminController = {
     const bar = document.getElementById("admin-inventory-filter-bar");
     if (!bar) return;
 
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const categories = this.getSafeCategories();
+    const products = this.getProducts();
 
     const getCount = (catId) => {
       if (catId === "all") return products.length;
@@ -580,8 +629,8 @@ const AdminController = {
 
   // 1. Inventory / Products Table with Category Badges and Filter
   renderProductsTable() {
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
+    const products = this.getProducts();
+    const categories = this.getSafeCategories();
     const tbody = document.getElementById("admin-products-tbody");
     if (!tbody) return;
 
@@ -1045,7 +1094,7 @@ const AdminController = {
   // 2. Brands & Accessories Management Tab
   renderBrandsManager() {
     const brands = (window.App && typeof App.getBrands === "function") ? App.getBrands() : (JSON.parse(localStorage.getItem("UH_BRANDS")) || INITIAL_BRANDS);
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     const tbody = document.getElementById("admin-brands-tbody");
     if (!tbody) return;
 
@@ -1321,8 +1370,8 @@ const AdminController = {
 
   // 2. Categories & Navbar Management Tab
   renderCategoriesManager() {
-    const categories = JSON.parse(localStorage.getItem("UH_CATEGORIES")) || INITIAL_CATEGORIES;
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const categories = this.getSafeCategories();
+    const products = this.getProducts();
     const tbody = document.getElementById("admin-categories-tbody");
     if (!tbody) return;
 
@@ -1654,32 +1703,10 @@ const AdminController = {
         description: desc
       };
 
-      // 1. Safe Save to localStorage with Quota Guard
-      let products = [];
-      try {
-        products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-      } catch (e) {
-        products = [];
-      }
+      // 1. Safe Save with getProducts and setProducts
+      let products = this.getProducts();
       products.unshift(newProduct);
-
-      try {
-        localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
-      } catch (quotaErr) {
-        console.warn("⚠️ LocalStorage quota exceeded, caching lighter subset...", quotaErr);
-        try {
-          // If quota hit, store just the recent 10 products without corrupting their authentic image data
-          localStorage.setItem("UH_PRODUCTS", JSON.stringify(products.slice(0, 10)));
-        } catch (err2) {
-          console.warn("Could not save to localStorage, continuing with Supabase cloud save:", err2);
-        }
-      }
-
-      // Persist to dual-tier storage & in-memory cache immediately
-      if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = products;
-      if (window.UHStorage && typeof window.UHStorage.saveProducts === "function") {
-        window.UHStorage.saveProducts(products);
-      }
+      this.setProducts(products);
 
       // Auto-register brand if not yet present in UH_BRANDS
       try {
@@ -1771,7 +1798,7 @@ const AdminController = {
 
   // Open Full Edit Product Modal
   openEditProduct(prodId) {
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 
@@ -1883,7 +1910,7 @@ const AdminController = {
     imagesList = Array.from(new Set(imagesList));
     if (imagesList.length === 0) imagesList = ["assets/hero_showcase.jpg"];
 
-    const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+    const products = this.getProducts();
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 
@@ -1943,11 +1970,7 @@ const AdminController = {
       prod.tags = [category, battery ? `${battery} Battery` : "Official Genuine"].filter(Boolean);
     }
 
-    localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
-    if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = products;
-    if (window.UHStorage && typeof window.UHStorage.saveProducts === "function") {
-      window.UHStorage.saveProducts(products);
-    }
+    this.setProducts(products);
 
     // Sync to Supabase Cloud Database
     let cloudOk = false;
@@ -1987,11 +2010,11 @@ const AdminController = {
   promptStockEdit(prodId, currentStock) {
     const newStock = prompt(`Update stock count for ${prodId}:`, currentStock);
     if (newStock !== null && !isNaN(parseInt(newStock, 10))) {
-      const products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
+      const products = this.getProducts();
       const prod = products.find(p => p.id === prodId);
       if (prod) {
         prod.stock = parseInt(newStock, 10);
-        localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
+        this.setProducts(products);
 
         // Sync to Supabase Cloud Database
         if (window.SupabaseSync && typeof window.SupabaseSync.saveProduct === "function") {
@@ -2018,15 +2041,9 @@ const AdminController = {
         try { localStorage.setItem("UH_DELETED_PRODUCT_IDS", JSON.stringify(deletedIds)); } catch (e) {}
       }
 
-      // 1. Remove from local storage
-      let products = [];
-      try {
-        products = JSON.parse(localStorage.getItem("UH_PRODUCTS")) || [];
-      } catch (e) { products = []; }
-      products = products.filter(p => String(p.id) !== strId);
-      try {
-        localStorage.setItem("UH_PRODUCTS", JSON.stringify(products));
-      } catch (e) {}
+      // 1. Remove from local storage & memory cache
+      let products = this.getProducts().filter(p => String(p.id) !== strId);
+      this.setProducts(products);
 
       // 2. Permanently delete from Supabase Cloud Database
       if (window.SupabaseSync && typeof window.SupabaseSync.deleteProduct === "function") {

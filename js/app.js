@@ -37,49 +37,28 @@ const App = {
   catalogResizeTimer: null,
 
   getProducts() {
+    const isCleanProd = (p) => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample');
+
     // 1. In-Memory cache is instant priority
     if (typeof window !== "undefined" && Array.isArray(window.UH_PRODUCTS_CACHE) && window.UH_PRODUCTS_CACHE.length > 0) {
-      return window.UH_PRODUCTS_CACHE;
+      return window.UH_PRODUCTS_CACHE.filter(isCleanProd);
     }
 
     // 2. Check stored products in localStorage
     try {
-      const storedVer = localStorage.getItem("UH_CATALOG_VERSION");
-      // If client has stale legacy cache (< 115), auto-upgrade to INITIAL_PRODUCTS
-      if (storedVer !== "115") {
-        if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
-          if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
-          try {
-            localStorage.setItem("UH_PRODUCTS", JSON.stringify(INITIAL_PRODUCTS));
-            localStorage.setItem("UH_CATALOG_VERSION", "115");
-          } catch (e) { }
-          return INITIAL_PRODUCTS;
-        }
-      }
-
       const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS"));
       if (Array.isArray(stored) && stored.length > 0) {
-        // Self-healing: if stored catalog has fewer than 13 items (e.g. mobile with only 3 items), merge missing INITIAL_PRODUCTS
-        if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && stored.length < INITIAL_PRODUCTS.length) {
-          INITIAL_PRODUCTS.forEach(ip => {
-            if (!stored.some(p => String(p.id) === String(ip.id) || (p.name && ip.name && p.name.trim().toLowerCase() === ip.name.trim().toLowerCase()))) {
-              stored.push(ip);
-            }
-          });
-          try {
-            localStorage.setItem("UH_PRODUCTS", JSON.stringify(stored));
-            localStorage.setItem("UH_CATALOG_VERSION", "115");
-          } catch (e) { }
-        }
-        if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = stored;
-        return stored;
+        const clean = stored.filter(isCleanProd);
+        if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = clean;
+        return clean;
       }
     } catch (e) { }
 
-    // 3. Fallback to bundled products
+    // 3. Fallback to bundled products (excluding sample products)
     if (typeof INITIAL_PRODUCTS !== "undefined" && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
-      if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = INITIAL_PRODUCTS;
-      return INITIAL_PRODUCTS;
+      const clean = INITIAL_PRODUCTS.filter(isCleanProd);
+      if (typeof window !== "undefined") window.UH_PRODUCTS_CACHE = clean;
+      return clean;
     }
 
     return [];
@@ -336,17 +315,35 @@ const App = {
     this.loadUserSession();
     this.applyStoreSettings();
 
+    // Clean out sample products from local storage immediately
+    try {
+      const stored = JSON.parse(localStorage.getItem("UH_PRODUCTS") || "[]");
+      if (Array.isArray(stored)) {
+        const cleaned = stored.filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
+        if (cleaned.length !== stored.length) {
+          localStorage.setItem("UH_PRODUCTS", JSON.stringify(cleaned));
+        }
+      }
+    } catch(e) {}
+
     // Async pre-load from IndexedDB if memory cache isn't warm yet
     if (window.UHStorage && typeof window.UHStorage.loadProducts === "function") {
       window.UHStorage.loadProducts().then(prods => {
         if (Array.isArray(prods) && prods.length > 0) {
-          window.UH_PRODUCTS_CACHE = prods;
+          const clean = prods.filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
+          window.UH_PRODUCTS_CACHE = clean;
           this.renderNavbar();
           this.renderCatalogTabs();
           this.renderBrandFilterBar();
           this.renderCategories();
           this.renderBrandsSection();
           this.renderCatalog();
+          this.renderBestSellers();
+          if (typeof window !== "undefined" && window.AdminController) {
+            if (typeof window.AdminController.renderStats === "function") window.AdminController.renderStats();
+            if (typeof window.AdminController.renderInventoryFilterBar === "function") window.AdminController.renderInventoryFilterBar();
+            if (typeof window.AdminController.renderProductsTable === "function") window.AdminController.renderProductsTable();
+          }
         }
       });
     }
@@ -370,14 +367,22 @@ const App = {
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchProducts === "function") {
       window.SupabaseSync.fetchProducts().then((prods) => {
         if (Array.isArray(prods) && prods.length > 0) {
-          window.UH_PRODUCTS_CACHE = prods;
+          const clean = prods.filter(p => p && p.id && String(p.id) !== 'prod-anker-maggo-10k' && !String(p.id).startsWith('prod-sample'));
+          window.UH_PRODUCTS_CACHE = clean;
+          try { localStorage.setItem("UH_PRODUCTS", JSON.stringify(clean)); } catch(e) {}
+          this.renderNavbar();
+          this.renderCatalogTabs();
+          this.renderBrandFilterBar();
+          this.renderCategories();
+          this.renderBrandsSection();
+          this.renderCatalog();
+          this.renderBestSellers();
+          if (typeof window !== "undefined" && window.AdminController) {
+            if (typeof window.AdminController.renderStats === "function") window.AdminController.renderStats();
+            if (typeof window.AdminController.renderInventoryFilterBar === "function") window.AdminController.renderInventoryFilterBar();
+            if (typeof window.AdminController.renderProductsTable === "function") window.AdminController.renderProductsTable();
+          }
         }
-        this.renderNavbar();
-        this.renderCatalogTabs();
-        this.renderBrandFilterBar();
-        this.renderCategories();
-        this.renderBrandsSection();
-        this.renderCatalog();
       });
     }
     if (window.SupabaseSync && typeof window.SupabaseSync.fetchStoreSettings === "function") {
