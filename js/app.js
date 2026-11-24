@@ -32,7 +32,7 @@ const App = {
   currentUser: null,
   pendingCartProdId: null,
   catalogCurrentPage: 0,
-  catalogViewMode: "slider",
+  catalogViewMode: "grid",
   storeSettings: null,
   catalogResizeTimer: null,
 
@@ -434,11 +434,12 @@ const App = {
     this.initNavbarScrollEffect();
     this.initHeroScrollIndicator();
 
-    // Responsive recalibration for 5-Item Catalog Slider
+    // Responsive recalibration for 5-Item Catalog Slider & Home Featured Grid
     window.addEventListener("resize", () => {
       if (this.catalogResizeTimer) clearTimeout(this.catalogResizeTimer);
       this.catalogResizeTimer = setTimeout(() => {
         this.updateCatalogSliderPosition();
+        this.renderHomeFeatured();
       }, 120);
     });
   },
@@ -1219,6 +1220,8 @@ const App = {
 
   navigateToShop(catId = 'all', brandId = 'all', pushHash = true) {
     this.currentView = 'shop';
+    this.catalogViewMode = 'grid';
+    this.catalogCurrentPage = 0;
     const homeSections = document.getElementById("home-view-sections");
     const storeView = document.getElementById("dedicated-store-view");
     const adminView = document.getElementById("admin-view");
@@ -1346,75 +1349,16 @@ const App = {
       return;
     }
 
-    // Curated top 6 products
-    const featuredList = products.slice(0, 6);
+    // On mobile screens, show 2 products (1 clean row, exactly matching screenshot 1).
+    // On wider screens (laptop/desktop), show 4 products (1 clean row of 4).
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 680;
+    const limit = isMobile ? 2 : 4;
+    const featuredList = products.slice(0, limit);
     const wishlist = JSON.parse(localStorage.getItem("UH_WISHLIST")) || [];
+    const allBrands = this.getBrands();
 
-    container.innerHTML = featuredList.map(prod => {
-      const isWishlisted = wishlist.includes(prod.id);
-      const isUsed = !!(prod.condition && !prod.condition.toLowerCase().includes("brand new"));
-      const hasStorageVariants = Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0;
-      const minPrice = hasStorageVariants ? Math.min(...prod.storageOptions.map(t => Number(t.price) || prod.price)) : prod.price;
-
-      let primaryBadge = '';
-      if (prod.discount) {
-        primaryBadge = `<span class="badge-pill badge-discount">${prod.discount}</span>`;
-      } else if (prod.batteryHealth) {
-        primaryBadge = `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}%</span>`;
-      } else if (prod.specs?.mah) {
-        primaryBadge = `<span class="badge-pill badge-tech">🔋 ${prod.specs.mah}</span>`;
-      } else if (prod.specs?.wattage) {
-        primaryBadge = `<span class="badge-pill badge-watt">⚡ ${prod.specs.wattage}</span>`;
-      } else if (isUsed) {
-        primaryBadge = `<span class="badge-pill badge-used">Grade A+</span>`;
-      }
-
-      return `
-        <div class="product-card" data-id="${prod.id}">
-          <div class="card-media" onclick="App.openQuickView('${prod.id}')" style="cursor:pointer;">
-            <div class="brand-micro-tag">
-              <span class="brand-text-only">${(prod.brand || 'Apple').toUpperCase()}</span>
-            </div>
-            ${primaryBadge}
-            <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="event.stopPropagation(); App.toggleWishlist('${prod.id}', this)" aria-label="Save to Wishlist">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="${isWishlisted ? '#ef4444' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-            </button>
-            <img src="${prod.image}" alt="${prod.name}" class="product-img" onerror="this.src='assets/hero_showcase.jpg'">
-            <div class="card-quick-specs">
-              <span>Quick Specs</span>
-            </div>
-          </div>
-          <div class="card-content">
-            <div class="card-rating">
-              <span class="stars">★</span>
-              <span class="rating-num">5.0</span>
-              <span class="review-count">(Verified)</span>
-            </div>
-            <h3 class="card-title" title="${prod.name}" onclick="App.openQuickView('${prod.id}')">${prod.name}</h3>
-            <div class="card-badges-row">
-              ${hasStorageVariants ? `<span class="spec-pill">💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}</span>` : ''}
-              ${!hasStorageVariants && prod.specs?.mah ? `<span class="spec-pill">🔋 ${prod.specs.mah}</span>` : ''}
-              ${!hasStorageVariants && prod.specs?.wattage ? `<span class="spec-pill">⚡ ${prod.specs.wattage}</span>` : ''}
-            </div>
-            <div class="card-price-row">
-              <div class="card-price-col">
-                <span class="current-price"><small>From </small>Rs. ${Number(minPrice).toLocaleString()}</span>
-                ${prod.originalPrice ? `<span class="orig-price">Rs. ${Number(prod.originalPrice).toLocaleString()}</span>` : ''}
-              </div>
-            </div>
-            <div class="card-actions">
-              <button class="add-to-cart-btn" style="flex:1;" onclick="App.openQuickView('${prod.id}')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
-                <span>Options</span>
-              </button>
-              <button class="card-whatsapp-btn" onclick="event.stopPropagation(); App.inquireProductStockWhatsApp('${prod.id}')" title="Inquire on WhatsApp">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
+    container.innerHTML = featuredList.map(prod => this.renderProductCard(prod, wishlist, allBrands)).join("");
+    this.initInteractiveEffects();
   },
 
   bindEvents() {
@@ -2031,6 +1975,7 @@ const App = {
     }
 
     this.activeCategory = catId;
+    this.catalogViewMode = "grid";
     this.catalogCurrentPage = 0;
     if (resetBrand) {
       this.activeBrand = "all";
@@ -2077,10 +2022,116 @@ const App = {
     }
 
     this.activeBrand = brandId;
+    this.catalogViewMode = "grid";
     this.catalogCurrentPage = 0;
     this.renderNavbar();
     this.renderBrandFilterBar();
     this.renderCatalog();
+  },
+
+  // Helper to render consistent, responsive, perfectly styled product cards across views
+  renderProductCard(prod, wishlist, allBrands) {
+    if (!wishlist) wishlist = JSON.parse(localStorage.getItem("UH_WISHLIST")) || [];
+    if (!allBrands) allBrands = this.getBrands();
+
+    const isWishlisted = wishlist.includes(prod.id);
+    const prodBrand = prod.brand || 'Apple';
+    const matchedBrand = allBrands.find(b => (b.name && b.name.toLowerCase() === prodBrand.toLowerCase()) || (b.id && b.id.toLowerCase() === prodBrand.toLowerCase()));
+    const brandLogo = matchedBrand && matchedBrand.logo;
+
+    const hasStorageVariants = Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0;
+    const hasColorVariants = Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0;
+    const minPrice = hasStorageVariants ? Math.min(...prod.storageOptions.map(t => Number(t.price) || prod.price)) : prod.price;
+
+    const isUsed = !!(prod.condition && !prod.condition.toLowerCase().includes("brand new"));
+
+    // Sleek single primary highlight badge (prevents messy badge stacking)
+    let primaryBadge = '';
+    if (prod.discount) {
+      primaryBadge = `<span class="badge-pill badge-discount">${prod.discount}</span>`;
+    } else if (prod.batteryHealth) {
+      primaryBadge = `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>`;
+    } else if (prod.specs?.mah) {
+      primaryBadge = `<span class="badge-pill badge-tech">🔋 ${prod.specs.mah}</span>`;
+    } else if (prod.specs?.wattage) {
+      primaryBadge = `<span class="badge-pill badge-watt">⚡ ${prod.specs.wattage}</span>`;
+    } else if (isUsed) {
+      primaryBadge = `<span class="badge-pill badge-used">Grade A+</span>`;
+    } else if (prod.stockStatus === 'on-request') {
+      primaryBadge = `<span class="badge-pill badge-request">On Order</span>`;
+    }
+
+    // Sleek 1-line micro-spec text (never wraps or clutters)
+    let specLine = '';
+    if (hasStorageVariants) {
+      specLine = `💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}`;
+    } else if (prod.specs?.mah || prod.specs?.wattage) {
+      const parts = [];
+      if (prod.specs.mah) parts.push(prod.specs.mah);
+      if (prod.specs.wattage) parts.push(prod.specs.wattage);
+      if (prod.specs.magsafe) parts.push('MagSafe');
+      specLine = `⚡ ${parts.join(" • ")}`;
+    } else if (prod.batteryHealth) {
+      specLine = `🔋 ${prod.batteryHealth}% Battery • Grade A+ Mint`;
+    } else if (prod.specs?.compatibility) {
+      specLine = `📱 ${prod.specs.compatibility}`;
+    } else if (prod.specs?.ports) {
+      specLine = `🔌 ${prod.specs.ports}`;
+    } else if (Array.isArray(prod.tags) && prod.tags.length > 0) {
+      specLine = `✨ ${prod.tags.slice(0, 2).join(" • ")}`;
+    } else {
+      specLine = `✓ 100% Genuine Apple & Flagship Tech`;
+    }
+
+    return `
+      <div class="product-card" data-id="${prod.id}">
+        <div class="card-top-badges">
+          <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
+            ${brandLogo
+        ? `<img src="${brandLogo}" alt="${prodBrand}" style="width:12px; height:12px; object-fit:contain; vertical-align:middle; margin-right:3px;">`
+        : (matchedBrand && matchedBrand.icon ? `${matchedBrand.icon} ` : '🏷️ ')
+      }${prodBrand}
+          </span>
+          ${primaryBadge}
+        </div>
+
+        <button class="card-wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="App.toggleWishlist('${prod.id}', this)" title="Add to Wishlist">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+
+        <div class="card-media" onclick="App.openQuickView('${prod.id}')">
+          <img src="${prod.image}" alt="${prod.name}" loading="lazy" onerror="this.src='assets/hero_showcase.jpg'">
+          <button class="quick-view-btn">Quick Specs</button>
+        </div>
+
+        <div class="card-details">
+          <div class="card-rating-row">
+            ★ <b>${(Number(prod.rating) || 5.0).toFixed(1)}</b> <span>(${prod.reviewsCount !== undefined ? prod.reviewsCount : (prod.reviews || 0)})</span>
+          </div>
+
+          <h3 class="card-title" title="${prod.name}" onclick="App.openQuickView('${prod.id}')">${prod.name}</h3>
+
+          <div class="card-spec-line" title="${specLine}">
+            ${specLine}
+          </div>
+
+          <div class="card-price-row">
+            <span class="current-price">${hasStorageVariants ? `<small style="font-size:11px; font-weight:normal; color:var(--text-muted);">From </small>` : ''}Rs. ${minPrice.toLocaleString()}</span>
+            ${prod.originalPrice > minPrice ? `<span class="original-price">Rs. ${prod.originalPrice.toLocaleString()}</span>` : ''}
+          </div>
+
+          <div style="display:flex; gap:6px; margin-top:auto;">
+            <button class="add-to-cart-btn" style="flex:1;" onclick="${(hasStorageVariants || hasColorVariants) ? `App.openQuickView('${prod.id}')` : `App.addToCart('${prod.id}')`}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+              <span>${(hasStorageVariants || hasColorVariants) ? 'Options' : 'Add to Cart'}</span>
+            </button>
+            <button type="button" class="btn-card-wa" onclick="event.stopPropagation(); App.inquireProductStockWhatsApp('${prod.id}')" title="Check Stock &amp; Inquire on WhatsApp">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
   },
 
   // 6. Product Catalog Rendering (Filters by BOTH Category & Brand)
@@ -2175,121 +2226,46 @@ const App = {
     const wishlist = JSON.parse(localStorage.getItem("UH_WISHLIST")) || [];
     const allBrands = this.getBrands();
 
-    container.innerHTML = filtered.map(prod => {
-      const isWishlisted = wishlist.includes(prod.id);
-      const prodBrand = prod.brand || 'Apple';
-      const matchedBrand = allBrands.find(b => (b.name && b.name.toLowerCase() === prodBrand.toLowerCase()) || (b.id && b.id.toLowerCase() === prodBrand.toLowerCase()));
-      const brandLogo = matchedBrand && matchedBrand.logo;
-
-      const hasStorageVariants = Array.isArray(prod.storageOptions) && prod.storageOptions.length > 0;
-      const hasColorVariants = Array.isArray(prod.colorOptions) && prod.colorOptions.length > 0;
-      const minPrice = hasStorageVariants ? Math.min(...prod.storageOptions.map(t => Number(t.price) || prod.price)) : prod.price;
-
-      const isUsed = !!(prod.condition && !prod.condition.toLowerCase().includes("brand new"));
-
-      // Sleek single primary highlight badge (prevents messy badge stacking)
-      let primaryBadge = '';
-      if (prod.discount) {
-        primaryBadge = `<span class="badge-pill badge-discount">${prod.discount}</span>`;
-      } else if (prod.batteryHealth) {
-        primaryBadge = `<span class="badge-pill badge-battery">🔋 ${prod.batteryHealth}${typeof prod.batteryHealth === 'number' || !String(prod.batteryHealth).includes('%') ? '%' : ''}</span>`;
-      } else if (prod.specs?.mah) {
-        primaryBadge = `<span class="badge-pill badge-tech">🔋 ${prod.specs.mah}</span>`;
-      } else if (prod.specs?.wattage) {
-        primaryBadge = `<span class="badge-pill badge-watt">⚡ ${prod.specs.wattage}</span>`;
-      } else if (isUsed) {
-        primaryBadge = `<span class="badge-pill badge-used">Grade A+</span>`;
-      } else if (prod.stockStatus === 'on-request') {
-        primaryBadge = `<span class="badge-pill badge-request">On Order</span>`;
-      }
-
-      // Sleek 1-line micro-spec text (never wraps or clutters)
-      let specLine = '';
-      if (hasStorageVariants) {
-        specLine = `💾 ${prod.storageOptions.map(t => t.capacity).join(" • ")}`;
-      } else if (prod.specs?.mah || prod.specs?.wattage) {
-        const parts = [];
-        if (prod.specs.mah) parts.push(prod.specs.mah);
-        if (prod.specs.wattage) parts.push(prod.specs.wattage);
-        if (prod.specs.magsafe) parts.push('MagSafe');
-        specLine = `⚡ ${parts.join(" • ")}`;
-      } else if (prod.batteryHealth) {
-        specLine = `🔋 ${prod.batteryHealth}% Battery • Grade A+ Mint`;
-      } else if (prod.specs?.compatibility) {
-        specLine = `📱 ${prod.specs.compatibility}`;
-      } else if (prod.specs?.ports) {
-        specLine = `🔌 ${prod.specs.ports}`;
-      } else if (Array.isArray(prod.tags) && prod.tags.length > 0) {
-        specLine = `✨ ${prod.tags.slice(0, 2).join(" • ")}`;
-      } else {
-        specLine = `✓ 100% Genuine Apple & Flagship Tech`;
-      }
-
-      return `
-        <div class="product-card" data-id="${prod.id}">
-          <div class="card-top-badges">
-            <span class="badge-pill badge-brand" onclick="event.stopPropagation(); App.filterByBrand('${prodBrand.toLowerCase()}');" title="Filter by ${prodBrand}">
-              ${brandLogo
-          ? `<img src="${brandLogo}" alt="${prodBrand}" style="width:12px; height:12px; object-fit:contain; vertical-align:middle; margin-right:3px;">`
-          : (matchedBrand && matchedBrand.icon ? `${matchedBrand.icon} ` : '🏷️ ')
-        }${prodBrand}
-            </span>
-            ${primaryBadge}
-          </div>
-
-          <button class="card-wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="App.toggleWishlist('${prod.id}', this)" title="Add to Wishlist">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-          </button>
-
-          <div class="card-media" onclick="App.openQuickView('${prod.id}')">
-            <img src="${prod.image}" alt="${prod.name}" loading="lazy" onerror="this.src='assets/hero_showcase.jpg'">
-            <button class="quick-view-btn">Quick Specs</button>
-          </div>
-
-          <div class="card-details">
-            <div class="card-rating-row">
-              ★ <b>${(Number(prod.rating) || 5.0).toFixed(1)}</b> <span>(${prod.reviewsCount !== undefined ? prod.reviewsCount : (prod.reviews || 0)})</span>
-            </div>
-
-            <h3 class="card-title" title="${prod.name}" onclick="App.openQuickView('${prod.id}')">${prod.name}</h3>
-
-            <div class="card-spec-line" title="${specLine}">
-              ${specLine}
-            </div>
-
-            <div class="card-price-row">
-              <span class="current-price">${hasStorageVariants ? `<small style="font-size:11px; font-weight:normal; color:var(--text-muted);">From </small>` : ''}Rs. ${minPrice.toLocaleString()}</span>
-              ${prod.originalPrice > minPrice ? `<span class="original-price">Rs. ${prod.originalPrice.toLocaleString()}</span>` : ''}
-            </div>
-
-            <div style="display:flex; gap:6px; margin-top:auto;">
-              <button class="add-to-cart-btn" style="flex:1;" onclick="${(hasStorageVariants || hasColorVariants) ? `App.openQuickView('${prod.id}')` : `App.addToCart('${prod.id}')`}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <span>${(hasStorageVariants || hasColorVariants) ? 'Options' : 'Add to Cart'}</span>
-              </button>
-              <button type="button" class="btn-card-wa" onclick="event.stopPropagation(); App.inquireProductStockWhatsApp('${prod.id}')" title="Check Stock &amp; Inquire on WhatsApp">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.36 7.03 9.09 7.1 8.87 7.33C8.65 7.57 8.02 8.16 8.02 9.36C8.02 10.56 8.9 11.72 9.02 11.89C9.14 12.05 10.74 14.53 13.2 15.59C13.79 15.84 14.24 16 14.6 16.11C15.19 16.3 15.73 16.27 16.16 16.21C16.64 16.14 17.63 15.61 17.84 15.02C18.05 14.43 18.05 13.92 17.98 13.82C17.92 13.71 17.75 13.65 17.5 13.52C17.25 13.4 16.03 12.8 15.8 12.72C15.58 12.63 15.41 12.59 15.25 12.84C15.08 13.08 14.6 13.65 14.46 13.82C14.31 13.98 14.17 14 13.92 13.88C13.67 13.75 12.88 13.49 11.94 12.65C11.21 11.99 10.71 11.18 10.57 10.93C10.42 10.68 10.55 10.55 10.68 10.42C10.79 10.31 10.93 10.13 11.06 9.98C11.18 9.83 11.22 9.72 11.31 9.55C11.39 9.38 11.35 9.24 11.29 9.11C11.23 8.99 10.73 7.76 10.53 7.26C10.33 6.77 10.12 6.84 9.96 6.83C9.81 6.82 9.67 6.82 9.53 7.03Z"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
+    container.innerHTML = filtered.map(prod => this.renderProductCard(prod, wishlist, allBrands)).join("");
 
     if (this.catalogViewMode === "grid") {
       container.classList.remove("catalog-slider-track");
       container.classList.add("products-grid");
       container.style.transform = "none";
+
+      const headerArrows = document.querySelector(".catalog-slider-nav-arrows");
+      if (headerArrows) headerArrows.style.display = "none";
+
+      const paginationBar = document.getElementById("catalog-pagination-bar");
+      if (paginationBar) {
+        paginationBar.innerHTML = "";
+        paginationBar.style.display = "none";
+      }
+
+      const counterEl = document.getElementById("catalog-slider-counter");
+      if (counterEl) {
+        counterEl.textContent = `${filtered.length} Product${filtered.length === 1 ? '' : 's'}`;
+      }
+
+      const toggleBtn = document.getElementById("catalog-view-toggle-btn");
+      if (toggleBtn) toggleBtn.textContent = "🎬 5-Card Slider";
     } else {
       container.classList.remove("products-grid");
       container.classList.add("catalog-slider-track");
+
+      const headerArrows = document.querySelector(".catalog-slider-nav-arrows");
+      if (headerArrows) headerArrows.style.display = "flex";
+
+      const toggleBtn = document.getElementById("catalog-view-toggle-btn");
+      if (toggleBtn) toggleBtn.textContent = "⊞ View All Grid";
+
+      this.updateCatalogSliderPosition();
     }
 
     const headerControls = document.getElementById("catalog-slider-header-controls");
     if (headerControls) headerControls.style.display = "flex";
 
     this.initInteractiveEffects();
-    this.updateCatalogSliderPosition();
     this.setupCatalogSliderSwipe();
   },
 
@@ -2367,6 +2343,13 @@ const App = {
 
     if (this.catalogViewMode === "grid") {
       container.style.transform = "none";
+      const headerArrows = document.querySelector(".catalog-slider-nav-arrows");
+      if (headerArrows) headerArrows.style.display = "none";
+      const paginationBar = document.getElementById("catalog-pagination-bar");
+      if (paginationBar) {
+        paginationBar.innerHTML = "";
+        paginationBar.style.display = "none";
+      }
       return;
     }
 

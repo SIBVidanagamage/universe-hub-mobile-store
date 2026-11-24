@@ -6871,17 +6871,44 @@ img, video, iframe {
   transform: scale(0.96);
 }
 
-/* Home Featured Grid & Explore Store CTA */
-#home-featured-products-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
+/* Home Featured Grid Alignment & Polish */
+#home-featured-section {
+  position: relative;
 }
 
-@media (max-width: 680px) {
+#home-featured-products-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
   #home-featured-products-container {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+  }
+}
+
+@media (max-width: 680px) {
+  #home-featured-section .catalog-section-head {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  #home-featured-section .btn-home-featured-cta {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 800;
+    border-radius: 12px;
+  }
+  #home-featured-products-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
   }
 }
 
