@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "universe-hub-mobile-store",
+  "main": "_worker.js",
   "compatibility_date": "2026-11-10",
   "assets": {
     "directory": "."

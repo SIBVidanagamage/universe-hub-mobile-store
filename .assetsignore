@@ -1,0 +1,6 @@
+_worker.js
+functions/
+test/
+.git/
+.gitignore
+.wrangler/
