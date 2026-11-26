@@ -179,7 +179,8 @@ export async function onRequestGet(context) {
       const availability = getAvailability(p);
       const condition = getCondition(p);
       const price = `${Number(p.price).toFixed(2)} LKR`;
-      const link = `${baseUrl}/#shop?prod=${encodeURIComponent(id)}`;
+      // Standard query-parameter product deep link for full crawler & mobile landing page compatibility
+      const link = `${baseUrl}/?prod=${encodeURIComponent(id)}`;
 
       const version = p.updated_at || p.created_at || "1";
       const image_link = formatImageUrl(p.image, id, version, baseUrl);

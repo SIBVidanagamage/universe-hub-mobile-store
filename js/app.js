@@ -346,6 +346,14 @@ const App = {
             if (typeof window.AdminController.renderInventoryFilterBar === "function") window.AdminController.renderInventoryFilterBar();
             if (typeof window.AdminController.renderProductsTable === "function") window.AdminController.renderProductsTable();
           }
+          if (this.pendingDirectProdId) {
+            const targetId = this.pendingDirectProdId;
+            const found = clean.find(p => p.id === targetId);
+            if (found) {
+              this.pendingDirectProdId = null;
+              this.openQuickView(targetId);
+            }
+          }
         }
       });
     }
@@ -385,6 +393,14 @@ const App = {
             if (typeof window.AdminController.renderStats === "function") window.AdminController.renderStats();
             if (typeof window.AdminController.renderInventoryFilterBar === "function") window.AdminController.renderInventoryFilterBar();
             if (typeof window.AdminController.renderProductsTable === "function") window.AdminController.renderProductsTable();
+          }
+          if (this.pendingDirectProdId) {
+            const targetId = this.pendingDirectProdId;
+            const found = clean.find(p => p.id === targetId);
+            if (found) {
+              this.pendingDirectProdId = null;
+              this.openQuickView(targetId);
+            }
           }
         }
       });
@@ -1304,26 +1320,56 @@ const App = {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   },
 
+  getDirectProductParam() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const qp = params.get('prod');
+      if (qp && qp.trim()) return qp.trim();
+    } catch (e) {}
+
+    const hash = window.location.hash || '';
+    if (hash.includes('prod=')) {
+      const match = hash.match(/prod=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) return match[1].trim();
+    }
+    return null;
+  },
+
   initRouter() {
     const handleRoute = () => {
       const hash = window.location.hash || '';
       if (hash === '#admin') {
         this.toggleAdminView(true);
-      } else if (hash.startsWith('#shop') || hash.startsWith('#catalog')) {
+        return;
+      }
+
+      if (hash.startsWith('#shop') || hash.startsWith('#catalog')) {
         let targetCat = 'all';
         if (hash.includes('cat=')) {
           const match = hash.match(/cat=([a-zA-Z0-9_-]+)/);
           if (match && match[1]) targetCat = match[1];
         }
         this.navigateToShop(targetCat, 'all', false);
-      } else if (hash.includes('?prod=')) {
-        const prodMatch = hash.match(/prod=([a-zA-Z0-9_-]+)/);
-        if (prodMatch && prodMatch[1]) {
-          this.openQuickView(prodMatch[1]);
-        }
-      } else {
-        if (this.currentView !== 'home') {
+      } else if (!hash || hash === '#' || hash === '#home') {
+        const hasDirectProd = (window.location.search && window.location.search.includes('prod='));
+        if (this.currentView !== 'home' && !hasDirectProd) {
           this.navigateToHome(false);
+        }
+      }
+
+      // Check for direct product deep link via query string (?prod=...) or hash (#shop?prod=...)
+      const directProdId = this.getDirectProductParam();
+      if (directProdId) {
+        const qv = document.getElementById("quickview-modal");
+        const isAlreadyOpen = qv && qv.classList.contains("active") && this.quickViewCurrentProdId === directProdId;
+        if (!isAlreadyOpen) {
+          const products = this.getProducts();
+          const prod = Array.isArray(products) ? products.find(p => p.id === directProdId) : null;
+          if (prod) {
+            this.openQuickView(directProdId);
+          } else {
+            this.pendingDirectProdId = directProdId;
+          }
         }
       }
     };
@@ -2935,19 +2981,24 @@ const App = {
     this.openModal("quickview-modal");
 
     try {
-      const baseHash = (window.location.hash && !window.location.hash.includes('?prod=')) ? window.location.hash : (this.currentView === 'shop' ? '#shop' : '#home');
-      window.history.pushState({ modal: 'quickview', prodId }, '', baseHash + `?prod=${prodId}`);
+      const cleanHash = (window.location.hash || '').split('?prod=')[0];
+      const baseHash = cleanHash && cleanHash !== '#' ? cleanHash : (this.currentView === 'shop' ? '#shop' : '#home');
+      window.history.pushState({ modal: 'quickview', prodId }, '', window.location.pathname + baseHash + `?prod=${prodId}`);
     } catch(e) {}
   },
 
   closeQuickView() {
     this.closeModal('quickview-modal');
-    if (window.location.hash.includes('?prod=')) {
-      try {
-        const cleanHash = window.location.hash.split('?prod=')[0];
-        window.history.pushState(null, '', cleanHash || '#');
-      } catch(e) {}
-    }
+    this.quickViewCurrentProdId = null;
+    this.pendingDirectProdId = null;
+    try {
+      const cleanHash = (window.location.hash || '').split('?prod=')[0];
+      const hasSearch = window.location.search && window.location.search.includes('prod=');
+      if (hasSearch || window.location.hash.includes('?prod=')) {
+        const cleanPath = window.location.pathname + (cleanHash && cleanHash !== '#' ? cleanHash : '');
+        window.history.pushState(null, '', cleanPath || '/');
+      }
+    } catch(e) {}
   },
 
   setQuickViewMedia(index) {

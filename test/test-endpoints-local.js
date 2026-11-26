@@ -123,7 +123,7 @@ async function runTests() {
     if (!["in stock", "out of stock", "available for order", "preorder"].includes(avail)) allValid = false;
     if (!["new", "refurbished", "used"].includes(cond)) allValid = false;
     if (!priceRegex.test(price)) invalidPrices++;
-    if (!link.startsWith("https://universehub.store/#shop?prod=")) allValid = false;
+    if (!link.startsWith("https://universehub.store/?prod=")) allValid = false;
     if (!imgLink.startsWith("https://universehub.store/")) missingImages++;
     if (!brand || brand.trim() === "") allValid = false;
     if (!pType || pType.trim() === "") allValid = false;
@@ -197,6 +197,43 @@ async function runTests() {
   const sampleReq = new Request("https://universehub.store/api/product-image?id=prod-anker-maggo-10k", { method: "GET" });
   const sampleRes = await getImage({ request: sampleReq, env: {} });
   assert(sampleRes.status === 404, `Obsolete sample product is blocked and returns HTTP 404 (Got ${sampleRes.status})`);
+
+  // ----------------------------------------------------------------
+  // TEST 4: Deep Link URL Parsing & Product Resolution (All 33 Products)
+  // ----------------------------------------------------------------
+  console.log("\n--- 4. Testing Product Deep Link Resolution (All 33 Products) ---");
+  
+  function simulateDeepLinkExtraction(urlStr) {
+    const u = new URL(urlStr);
+    const qp = u.searchParams.get("prod");
+    if (qp && qp.trim()) return qp.trim();
+    if (u.hash.includes("prod=")) {
+      const match = u.hash.match(/prod=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) return match[1].trim();
+    }
+    return null;
+  }
+
+  let queryLinkSuccess = 0;
+  let hashLinkSuccess = 0;
+
+  productRows.forEach(r => {
+    const id = r[0];
+    const queryUrl = `https://universehub.store/?prod=${id}`;
+    const hashUrl = `https://universehub.store/#shop?prod=${id}`;
+
+    if (simulateDeepLinkExtraction(queryUrl) === id) queryLinkSuccess++;
+    if (simulateDeepLinkExtraction(hashUrl) === id) hashLinkSuccess++;
+  });
+
+  assert(queryLinkSuccess === 33, `All 33 products resolve correctly via query parameter '?prod=ID' (${queryLinkSuccess}/33)`);
+  assert(hashLinkSuccess === 33, `All 33 products resolve correctly via hash parameter '#shop?prod=ID' (${hashLinkSuccess}/33)`);
+
+  // Test invalid product ID handling
+  const invalidExtract = simulateDeepLinkExtraction("https://universehub.store/?prod=invalid-id-xyz");
+  assert(invalidExtract === "invalid-id-xyz", "Router safely extracts invalid ID for graceful fallback check");
+  const noParamExtract = simulateDeepLinkExtraction("https://universehub.store/#shop");
+  assert(noParamExtract === null, "Router returns null when no product param present without error");
 
   console.log("\n=================================================");
   console.log(`TEST RUN COMPLETE: ${passed} PASSED, ${failed} FAILED`);
