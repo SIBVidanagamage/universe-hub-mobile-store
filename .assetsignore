@@ -1,6 +1,30 @@
+# Cloudflare Worker & Functions code
 _worker.js
 functions/
 test/
-.git/
+
+# Config & Infrastructure
+wrangler.jsonc
+.assetsignore
 .gitignore
+netlify.toml
+package.json
+package-lock.json
+README.md
+
+# Secrets & Environment Variables
+.env
+.env.*
+.dev.vars*
+
+# Internal backend & DB scripts
+server.js
+supabase_schema.sql
+sync-supabase.js
+
+# Dependencies & Cache
+node_modules/
 .wrangler/
+.git/
+.vscode/
+.idea/
