@@ -3774,9 +3774,9 @@
   </div>
 
   <!-- Cookie Preferences Modal -->
-  <div id="cookie-preferences-modal" class="modal-backdrop">
-    <div class="modal-card cookie-preferences-card" style="max-width:520px;">
-      <div class="modal-header">
+  <div id="cookie-preferences-modal" class="modal-overlay" style="z-index: 10002;">
+    <div class="modal-box cookie-preferences-card" style="max-width:540px; border:1px solid rgba(238, 189, 67, 0.4); box-shadow:0 24px 70px rgba(0, 0, 0, 0.95), 0 0 35px rgba(238, 189, 67, 0.15); margin:auto;">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; padding:18px 20px; border-bottom:1px solid var(--border-subtle);">
         <div style="display:flex; align-items:center; gap:10px;">
           <span style="font-size:24px;">🍪</span>
           <div>
@@ -3806,10 +3806,10 @@
       </div>
 
       <div class="modal-footer" style="padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); background:rgba(0,0,0,0.25);">
-        <button type="button" class="btn-glass" onclick="MetaPixel.revokeConsent()" style="color:#ef4444; border-color:rgba(239,68,68,0.35); font-size:12px; padding:7px 14px;">Revoke / Disable Marketing</button>
+        <button type="button" class="btn-glass" onclick="MetaPixel.revokeConsent()" style="color:#ef4444; border-color:rgba(239,68,68,0.35); font-size:12px; padding:8px 14px;">Revoke / Disable Marketing</button>
         <div style="display:flex; gap:10px;">
-          <button type="button" class="btn-glass" onclick="MetaPixel.closePreferencesModal()" style="font-size:12px; padding:7px 14px;">Close</button>
-          <button type="button" class="btn-primary-glow" onclick="MetaPixel.acceptConsent(); MetaPixel.closePreferencesModal();" style="font-size:12px; padding:7px 16px;">Accept &amp; Enable</button>
+          <button type="button" class="btn-glass" onclick="MetaPixel.closePreferencesModal()" style="font-size:12px; padding:8px 14px;">Close</button>
+          <button type="button" class="btn-primary-glow" onclick="MetaPixel.acceptConsent(); MetaPixel.closePreferencesModal();" style="font-size:12px; padding:8px 18px;">Accept &amp; Enable</button>
         </div>
       </div>
     </div>

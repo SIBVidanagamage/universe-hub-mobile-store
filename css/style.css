@@ -7024,6 +7024,11 @@ img, video, iframe {
   }
 }
 
+.cookie-preferences-card {
+  border: 1px solid rgba(238, 189, 67, 0.45) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 40px rgba(238, 189, 67, 0.16) !important;
+}
+
 
 
 
