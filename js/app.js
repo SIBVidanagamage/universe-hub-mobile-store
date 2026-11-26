@@ -1343,6 +1343,11 @@ const App = {
         return;
       }
 
+      // Meta Pixel PageView Hook (Deduplicated & Filtered by Route Allowlist)
+      if (typeof window !== 'undefined' && window.MetaPixel && typeof window.MetaPixel.trackPageView === 'function') {
+        window.MetaPixel.trackPageView(hash || '#home');
+      }
+
       if (hash.startsWith('#shop') || hash.startsWith('#catalog')) {
         let targetCat = 'all';
         if (hash.includes('cat=')) {
@@ -2749,6 +2754,11 @@ const App = {
     const prod = products.find(p => p.id === prodId);
     if (!prod) return;
 
+    // Meta Pixel ViewContent Hook (Uses genuine Catalog Product ID & LKR price)
+    if (typeof window !== 'undefined' && window.MetaPixel && typeof window.MetaPixel.trackViewContent === 'function') {
+      window.MetaPixel.trackViewContent(prod);
+    }
+
     this.quickViewCurrentProdId = prodId;
 
     // Prepare media items list (sanitized & deduplicated)
@@ -3116,6 +3126,11 @@ const App = {
     const variantTag = [storage, color].filter(Boolean).join(" | ");
     showToast(`🛒 Added "${prod.name}${variantTag ? ` (${variantTag})` : ''}" to your cart!`);
 
+    // Meta Pixel AddToCart Hook (Uses genuine Catalog Product ID & quantity)
+    if (typeof window !== 'undefined' && window.MetaPixel && typeof window.MetaPixel.trackAddToCart === 'function') {
+      window.MetaPixel.trackAddToCart(prod, 1);
+    }
+
     // Automatically slide in / pop up the cart drawer
     this.openCart();
   },
@@ -3303,6 +3318,11 @@ const App = {
     }
 
     this.openModal("checkout-modal");
+
+    // Meta Pixel InitiateCheckout Hook (Catalog IDs array & total value)
+    if (typeof window !== 'undefined' && window.MetaPixel && typeof window.MetaPixel.trackInitiateCheckout === 'function') {
+      window.MetaPixel.trackInitiateCheckout(cart, subtotal);
+    }
   },
 
   handleCompleteCheckout(e) {

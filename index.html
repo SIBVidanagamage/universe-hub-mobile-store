@@ -624,6 +624,7 @@
               <li><a href="#repair-center">Track Device Status</a></li>
               <li><a href="javascript:void(0)" onclick="App.openStoreReviewsModal()">Store Customer Reviews (4.9★)</a></li>
               <li><a href="javascript:void(0)" onclick="InvoiceService.showCustomerOrders()">🧾 Download Order Invoices (PDF)</a></li>
+              <li><a href="javascript:void(0)" onclick="MetaPixel.openPreferencesModal()">🍪 Privacy &amp; Cookie Preferences</a></li>
               <li><a id="footer-store-location-link" href="https://maps.app.goo.gl/r1BY5dMznxRunVC58" target="_blank" rel="noopener noreferrer">Maharagama Flagship Location ↗</a></li>
             </ul>
           </div>
@@ -646,6 +647,10 @@
           <div>© 2026 Universe Hub Mobile & Tech Lab. All Rights Reserved.</div>
           <div style="display:flex; align-items:center; gap:16px;">
             <span>Visa / Master / Koko / Cash on Delivery</span>
+            <span style="color:var(--text-muted);">|</span>
+            <a href="javascript:void(0)" onclick="MetaPixel.openPreferencesModal()" style="color:var(--text-muted); text-decoration:none; font-size:12px; display:inline-flex; align-items:center; gap:4px; transition:color 0.2s ease;" onmouseover="this.style.color='#eebd43'" onmouseout="this.style.color='var(--text-muted)'">
+              🍪 Cookie Preferences
+            </a>
             <span style="color:var(--text-muted);">|</span>
             <a href="javascript:void(0)" onclick="App.requestAdminAccess()" style="color:var(--text-muted); text-decoration:none; font-size:12px; display:inline-flex; align-items:center; gap:4px; transition:color 0.2s ease;" onmouseover="this.style.color='var(--neon-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
               🔐 Staff Portal
@@ -3749,6 +3754,67 @@
     <input type="text" name="preferred_time" />
   </form>
 
+  <!-- =========================================================================
+       COOKIE CONSENT BANNER & PREFERENCES MODAL (Minimal Black & Gold Luxury Theme)
+       ========================================================================= -->
+  <div id="cookie-consent-banner" class="cookie-consent-banner" aria-label="Cookie Consent Banner">
+    <div class="cookie-banner-content">
+      <div class="cookie-banner-header">
+        <span class="cookie-icon" style="font-size:18px;">🍪</span>
+        <div class="cookie-banner-title">Privacy &amp; Cookie Choices</div>
+      </div>
+      <p class="cookie-banner-text">
+        We use essential cookies for store operations and optional marketing cookies to personalize products and analyze traffic via Meta Pixel.
+      </p>
+      <div class="cookie-banner-actions">
+        <button type="button" class="btn-cookie-decline" onclick="MetaPixel.declineConsent()">Necessary Only</button>
+        <button type="button" class="btn-cookie-accept" onclick="MetaPixel.acceptConsent()">Accept Marketing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie Preferences Modal -->
+  <div id="cookie-preferences-modal" class="modal-backdrop">
+    <div class="modal-card cookie-preferences-card" style="max-width:520px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">🍪</span>
+          <div>
+            <h3 style="margin:0; font-size:17px; font-weight:800; color:#fff;">Cookie &amp; Privacy Preferences</h3>
+            <p style="margin:0; font-size:12px; color:var(--text-secondary);">Manage your marketing and analytical tracking consent</p>
+          </div>
+        </div>
+        <button type="button" class="close-modal-btn" onclick="MetaPixel.closePreferencesModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding:20px;">
+        <div class="cookie-preference-item" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; display:flex; justify-content:space-between; align-items:flex-start; gap:14px;">
+          <div>
+            <div style="font-weight:700; color:#fff; font-size:13.5px; margin-bottom:4px;">Strictly Necessary Cookies</div>
+            <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.45;">Required for core storefront navigation, cart state, local session security, and WhatsApp inquiry routing. Cannot be disabled.</p>
+          </div>
+          <span class="badge-pill" style="background:rgba(16,185,129,0.18); color:#10b981; font-weight:700; font-size:11px; white-space:nowrap;">Always Active</span>
+        </div>
+
+        <div class="cookie-preference-item" style="margin-top:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; display:flex; justify-content:space-between; align-items:flex-start; gap:14px;">
+          <div>
+            <div style="font-weight:700; color:#fff; font-size:13.5px; margin-bottom:4px;">Marketing &amp; Meta Pixel Analytics</div>
+            <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.45;">Allows Meta Pixel (ID: 3017553705263511) to track product views, cart additions, and catalog matching. No personal contact details, customer names, or phone numbers are ever transmitted.</p>
+            <div id="cookie-status-text" style="font-size:12px; margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); background:rgba(0,0,0,0.25);">
+        <button type="button" class="btn-glass" onclick="MetaPixel.revokeConsent()" style="color:#ef4444; border-color:rgba(239,68,68,0.35); font-size:12px; padding:7px 14px;">Revoke / Disable Marketing</button>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn-glass" onclick="MetaPixel.closePreferencesModal()" style="font-size:12px; padding:7px 14px;">Close</button>
+          <button type="button" class="btn-primary-glow" onclick="MetaPixel.acceptConsent(); MetaPixel.closePreferencesModal();" style="font-size:12px; padding:7px 16px;">Accept &amp; Enable</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/html2pdf.bundle.min.js"></script>
@@ -3760,6 +3826,7 @@
   <script src="js/bulk-uploader.js?v=130"></script>
   <script src="js/payment-gateway.js?v=130"></script>
   <script src="js/admin.js?v=168"></script>
-  <script src="js/app.js?v=201"></script>
+  <script src="js/meta-pixel.js?v=101"></script>
+  <script src="js/app.js?v=202"></script>
 </body>
 </html>
